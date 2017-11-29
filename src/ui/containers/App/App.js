@@ -17,6 +17,6 @@ const App = (props) => (
 )
 
 const stateMap = (state) => ({
-  theme: state.settings.theme
+  theme: state.settings.theme,
 })
 export default connect(stateMap)(App)

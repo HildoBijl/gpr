@@ -1,18 +1,54 @@
 .page .content {
   margin: auto;
-  max-width: 960px;
-  padding: 0 8px;
+  max-width: 1200px;
+  padding: 20px 8px;
 }
 @media (min-width: 480.01px) and (max-width: 960px) {
   .page .content {
-    padding: 0 16px;
+    padding: 20px 16px;
   }
 }
 @media (min-width: 960.01px) {
   .page .content {
-    padding: 0 24px;
+    padding: 28px 24px;
+  }
+}
+.page .content h1 {
+  font-weight: bold;
+  margin: 32px 0 24px 0;
+  font-size: 1.6em;
+}
+@media (min-width: 480.01px) {
+  .page .content h1 {
+    font-size: 1.9em;
+  }
+}
+.page .content h2 {
+  font-weight: bold;
+  margin: 24px 0 16px 0;
+  font-size: 1.4em;
+}
+@media (min-width: 480.01px) {
+  .page .content h2 {
+    font-size: 1.7em;
+  }
+}
+.page .content h3 {
+  font-weight: bold;
+  margin: 16px 0 10px 0;
+  font-size: 1.2em;
+}
+@media (min-width: 480.01px) {
+  .page .content h3 {
+    font-size: 1.4em;
   }
 }
 .page .content p {
-  margin: 40px 0;
+  margin: 6px 0 10px;
+}
+.page .content h1:first-child,
+.page .content h2:first-child,
+.page .content h3:first-child,
+.page .content p:first-child {
+  margin-top: 0;
 }

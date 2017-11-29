@@ -5,16 +5,52 @@
 		margin: auto;
 		max-width: @maxWidth;
 
-		padding: 0 8px;
+		padding: 20px 8px;
 		@media @phoneLandscape {
-			padding: 0 16px;
+			padding: 20px 16px;
 		}
 		@media @desktop {
-			padding: 0 24px;
+			padding: 28px 24px;
+		}
+
+		h1 {
+			font-weight: bold;
+			margin: 32px 0 24px 0;
+			
+			font-size: 1.6em;
+			@media @landscape {
+				font-size: 1.9em;
+			}
+		}
+
+		h2 {
+			font-weight: bold;
+			margin: 24px 0 16px 0;
+			
+			font-size: 1.4em;
+			@media @landscape {
+				font-size: 1.7em;
+			}
+		}
+
+		h3 {
+			font-weight: bold;
+			margin: 16px 0 10px 0;
+			
+			font-size: 1.2em;
+			@media @landscape {
+				font-size: 1.4em;
+			}
 		}
 
 		p {
-			margin: 40px 0;
+			margin: 6px 0 10px;
+		}
+
+		h1, h2, h3, p {
+			&:first-child {
+				margin-top: 0;
+			}
 		}
 	}
 }

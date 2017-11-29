@@ -1,20 +1,8 @@
-html,
-body,
-#root,
-.app {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-body {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 0;
-}
 .app {
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-start;
+  height: 100%;
 }
 .app.lightTheme {
   background: #eee;
