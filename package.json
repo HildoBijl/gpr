@@ -1,0 +1,34 @@
+{
+  "name": "gp",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "history": "4.7.2",
+    "idb-keyval": "2.3.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-redux": "5.0.6",
+    "react-scripts": "1.0.17",
+    "redux": "3.7.2",
+    "redux-devtools-extension": "2.13.2",
+    "redux-first-router": "0.0.16-next",
+    "redux-first-router-link": "1.4.2",
+    "redux-thunk": "2.2.0"
+  },
+  "scripts": {
+    "start": "npm run build-css && run-p -ncr watch-css start-js",
+    "start-js": "react-scripts start",
+    "build": "run-s -n build-css build-js",
+    "build-js": "react-scripts build",
+    "test": "run-s -n build-css test-js",
+    "test-js": "react-scripts test --env=jsdom",
+    "build-css": "node-less-chokidar src",
+    "watch-css": "node-less-chokidar src --watch",
+    "eject": "react-scripts eject",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "devDependencies": {
+    "node-less-chokidar": "0.1.2",
+    "npm-run-all": "4.1.2"
+  }
+}
