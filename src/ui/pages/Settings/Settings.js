@@ -3,27 +3,29 @@ import './Settings.css'
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import settingActions from '../../../redux/settings.js'
+import Checkbox from '../../components/Checkbox/Checkbox.js'
 
-// import Checkbox from '../../components/Checkbox/Checkbox.js'
-// import Radio from '../../components/Radio/Radio.js'
+import settingsActions from '../../../redux/settings.js'
 
 class Settings extends Component {
   render() {
 		console.log(this.props.state)
     return (
       <div className="page settings">
-				<h1>Settings</h1>
-				<p>ToDo: make this page</p>
+				<Checkbox
+					label="Use alternative dark theme"
+					checked={this.props.settings.theme === 'darkTheme'}
+					changeFunction={(newVal) => this.props.applySettings({ theme: newVal ? 'darkTheme' : 'lightTheme' })}
+				/>
       </div>
     )
   }
 }
 
 const stateMap = (state) => ({
-	state
+	settings: state.settings,
 })
 const actionMap = (dispatch) => ({
-
+	applySettings: (newSettings) => dispatch(settingsActions.applySettings(newSettings)),
 })
 export default connect(stateMap, actionMap)(Settings)
