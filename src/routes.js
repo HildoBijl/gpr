@@ -1,8 +1,8 @@
 const routes = { 
-	HOME: '/',      // action <-> url path
+	HOME: '/',
 	SETTINGS: '/settings',
 	ABOUT: '/about',
-	TREE: '/tree',
+	TREE: '/contents',
 	CHAPTER: '/chapter/:chapter/:section',
 }
 

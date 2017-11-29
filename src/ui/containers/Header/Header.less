@@ -1,17 +1,77 @@
-// TODO
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
+@import '../../shared/params.less';
 
 .header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+	box-shadow: 0 4px 8px rgba(0,0,0,.26);
+	width: 100%;
+
+	height: 50px;
+	@media @desktop {
+		height: 80px;
+	}
+	
+	.contents {
+		display: flex;
+		flex-flow: row nowrap;
+		height: 100%;
+		justify-content: space-between;
+		margin: auto;
+		max-width: @maxWidth;
+
+		padding: 0 4px;
+		@media @phoneLandscape {
+			padding: 0 8px;
+		}
+		@media @desktop {
+			padding: 0 12px;
+		}
+
+		.title {
+			align-items: center;
+			display: flex;
+			flex-flow: row nowrap;
+
+			img {
+				height: 46px;
+				margin-right: 8px;
+				width: 46px;
+				@media @phoneLandscape {
+					margin-right: 12px;
+				}
+				@media @desktop {
+					height: 70px;
+					margin-right: 20px;
+					width: 70px;
+				}
+			}
+
+			h1 {
+				font-size: 0.8em;
+				margin-right: 4px;
+				@media @phoneLandscape {
+					font-size: 1em;
+					margin-right: 8px;
+				}
+				@media @desktop {
+					font-size: 1.2em;
+					margin-right: 12px;
+				}
+			}
+		}
+	
+		.menu {
+			align-items: center;
+			display: flex;
+			flex-flow: row nowrap;
+			height: 100%;
+		}
+	}
 }
 
-.App-title {
-  font-size: 1.5em;
+.lightTheme .header {
+	background-color: #222;
+	color: #fff;
+}
+.darkTheme .header {
+	background-color: #000;
+	color: #fff;
 }

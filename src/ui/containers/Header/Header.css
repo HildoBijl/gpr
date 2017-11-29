@@ -1,13 +1,81 @@
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
 .header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.26);
+  width: 100%;
+  height: 50px;
 }
-.App-title {
-  font-size: 1.5em;
+@media (min-width: 960.01px) {
+  .header {
+    height: 80px;
+  }
+}
+.header .contents {
+  display: flex;
+  flex-flow: row nowrap;
+  height: 100%;
+  justify-content: space-between;
+  margin: auto;
+  max-width: 960px;
+  padding: 0 4px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .header .contents {
+    padding: 0 8px;
+  }
+}
+@media (min-width: 960.01px) {
+  .header .contents {
+    padding: 0 12px;
+  }
+}
+.header .contents .title {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.header .contents .title img {
+  height: 46px;
+  margin-right: 8px;
+  width: 46px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .header .contents .title img {
+    margin-right: 12px;
+  }
+}
+@media (min-width: 960.01px) {
+  .header .contents .title img {
+    height: 70px;
+    margin-right: 20px;
+    width: 70px;
+  }
+}
+.header .contents .title h1 {
+  font-size: 0.8em;
+  margin-right: 4px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .header .contents .title h1 {
+    font-size: 1em;
+    margin-right: 8px;
+  }
+}
+@media (min-width: 960.01px) {
+  .header .contents .title h1 {
+    font-size: 1.2em;
+    margin-right: 12px;
+  }
+}
+.header .contents .menu {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  height: 100%;
+}
+.lightTheme .header {
+  background-color: #222;
+  color: #fff;
+}
+.darkTheme .header {
+  background-color: #000;
+  color: #fff;
 }

@@ -1,0 +1,18 @@
+.page .content {
+  margin: auto;
+  max-width: 960px;
+  padding: 0 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .page .content {
+    padding: 0 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .page .content {
+    padding: 0 24px;
+  }
+}
+.page .content p {
+  margin: 40px 0;
+}

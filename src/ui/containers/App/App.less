@@ -1,18 +1,30 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+html, body, #root, .app {
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 .app {
-  text-align: center;
+	// min-height: 100vh;
 }
 
-.App-intro {
-  font-size: large;
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.app {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+	
+	&.lightTheme {
+		background: #eee;
+		color: #212121;
+	}
+	&.darkTheme {
+		background: #212121;
+		color: #fff;
+	}
 }

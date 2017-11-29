@@ -9,12 +9,12 @@ body.body {
   line-height: 1.42857143;
   padding: 10px 0px;
 }
-@media (min-width: 640px) and (max-width: 899.99px) {
+@media (min-width: 480.01px) and (max-width: 960px) {
   body.body {
     padding: 15px 0px;
   }
 }
-@media (min-width: 900px) {
+@media (min-width: 960.01px) {
   body.body {
     padding: 20px 0px;
   }
@@ -23,13 +23,13 @@ body.body {
   padding-left: 5px;
   padding-right: 5px;
 }
-@media (min-width: 640px) and (max-width: 899.99px) {
+@media (min-width: 480.01px) and (max-width: 960px) {
   .container {
     padding-left: 10px;
     padding-right: 10px;
   }
 }
-@media (min-width: 900px) {
+@media (min-width: 960.01px) {
   .container {
     padding-left: 15px;
     padding-right: 15px;
