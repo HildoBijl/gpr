@@ -8,7 +8,7 @@ import NotFound from './NotFound/NotFound.js'
 const pages = {
 	HOME: {
 		component: Home,
-		title: 'Gaussian Process Regression - A Tutorial',
+		title: 'Gaussian Process Regression',
 		skipPrefix: true, // Do not use a prefix in the <title>.
 	},
 	TREE: {

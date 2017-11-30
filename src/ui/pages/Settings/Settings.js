@@ -22,7 +22,7 @@ class Settings extends Component {
 					checked={this.props.settings.showEquations}
 					changeFunction={(newVal) => this.props.applySettings({ showEquations: newVal })}
 				/>
-				<p className="addedNote"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> This requires a background in both probability theory and linear algebra</p>
+				<p className="addedNote"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> This requires knowledge of both probability theory and linear algebra</p>
 				<Checkbox
 					label="Include derivations of equations (under construction)"
 					checked={this.props.settings.showDerivations}
