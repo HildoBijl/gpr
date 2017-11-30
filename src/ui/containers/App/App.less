@@ -1,15 +1,18 @@
+@import '../../shared/params.less';
+
 .app {
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: flex-start;
 	height: 100%;
 	
+	transition: background-color @slowTime, color @slowTime;
 	&.lightTheme {
 		background: #eee;
-		color: #212121;
+		color: #222;
 	}
 	&.darkTheme {
-		background: #212121;
-		color: #fff;
+		background: #222;
+		color: #eee;
 	}
 }

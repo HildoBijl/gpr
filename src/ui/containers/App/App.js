@@ -13,7 +13,6 @@ import settingsActions from '../../../redux/settings.js'
 
 class App extends Component {
   componentWillMount() {
-    console.log('AAA')
     this.props.loadSettings()
   }
   render() {

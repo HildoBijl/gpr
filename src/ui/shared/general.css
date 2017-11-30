@@ -8,6 +8,11 @@ body,
 }
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 16px;
   line-height: 1.42857143;
+  font-size: 13px;
+}
+@media (min-width: 960.01px) {
+  body {
+    font-size: 16px;
+  }
 }

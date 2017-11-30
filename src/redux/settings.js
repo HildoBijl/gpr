@@ -3,7 +3,12 @@ import idbKeyval from 'idb-keyval'
 import { deepClone } from '../logic/util.js'
 
 const defaultSettings = {
+	showFigureGuides: false,
+	showEquations: false,
+	showDerivations: false,
+	enableOfflineUse: false,
 	theme: 'lightTheme',
+	showProgress: true,
 }
 
 /*
@@ -33,8 +38,6 @@ export function reducer(settings = defaultSettings, action) {
 	window.idb = idbKeyval
   switch (action.type) {
 		case 'ApplySettings': {
-			console.log(action)
-			console.log(settings)
 			// Merge the given settings into the existing settings.
 			const mergedSettings = applySettings(deepClone(settings), action.settings)
 

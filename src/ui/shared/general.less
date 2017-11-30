@@ -10,6 +10,10 @@ html, body, #root {
 
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 10/7;
+  line-height: @lineHeight;
+  
+  font-size: @phoneFontSize;
+  @media @desktop {
+    font-size: @desktopFontSize;
+  }
 }

@@ -6,11 +6,30 @@ import Chapter from './Chapter/Chapter.js'
 import NotFound from './NotFound/NotFound.js'
 
 const pages = {
-	HOME: Home,
-	TREE: Tree,
-	SETTINGS: Settings,
-	ABOUT: About,
-	CHAPTER: Chapter,
-	NOTFOUND: NotFound
+	HOME: {
+		component: Home,
+		title: 'Gaussian Process Regression - A Tutorial',
+		skipPrefix: true, // Do not use a prefix in the <title>.
+	},
+	TREE: {
+		component: Tree,
+		title: 'Learning Tree',
+	},
+	SETTINGS: {
+		component: Settings,
+		title: 'Settings',
+	},
+	ABOUT: {
+		component: About,
+		title: 'About this tutorial',
+	},
+	CHAPTER: {
+		component: Chapter,
+		title: (payload) => `Chapter ${payload.chapter}, section ${payload.section}`,
+	},
+	NOTFOUND: {
+		component: NotFound,
+		title: 'Oops ...',
+	},
 }
 export default pages

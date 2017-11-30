@@ -1,76 +1,142 @@
 @import '../../shared/params.less';
 
-// TODO: CLEAN THIS UP.
-.checkboxField {
-  @height: 24px;
-  @width: 60px;
-  @fontSize: 12px;
-  @sliderHeight: 14px;
-  @sliderWidth: 24px;
-	@offColor: #888;
-	@onColor: #24e;
+@height: 24px;
+@width: 60px;
+@fontSize: 12px;
+@sliderHeight: 14px;
+@sliderWidth: 24px;
 
-  background: #222;
-	border-radius: @height/2;
-  cursor: pointer;
-  display: inline-block;
-	height: @height;
-  line-height: @height;
-	margin: 0 6px 6px 0;
-	position: relative;
-	user-select: none;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-	width: @width;
-
-  &:after, &:before {
-    font-size: @fontSize;
-    height: @fontSize;
-    line-height: @fontSize;
-    position: absolute;
-    top: (@height - @fontSize)/2;
+.checkboxContainer {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  margin: 6px 0 4px;
+  @media @desktop {
+    margin: 9px 0 6px;
   }
+  transition: opacity @slowTime;
+
+  .checkboxField {
+    border-radius: @height/2;
+    display: inline-block;
+    flex-shrink: 0;
+    height: @height;
+    line-height: @height;
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    width: @width;
+    
+    margin: 0 6px 0 0;
+    @media @desktop {
+      margin: 0 9px 0 0;
+    }
+
+    &:after, &:before {
+      font-size: @fontSize;
+      height: @fontSize;
+      line-height: @fontSize;
+      position: absolute;
+      top: (@height - @fontSize)/2;
+    }
+    &:before {
+      content: 'On';
+      font-weight: bold;
+      left: @height/3;
+      transition: color @slowTime;
+    }
+    &:after {
+      content: 'Off';
+      font-weight: bold;
+      right: @height/3;
+      transition: color @slowTime;
+    }
+
+    span {
+      display: inline-block; // No idea why we need this line, but it does make a big difference.
+    }
+
+    label {
+      border-radius: @sliderHeight/2;
+      display: block;
+      height: @sliderHeight;
+      left: (@height - @sliderHeight)/2;
+      position: absolute;
+      top: (@height - @sliderHeight)/2;
+      transition: left @slowTime, background-color @slowTime;
+      width: @sliderWidth;
+      z-index: 1;
+    }
+
+    &.checked label {
+      left: @width - @sliderWidth - (@height - @sliderHeight)/2;
+    }
+  }
+
+  .checkboxLabel {
+    display: inline-block;
+    flex-shrink: 1;
+    line-height: 8/6;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+
+    margin: (@height - @lineHeight*@phoneFontSize)/2 0;
+    @media @desktop {
+      margin: (@height - @lineHeight*@desktopFontSize)/2 0;
+    }
+  }
+
+  // Differences between enabled and disabled.
+  &.disabled {
+    opacity: 0.3;
+  }
+  &.enabled {
+    .checkboxField {
+      cursor: pointer;
+      label {
+        cursor: pointer;
+      }
+    }
+    .checkboxLabel {
+      cursor: pointer;
+    }
+  }
+}
+
+// Coloring
+.lightTheme .checkboxContainer .checkboxField {
+  background: #222;
+  @offColor: #888;
+  @onColor: #36f;
+
   &:before {
     color: @onColor;
-		content: 'On';
-		font-weight: bold;
-    left: @height/3;
   }
   &:after {
     color: @offColor;
-    content: 'Off';
-		font-weight: bold;
-    right: @height/3;
   }
-
-  span {
-    display: inline-block; // No idea why we need this line, but it does make a big difference.
-  }
-
   label {
     background: @offColor;
-    border-radius: @sliderHeight/2;
-    cursor: pointer;
-    display: block;
-    height: @sliderHeight;
-    left: (@height - @sliderHeight)/2;
-    position: absolute;
-    top: (@height - @sliderHeight)/2;
-    transition: all .4s ease;
-    width: @sliderWidth;
-    z-index: 1;
   }
-
   &.checked label {
-    left: @width - @sliderWidth - (@height - @sliderHeight)/2;
     background: @onColor;
   }
+}
+.darkTheme .checkboxContainer .checkboxField {
+  background: #888;
+  @offColor: #222;
+  @onColor: #139;
 
-  & + span {
-    cursor: pointer;
-    display: inline-block;
-    height: @height;
-    line-height: @height;
-    user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+  &:before {
+    color: @onColor;
+  }
+  &:after {
+    color: @offColor;
+  }
+  label {
+    background: @offColor;
+  }
+  &.checked label {
+    background: @onColor;
   }
 }
