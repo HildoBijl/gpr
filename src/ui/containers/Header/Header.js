@@ -18,8 +18,8 @@ const Header = (props) => {
 		<header className="header">
 			<div className="contents">
 				<div className="title">
-					<Link to={{ type: 'HOME' }}>
-						<img src={logo} alt="logo" />
+					<Link to={{ type: 'HOME' }} className="logoLink">
+						<img src={logo} alt="logo" className="logo" />
 					</Link>
 					<h1>{page.title}</h1>
 					<Helmet>

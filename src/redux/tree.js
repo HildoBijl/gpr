@@ -163,7 +163,7 @@ export function reducer(originalState = getDefaultState(), action) {
 
 		case 'UpdateTreeTouch': {
 			// Check the number of touches. If there's one, update the drag.
-			if (action.evt.touches.length === 1) {
+			if (action.evt.touches.length === 1 && state.data.dragging) {
 				return updateDragging(state, getPosition(action.evt.touches[0]))
 			}
 
@@ -178,7 +178,7 @@ export function reducer(originalState = getDefaultState(), action) {
 
 		case 'EndTreeTouch': {
 			// Check the number of touches. If there's zero, end the drag.
-			if (action.evt.touches.length === 0) {
+			if (action.evt.touches.length === 0 && state.data.dragging) {
 				action.evt.preventDefault()
 				return endDragging(state, getPosition(action.evt.changedTouches[0]))
 			}
@@ -300,6 +300,10 @@ function updateDragging(state, mousePosition) {
 	return state
 }
 function endDragging(state, mousePosition) {
+	// If there's no dragging, then don't do anything.
+	if (!state.data.dragging)
+		return state
+
 	// Apply a final update to the state.
 	state = updateDragging(state, mousePosition)
 

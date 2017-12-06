@@ -13,7 +13,7 @@ const pages = {
 	},
 	TREE: {
 		component: Tree,
-		title: 'Learning Tree',
+		title: 'Content Tree',
 	},
 	SETTINGS: {
 		component: Settings,

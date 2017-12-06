@@ -31,17 +31,21 @@
 			display: flex;
 			flex-flow: row nowrap;
 
-			img {
-				height: 46px;
-				margin-right: 8px;
-				width: 46px;
-				@media @phoneLandscape {
-					margin-right: 12px;
-				}
-				@media @desktop {
-					height: 70px;
-					margin-right: 20px;
-					width: 70px;
+			.logoLink {
+				-webkit-tap-highlight-color: rgba(0,0,0,0);
+
+				.logo {
+					height: 46px;
+					margin-right: 8px;
+					width: 46px;
+					@media @phoneLandscape {
+						margin-right: 12px;
+					}
+					@media @desktop {
+						height: 70px;
+						margin-right: 20px;
+						width: 70px;
+					}
 				}
 			}
 
