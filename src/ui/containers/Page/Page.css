@@ -1,6 +1,17 @@
+.page {
+  align-self: stretch;
+  display: flex;
+  flex-flow: column nowrap;
+  flex-grow: 1;
+  overflow: hidden;
+}
 .page .content {
+  display: flex;
+  flex-flow: column nowrap;
+  flex-grow: 1;
   margin: auto;
   max-width: 1200px;
+  width: 100%;
   padding: 20px 8px;
 }
 @media (min-width: 480.01px) and (max-width: 960px) {

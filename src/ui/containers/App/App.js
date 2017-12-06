@@ -29,6 +29,6 @@ const stateMap = (state) => ({
   theme: state.settings.theme,
 })
 const actionMap = (dispatch) => ({
-  loadSettings: () => dispatch(settingsActions.loadSettings())
+  loadSettings: () => dispatch(settingsActions.loadSettings()),
 })
 export default connect(stateMap, actionMap)(App)

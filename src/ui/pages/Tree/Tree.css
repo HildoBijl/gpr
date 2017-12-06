@@ -1,0 +1,38 @@
+.treeContainer {
+  background: #141;
+  flex-grow: 1;
+  height: 100%;
+  overflow: visible;
+  position: relative;
+  user-select: none;
+  width: 100%;
+}
+.treeContainer .tree {
+  border: 2px dashed #600;
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  position: absolute;
+}
+.treeContainer .tree .chapter {
+  border-radius: 6px;
+  height: 200px;
+  padding: 10px;
+  position: absolute;
+  width: 400px;
+}
+.treeContainer.dragging {
+  background: #252;
+}
+.treeContainer.dragging .tree {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+.lightTheme .tree .chapter {
+  background: #69f;
+}
+.darkTheme .tree .chapter {
+  background: #125;
+}

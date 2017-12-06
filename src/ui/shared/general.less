@@ -17,3 +17,9 @@ body {
     font-size: @desktopFontSize;
   }
 }
+
+a {			
+  &, &:active, &:focus { // To prevent a dotted border from appearing after clicking on the link.
+    outline: none;
+  }
+}

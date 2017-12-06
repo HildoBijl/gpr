@@ -38,6 +38,10 @@ export function reducer(settings = defaultSettings, action) {
 	window.idb = idbKeyval
   switch (action.type) {
 		case 'ApplySettings': {
+			// If no settings were provided, do nothing.
+			if (!action.settings)
+				return settings
+
 			// Merge the given settings into the existing settings.
 			const mergedSettings = applySettings(deepClone(settings), action.settings)
 
@@ -58,9 +62,11 @@ export function reducer(settings = defaultSettings, action) {
 // applySettings takes an existing oldSettings object, looks at a newSettings object and copies all known settings from 
 function applySettings(oldSettings, newSettings) {
 	// If the newSettings object has a different type than what we're used to, throw an error.
-	if (typeof(newSettings) !== typeof(oldSettings))
-		return console.log('Warning: Cannot apply some settings. Object types do not match to what was given in the default settings.')
-
+	if (typeof(newSettings) !== typeof(oldSettings)) {
+		console.log('Warning: Cannot apply some settings. Object types do not match to what was given in the default settings.')
+		return oldSettings
+	}
+	
 	// If the newSettings parameter is not an object, just return it. We are only able to deal with objects.
 	if (typeof(newSettings) !== 'object' || Array.isArray(newSettings))
 		return newSettings

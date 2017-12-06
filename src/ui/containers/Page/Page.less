@@ -1,9 +1,19 @@
 @import '../../shared/params.less';
 
 .page {
+	align-self: stretch;
+	display: flex;
+	flex-flow: column nowrap;
+	flex-grow: 1;
+	overflow: hidden;
+
 	.content {
+		display: flex;
+		flex-flow: column nowrap;
+		flex-grow: 1;
 		margin: auto;
 		max-width: @maxWidth;
+		width: 100%;
 
 		padding: 20px 8px;
 		@media @phoneLandscape {

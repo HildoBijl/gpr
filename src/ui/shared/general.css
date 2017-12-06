@@ -16,3 +16,8 @@ body {
     font-size: 16px;
   }
 }
+a,
+a:active,
+a:focus {
+  outline: none;
+}
