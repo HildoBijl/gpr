@@ -21,6 +21,9 @@ class Tree extends Component {
 		// Listen to user inputs.
 		this.tree.addEventListener('mousedown', this.startDragging)
 		document.addEventListener('mouseup', this.endDragging)
+		this.tree.addEventListener('touchstart', this.props.startTouch)
+		document.addEventListener('touchmove', this.props.updateTouch)
+		document.addEventListener('touchend', this.props.endTouch)
 		document.addEventListener('wheel', this.props.scroll)
 
 		// Listen to screen resizes.
@@ -35,6 +38,9 @@ class Tree extends Component {
 		// Remove event listeners.
 		this.tree.removeEventListener('mouseup', this.startDragging)
 		document.removeEventListener('mouseup', this.endDragging)
+		this.tree.removeEventListener('touchstart', this.props.startTouch)
+		document.removeEventListener('touchmove', this.props.updateTouch)
+		document.removeEventListener('touchend', this.props.endTouch)
 		document.removeEventListener('wheel', this.props.scroll)
 
 		// Stop listening for screen resizes.
@@ -57,7 +63,8 @@ class Tree extends Component {
 
 	endDragging(evt) {
 		this.props.endDragging(evt)
-		document.removeEventListener('mousemove', this.updateDragging)
+		document.removeEventListener('mousemove', this.props.updateDragging)
+		document.removeEventListener('touchmove', this.props.updateDragging)
 	}
 
 	checkSize(evt) {
@@ -111,6 +118,9 @@ const actionMap = (dispatch) => ({
   startDragging: (evt) => dispatch(treeActions.startDragging(evt)),
   updateDragging: (evt) => dispatch(treeActions.updateDragging(evt)),
   endDragging: (evt) => dispatch(treeActions.endDragging(evt)),
+  startTouch: (evt) => dispatch(treeActions.startTouch(evt)),
+  updateTouch: (evt) => dispatch(treeActions.updateTouch(evt)),
+  endTouch: (evt) => dispatch(treeActions.endTouch(evt)),
   scroll: (evt) => dispatch(treeActions.scroll(evt)),
 	updateVisuals: (evt) => dispatch(treeActions.updateVisuals(evt)),
 	updateSize: (size) => dispatch(treeActions.updateSize(size)),
