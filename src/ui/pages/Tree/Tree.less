@@ -1,5 +1,9 @@
 .treeContainer {
-	background: #141;
+	background: green;
+	cursor: move; // Fallback if grab cursor is unsupported.
+	cursor: grab;
+	cursor: -moz-grab;
+	cursor: -webkit-grab;
 	flex-grow: 1;
 	height: 100%;
 	overflow: visible;
@@ -7,38 +11,39 @@
 	user-select: none;
 	width: 100%;
 
+	&.dragging {
+		cursor: grabbing;
+		cursor: -moz-grabbing;
+		cursor: -webkit-grabbing;
+	}
 
 	.tree {
-		border: 2px dashed #600;
-    cursor: move; // Fallback if grab cursor is unsupported.
-    cursor: grab;
-    cursor: -moz-grab;
-    cursor: -webkit-grab;
+		cursor: pointer;
 		position: absolute;
 
 		.chapter {
-			border-radius: 6px;
-			height: 200px;
-			padding: 10px;
+			border-radius: 8px;
+			display: flex;
+			flex-flow: column nowrap;
+			font-weight: bold;
+			height: 80px;
+			justify-content: center;
+			padding: 10px 20px;
 			position: absolute;
-			width: 400px;
+			text-align: center;
+			width: 320px;
 		}
 	}
 
-	&.dragging {
-		background: #252;
-		.tree {
-			cursor: grabbing;
-			cursor: -moz-grabbing;
-			cursor: -webkit-grabbing;
-		}
+	svg {
+		background: green;
 	}
 }
 
 .lightTheme {
 	.tree {
 		.chapter {
-			background: #69f;
+			background: #8bf;
 		}
 	}
 }

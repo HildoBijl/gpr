@@ -27,17 +27,21 @@ const getDefaultState = () => ({
 			y: 0,
 		},
 		oldPositions: [], // We use this to store old positions, so we can obtain the velocity later of the dragger when needed.
-		size: { // The original size of the tree object. Scaling is ignored. So even if we zoom in, the size remains the same.
-			x: 0,
-			y: 0,
+		rect: { // The original rectangle of the tree object. Scaling is ignored. So even if we zoom in, the size remains the same.
+			width: 0,
+			height: 0,
+			left: 0,
+			top: 0,
+			right: 0,
+			bottom: 0,
 		},
-		containerSize: { // The size (width/height) of the container containing the tree. When the window is resized, this is adjusted.
-			x: 0,
-			y: 0,
-		},
-		containerPosition: { // The position of the container within the page (client).
-			x: 0,
-			y: 0,
+		containerRect: { // The rectangle of the container containing the tree, in client (screen) coordinates. When the window is resized, this rectangle is adjusted.
+			width: 0,
+			height: 0,
+			left: 0,
+			top: 0,
+			right: 0,
+			bottom: 0,			
 		},
 		velocity: {
 			x: 0,
@@ -95,14 +99,13 @@ const actions = {
 	updateVisuals: () => ({
 		type: 'UpdateTreeVisuals',
 	}),
-	updateSize: (size) => ({
-		type: 'UpdateTreeSize',
-		size,
+	updateRect: (rect) => ({
+		type: 'UpdateTreeRect',
+		rect,
 	}),
-	updateContainerSize: (size, position) => ({
-		type: 'UpdateTreeContainerSize',
-		size,
-		position,
+	updateContainerRect: (rect) => ({
+		type: 'UpdateTreeContainerRect',
+		rect,
 	}),
 }
 export default actions
@@ -205,7 +208,7 @@ export function reducer(originalState = getDefaultState(), action) {
 				return originalState
 
 			// If there is a zoom command, adjust the zoom level.
-			if (action.evt.altKey)
+			if (!action.evt.shiftKey && !action.evt.ctrlKey)
 				return applyScrollZoom(state, action.evt)
 
 			// There is a scroll command. Apply it.
@@ -231,15 +234,14 @@ export function reducer(originalState = getDefaultState(), action) {
 			return state
 		}
 
-		case 'UpdateTreeSize': {
-			state.data.size = action.size
+		case 'UpdateTreeRect': {
+			state.data.rect = deepClone(action.rect)
 			state.data.requireUpdate = true
 			return state
 		}
 
-		case 'UpdateTreeContainerSize': {
-			state.data.containerSize = action.size
-			state.data.containerPosition = action.position
+		case 'UpdateTreeContainerRect': {
+			state.data.containerRect = deepClone(action.rect)
 			state.data.requireUpdate = true
 			return state
 		}
@@ -325,7 +327,7 @@ function endDragging(state, mousePosition) {
 function applyScroll(state, evt) {
 	// Check whether we need to adjust the coordinates horizontally or vertically.
 	const scroll = evt.deltaY > 0 ? -scrollAmount : scrollAmount
-	if (evt.ctrlKey) {
+	if (evt.shiftKey) {
 		const min = getMinCoordinate(state, 'x')
 		const max = getMaxCoordinate(state, 'x')
 		state.data.position.x = bound(state.data.position.x + scroll, min, max)
@@ -376,15 +378,15 @@ function applyScrollZoom(state, evt) {
 function setZoom(state, zoom, centerPoint) {
 	// Update the zoom value.
 	const oldZoom = state.data.zoom
-	const minZoom = Math.min(state.data.containerSize.x / state.data.size.x, state.data.containerSize.y / state.data.size.y)
+	const minZoom = Math.min(state.data.containerRect.width / state.data.rect.width, state.data.containerRect.height / state.data.rect.height)
 	const newZoom = bound(zoom, minZoom, maxZoom)
 	if (oldZoom === newZoom)
 		return state
 
-	// Our goal now is to adjust the position of the tree, to ensure that the mouse remains focused on the same point (the given centerpoint) while zooming. This feels more natural.
+	// Our goal now is to adjust the position of the tree, to ensure that the mouse remains focused on the same point (the given centerpoint) while zooming. This will make the zooming feel natural.
 	axes.forEach(axis => {
-		const containerLeftTopPosition = centerPoint[axis] - state.data.containerPosition[axis] // The position of the mouse within the container, in left/top coordinates.
-		const containerPosition = (axis === 'x' ? containerLeftTopPosition - state.data.containerSize.x / 2 : containerLeftTopPosition) // The position of the mouse in the container in our own default coordinate system, with (0:0) being at the middle-top.
+		const containerLeftTopPosition = centerPoint[axis] - state.data.containerRect[axis === 'x' ? 'left' : 'top'] // The position of the mouse within the container, in left/top coordinates.
+		const containerPosition = (axis === 'x' ? containerLeftTopPosition - state.data.containerRect.width / 2 : containerLeftTopPosition) // The position of the mouse in the container in our own default coordinate system, with (0:0) being at the middle-top.
 		const treePosition = (containerPosition + state.data.position[axis]) / oldZoom // The position of the mouse inside of the tree, independent of scaling, in our own default coordinate system.
 		state.data.position[axis] = treePosition * newZoom - containerPosition // The new position of the tree inside the container.
 	})
@@ -483,22 +485,30 @@ function updateSingleAxisPositionVelocity({ position, velocity, min, max, dt }) 
 	return result
 }
 
-// getMinCoordinate and getMaxCoordinate return the minimum and maximum coordinates which the tree might have inside its container. Remember that the default position of the tree (position 0:0) means horizontally centered at the top. Negative x means slide to the left, positive x means slide to the right, negative y is impossible and positive y means slide downwards.
+// getMinCoordinate and getMaxCoordinate return the minimum and maximum coordinates which the tree might have inside its container. Remember that the default position of the tree (position 0:0) means that the (0:0) point defined in the tree is at the center in the top. Negative x means slide to the left, positive x means slide to the right, negative y is impossible (unless there are tree blocks there) and positive y means slide downwards. We also do some bounding to ensure that, if the user zooms out a lot, we don't get max bounds smaller than min bounds.
 function getMinCoordinate(state, axis) {
-	if (axis === 'y')
-		return 0
-	return -0.5 * Math.max(0, state.data.size.x * state.data.zoom - state.data.containerSize.x)
+	if (axis === 'y') {
+		return state.data.rect.top * state.data.zoom
+	}
+	const minX = state.data.rect.left * state.data.zoom + state.data.containerRect.width/2
+	const maxX = state.data.rect.right * state.data.zoom - state.data.containerRect.width/2
+	return Math.min(minX, (minX + maxX)/2)
 }
 function getMaxCoordinate(state, axis) {
-	if (axis === 'y')
-		return Math.max(0, state.data.size.y * state.data.zoom - state.data.containerSize.y)
-	return -getMinCoordinate(state, axis)
+	if (axis === 'y') {
+		const minY = getMinCoordinate(state, axis)
+		const maxY = state.data.rect.bottom * state.data.zoom - state.data.containerRect.height
+		return Math.max(maxY, minY)
+	}
+	const minX = state.data.rect.left * state.data.zoom + state.data.containerRect.width/2
+	const maxX = state.data.rect.right * state.data.zoom - state.data.containerRect.width/2
+	return Math.max(maxX, (minX + maxX)/2)
 }
 // getViewPosition returns the position of the tree in left/top coordinates, given the position in our regular coordinate system.
 function getViewPosition(state) {
 	return {
-		x: -state.data.position.x - (state.data.size.x - state.data.containerSize.x) / 2,
-		y: -state.data.position.y + (state.data.zoom - 1) * state.data.size.y / 2,
+		x: -state.data.position.x + state.data.containerRect.width / 2,
+		y: -state.data.position.y,
 	}
 }
 

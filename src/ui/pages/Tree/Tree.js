@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import classnames from 'classnames'
 
 import treeActions from '../../../redux/tree.js'
+import chapters, { chapterArray, size, margin, treeRect } from '../chapters'
 
 class Tree extends Component {
 	constructor() {
@@ -19,9 +20,9 @@ class Tree extends Component {
 
 	componentDidMount() {
 		// Listen to user inputs.
-		this.tree.addEventListener('mousedown', this.startDragging)
+		this.treeContainer.addEventListener('mousedown', this.startDragging)
 		document.addEventListener('mouseup', this.endDragging)
-		this.tree.addEventListener('touchstart', this.props.startTouch)
+		this.treeContainer.addEventListener('touchstart', this.props.startTouch)
 		document.addEventListener('touchmove', this.props.updateTouch)
 		document.addEventListener('touchend', this.props.endTouch)
 		document.addEventListener('wheel', this.props.scroll)
@@ -34,11 +35,11 @@ class Tree extends Component {
 		this.updateVisuals()
 	}
 
-	componentWillUnmount() {		
+	componentWillUnmount() {
 		// Remove event listeners.
-		this.tree.removeEventListener('mouseup', this.startDragging)
+		this.treeContainer.removeEventListener('mousedown', this.startDragging)
 		document.removeEventListener('mouseup', this.endDragging)
-		this.tree.removeEventListener('touchstart', this.props.startTouch)
+		this.treeContainer.removeEventListener('touchstart', this.props.startTouch)
 		document.removeEventListener('touchmove', this.props.updateTouch)
 		document.removeEventListener('touchend', this.props.endTouch)
 		document.removeEventListener('wheel', this.props.scroll)
@@ -68,43 +69,44 @@ class Tree extends Component {
 	}
 
 	checkSize(evt) {
-		this.props.updateSize(this.getTreeSize())
-		this.props.updateContainerSize(this.getTreeContainerSize(), this.getTreeContainerPosition())
+		this.props.updateTreeRect(this.getTreeRect())
+		this.props.updateTreeContainerRect(this.getTreeContainerRect())
 	}
 
-	getTreeSize() {
+	getTreeRect() {
 		return {
-			x: this.tree.offsetWidth,
-			y: this.tree.offsetHeight,
+			...treeRect, // TODO: ADD ADJUSTABLE HEIGHT BASED ON WHAT OPENS UP.
 		}
 	}
-	getTreeContainerSize() {
+	getTreeContainerRect() {
 		return {
-			x: this.treeContainer.offsetWidth,
-			y: this.treeContainer.offsetHeight,
+			width: this.treeContainer.offsetWidth,
+			height: this.treeContainer.offsetHeight,
+			left: this.treeContainer.offsetLeft,
+			top: this.treeContainer.offsetTop,
+			right: this.treeContainer.offsetLeft + this.treeContainer.offsetWidth,
+			bottom: this.treeContainer.offsetTop + this.treeContainer.offsetHeight,
 		}
 	}
-	getTreeContainerPosition() {
-		return {
-			x: this.treeContainer.offsetLeft,
-			y: this.treeContainer.offsetTop,
-		}
-	}
-	
+
 	render() {
 		const scale = this.props.zoom
 		const shift = this.props.position
+		this.chapterBlocks = {}
 		return (
-			<div className={classnames('treeContainer', {'dragging': !!this.props.dragging })} ref={obj => this.treeContainer = obj}>
+			<div className={classnames('treeContainer', { 'dragging': !!this.props.dragging })} ref={obj => this.treeContainer = obj}>
 				<div className="tree" id="tree" style={{
-					width: '2000px', // TODO
-					height: '1200px',
 					transform: `matrix(${scale},0,0,${scale},${shift.x},${shift.y})`,
 				}} ref={obj => this.tree = obj}>
-					<div className="chapter" style={{left: '100px', top: '100px'}}>Chapter 1</div>
-					<div className="chapter" style={{left: '100px', top: '500px'}}>Chapter 2</div>
-					<div className="chapter" style={{left: '800px', top: '500px'}}>Chapter 3</div>
-					<div className="chapter" style={{left: '1500px', top: '900px'}}>Chapter 4</div>
+					{chapterArray.map(chapter => <div
+						key={chapter.name}
+						className="chapter"
+						ref={obj => this.chapterBlocks[chapter.name] = obj}
+						style={{
+							left: (chapter.tree.x - size.x / 2) + 'px',
+							top: chapter.tree.y + 'px',
+						}}
+					>{chapter.title}</div>)}
 				</div>
 			</div>
 		)
@@ -115,15 +117,15 @@ const stateMap = (state) => ({
 	...state.tree.visuals
 })
 const actionMap = (dispatch) => ({
-  startDragging: (evt) => dispatch(treeActions.startDragging(evt)),
-  updateDragging: (evt) => dispatch(treeActions.updateDragging(evt)),
-  endDragging: (evt) => dispatch(treeActions.endDragging(evt)),
-  startTouch: (evt) => dispatch(treeActions.startTouch(evt)),
-  updateTouch: (evt) => dispatch(treeActions.updateTouch(evt)),
-  endTouch: (evt) => dispatch(treeActions.endTouch(evt)),
-  scroll: (evt) => dispatch(treeActions.scroll(evt)),
+	startDragging: (evt) => dispatch(treeActions.startDragging(evt)),
+	updateDragging: (evt) => dispatch(treeActions.updateDragging(evt)),
+	endDragging: (evt) => dispatch(treeActions.endDragging(evt)),
+	startTouch: (evt) => dispatch(treeActions.startTouch(evt)),
+	updateTouch: (evt) => dispatch(treeActions.updateTouch(evt)),
+	endTouch: (evt) => dispatch(treeActions.endTouch(evt)),
+	scroll: (evt) => dispatch(treeActions.scroll(evt)),
 	updateVisuals: (evt) => dispatch(treeActions.updateVisuals(evt)),
-	updateSize: (size) => dispatch(treeActions.updateSize(size)),
-	updateContainerSize: (size, position) => dispatch(treeActions.updateContainerSize(size, position)),
+	updateTreeRect: (rect) => dispatch(treeActions.updateRect(rect)),
+	updateTreeContainerRect: (rect) => dispatch(treeActions.updateContainerRect(rect)),
 })
 export default connect(stateMap, actionMap)(Tree)
