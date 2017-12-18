@@ -5,6 +5,7 @@
   cursor: -moz-grab;
   cursor: -webkit-grab;
   flex-grow: 1;
+  font-size: 13px;
   height: 100%;
   overflow: visible;
   position: relative;
@@ -31,9 +32,6 @@
   position: absolute;
   text-align: center;
   width: 320px;
-}
-.treeContainer svg {
-  background: green;
 }
 .lightTheme .tree .chapter {
   background: #8bf;

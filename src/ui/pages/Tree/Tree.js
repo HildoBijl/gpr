@@ -6,6 +6,8 @@ import classnames from 'classnames'
 
 import treeActions from '../../../redux/tree.js'
 import chapters, { chapterArray, size, margin, treeRect } from '../chapters'
+import { getWindowSize } from '../../../logic/util.js'
+import { phoneLandscapeWidth } from '../../shared/params.js'
 
 class Tree extends Component {
 	constructor() {
@@ -71,6 +73,7 @@ class Tree extends Component {
 	checkSize(evt) {
 		this.props.updateTreeRect(this.getTreeRect())
 		this.props.updateTreeContainerRect(this.getTreeContainerRect())
+		this.props.updateWindowSize(getWindowSize()) // Make sure to do this only after the tree rectangles are is set. They are needed for the function to properly work.
 	}
 
 	getTreeRect() {
@@ -103,8 +106,8 @@ class Tree extends Component {
 						className="chapter"
 						ref={obj => this.chapterBlocks[chapter.name] = obj}
 						style={{
-							left: (chapter.tree.x - size.x / 2) + 'px',
-							top: chapter.tree.y + 'px',
+							left: (chapter.position.x - size.x / 2) + 'px',
+							top: chapter.position.y + 'px',
 						}}
 					>{chapter.title}</div>)}
 				</div>
@@ -125,6 +128,7 @@ const actionMap = (dispatch) => ({
 	endTouch: (evt) => dispatch(treeActions.endTouch(evt)),
 	scroll: (evt) => dispatch(treeActions.scroll(evt)),
 	updateVisuals: (evt) => dispatch(treeActions.updateVisuals(evt)),
+	updateWindowSize: (size) => dispatch(treeActions.updateWindowSize(size)),
 	updateTreeRect: (rect) => dispatch(treeActions.updateRect(rect)),
 	updateTreeContainerRect: (rect) => dispatch(treeActions.updateContainerRect(rect)),
 })

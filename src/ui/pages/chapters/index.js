@@ -28,7 +28,7 @@ chapters.whatisgpr = {
 		</div>
 	),
 	parents: [],
-	tree: {
+	position: {
 		x: 0,
 		y: 0,
 	},
@@ -43,9 +43,9 @@ chapters.fundamentalassumptions = {
 		</div>
 	),
 	parents: [chapters.whatisgpr],
-	tree: {
-		x: chapters.whatisgpr.tree.x,
-		y: chapters.whatisgpr.tree.y + size.y + margin.y,
+	position: {
+		x: chapters.whatisgpr.position.x,
+		y: chapters.whatisgpr.position.y + size.y + margin.y,
 	},
 }
 
@@ -58,9 +58,9 @@ chapters.addingdata = {
 		</div>
 	),
 	parents: [chapters.fundamentalassumptions],
-	tree: {
-		x: chapters.fundamentalassumptions.tree.x,
-		y: chapters.fundamentalassumptions.tree.y + size.y + 2*margin.y,
+	position: {
+		x: chapters.fundamentalassumptions.position.x,
+		y: chapters.fundamentalassumptions.position.y + size.y + 2*margin.y,
 	},
 }
 
@@ -72,9 +72,9 @@ chapters.samplingfunctions = {
 		</div>
 	),
 	parents: [chapters.fundamentalassumptions],
-	tree: {
-		x: chapters.addingdata.tree.x - (size.x + margin.x),
-		y: chapters.addingdata.tree.y,
+	position: {
+		x: chapters.addingdata.position.x - (size.x + margin.x),
+		y: chapters.addingdata.position.y,
 	},
 }
 
@@ -87,9 +87,9 @@ chapters.lineartransformations = {
 		</div>
 	),
 	parents: [chapters.fundamentalassumptions],
-	tree: {
-		x: chapters.addingdata.tree.x + (size.x + margin.x),
-		y: chapters.addingdata.tree.y,
+	position: {
+		x: chapters.addingdata.position.x + (size.x + margin.x),
+		y: chapters.addingdata.position.y,
 	},
 }
 
@@ -102,9 +102,9 @@ chapters.hyperparameters = {
 		</div>
 	),
 	parents: [chapters.addingdata],
-	tree: {
-		x: chapters.addingdata.tree.x - 3*(size.x + margin.x),
-		y: chapters.addingdata.tree.y + size.y + 2*margin.y,
+	position: {
+		x: chapters.addingdata.position.x - 3*(size.x + margin.x),
+		y: chapters.addingdata.position.y + size.y + 2*margin.y,
 	},
 }
 
@@ -117,9 +117,9 @@ chapters.covariancefunctions = {
 		</div>
 	),
 	parents: [chapters.hyperparameters],
-	tree: {
-		x: chapters.hyperparameters.tree.x,
-		y: chapters.hyperparameters.tree.y + (size.y + margin.y),
+	position: {
+		x: chapters.hyperparameters.position.x,
+		y: chapters.hyperparameters.position.y + (size.y + margin.y),
 	},
 }
 
@@ -132,9 +132,9 @@ chapters.multidimensionalinput = {
 		</div>
 	),
 	parents: [chapters.addingdata],
-	tree: {
-		x: chapters.hyperparameters.tree.x + (size.x + margin.x),
-		y: chapters.hyperparameters.tree.y,
+	position: {
+		x: chapters.hyperparameters.position.x + (size.x + margin.x),
+		y: chapters.hyperparameters.position.y,
 	},
 }
 
@@ -147,9 +147,9 @@ chapters.multidimensionaloutput = {
 		</div>
 	),
 	parents: [chapters.multidimensionalinput],
-	tree: {
-		x: chapters.multidimensionalinput.tree.x,
-		y: chapters.multidimensionalinput.tree.y + (size.y + margin.y),
+	position: {
+		x: chapters.multidimensionalinput.position.x,
+		y: chapters.multidimensionalinput.position.y + (size.y + margin.y),
 	},
 }
 
@@ -162,9 +162,9 @@ chapters.sparsemethods = {
 		</div>
 	),
 	parents: [chapters.addingdata],
-	tree: {
-		x: chapters.multidimensionalinput.tree.x + (size.x + margin.x),
-		y: chapters.multidimensionalinput.tree.y,
+	position: {
+		x: chapters.multidimensionalinput.position.x + (size.x + margin.x),
+		y: chapters.multidimensionalinput.position.y,
 	},
 }
 
@@ -177,9 +177,9 @@ chapters.onlinemethods = {
 		</div>
 	),
 	parents: [chapters.sparsemethods],
-	tree: {
-		x: chapters.sparsemethods.tree.x,
-		y: chapters.sparsemethods.tree.y + (size.y + margin.y),
+	position: {
+		x: chapters.sparsemethods.position.x,
+		y: chapters.sparsemethods.position.y + (size.y + margin.y),
 	},
 }
 
@@ -192,9 +192,9 @@ chapters.stochastictestinputs = {
 		</div>
 	),
 	parents: [chapters.addingdata],
-	tree: {
-		x: chapters.sparsemethods.tree.x + (size.x + margin.x),
-		y: chapters.sparsemethods.tree.y,
+	position: {
+		x: chapters.sparsemethods.position.x + (size.x + margin.x),
+		y: chapters.sparsemethods.position.y,
 	},
 }
 
@@ -207,9 +207,9 @@ chapters.stochasticmeasurementinputs = {
 		</div>
 	),
 	parents: [chapters.stochastictestinputs],
-	tree: {
-		x: chapters.stochastictestinputs.tree.x,
-		y: chapters.stochastictestinputs.tree.y + (size.y + margin.y),
+	position: {
+		x: chapters.stochastictestinputs.position.x,
+		y: chapters.stochastictestinputs.position.y + (size.y + margin.y),
 	},
 }
 
@@ -222,9 +222,9 @@ chapters.gpoptimization = {
 		</div>
 	),
 	parents: [chapters.addingdata],
-	tree: {
-		x: chapters.stochastictestinputs.tree.x + (size.x + margin.x),
-		y: chapters.stochastictestinputs.tree.y,
+	position: {
+		x: chapters.stochastictestinputs.position.x + (size.x + margin.x),
+		y: chapters.stochastictestinputs.position.y,
 	},
 }
 
@@ -237,9 +237,9 @@ chapters.functionoptimization = {
 		</div>
 	),
 	parents: [chapters.gpoptimization],
-	tree: {
-		x: chapters.gpoptimization.tree.x,
-		y: chapters.gpoptimization.tree.y + (size.y + margin.y),
+	position: {
+		x: chapters.gpoptimization.position.x,
+		y: chapters.gpoptimization.position.y + (size.y + margin.y),
 	},
 }
 
@@ -252,9 +252,9 @@ chapters.measuringlinearrelationships = {
 		</div>
 	),
 	parents: [chapters.addingdata],
-	tree: {
-		x: chapters.gpoptimization.tree.x + (size.x + margin.x),
-		y: chapters.gpoptimization.tree.y,
+	position: {
+		x: chapters.gpoptimization.position.x + (size.x + margin.x),
+		y: chapters.gpoptimization.position.y,
 	},
 }
 
@@ -267,9 +267,9 @@ chapters.sonig = {
 		</div>
 	),
 	parents: [chapters.multidimensionaloutput, chapters.onlinemethods, chapters.stochasticmeasurementinputs],
-	tree: {
-		x: chapters.onlinemethods.tree.x,
-		y: chapters.onlinemethods.tree.y + size.y + 2*margin.y,
+	position: {
+		x: chapters.onlinemethods.position.x,
+		y: chapters.onlinemethods.position.y + size.y + 2*margin.y,
 	},
 }
 
@@ -282,9 +282,9 @@ chapters.sisonig = {
 		</div>
 	),
 	parents: [chapters.sonig],
-	tree: {
-		x: chapters.sonig.tree.x,
-		y: chapters.sonig.tree.y + (size.y + margin.y),
+	position: {
+		x: chapters.sonig.position.x,
+		y: chapters.sonig.position.y + (size.y + margin.y),
 	},
 }
 
@@ -312,10 +312,10 @@ for (var name in chapters) {
 
 // Calculate the tree bounding rectangle.
 const initialChapter = chapterArray[0]
-const left = chapterArray.reduce((min, chapter) => Math.min(min, chapter.tree.x - size.x/2), initialChapter.tree.x)
-const right = chapterArray.reduce((max, chapter) => Math.max(max, chapter.tree.x + size.x/2), initialChapter.tree.x)
-const top = chapterArray.reduce((min, chapter) => Math.min(min, chapter.tree.y), initialChapter.tree.y)
-const bottom = chapterArray.reduce((max, chapter) => Math.max(max, chapter.tree.y + size.y), initialChapter.tree.y)
+const left = chapterArray.reduce((min, chapter) => Math.min(min, chapter.position.x - size.x/2), initialChapter.position.x)
+const right = chapterArray.reduce((max, chapter) => Math.max(max, chapter.position.x + size.x/2), initialChapter.position.x)
+const top = chapterArray.reduce((min, chapter) => Math.min(min, chapter.position.y), initialChapter.position.y)
+const bottom = chapterArray.reduce((max, chapter) => Math.max(max, chapter.position.y + size.y), initialChapter.position.y)
 const treeRect = {
 	left,
 	right,

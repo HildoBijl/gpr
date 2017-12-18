@@ -1,4 +1,5 @@
 import { deepClone, getPosition, bound, getDistance, getMiddle, getEigenvalues } from '../logic/util.js'
+import { phoneLandscapeWidth } from '../ui/shared/params';
 
 // These are important settings.
 const axes = ['x', 'y']
@@ -27,6 +28,10 @@ const getDefaultState = () => ({
 			y: 0,
 		},
 		oldPositions: [], // We use this to store old positions, so we can obtain the velocity later of the dragger when needed.
+		windowSize: { // The size of the window. This can be used to adjust the zoom factor. Smartphones may want to have a smaller tree than huge desktop screens. We assume a certain width of the screen. If it turns out to be different (e.g. smaller) than the script may adjust the zoom factor to compensate.
+			x: 1200,
+			y: 900,
+		},
 		rect: { // The original rectangle of the tree object. Scaling is ignored. So even if we zoom in, the size remains the same.
 			width: 0,
 			height: 0,
@@ -41,7 +46,7 @@ const getDefaultState = () => ({
 			left: 0,
 			top: 0,
 			right: 0,
-			bottom: 0,			
+			bottom: 0,
 		},
 		velocity: {
 			x: 0,
@@ -98,6 +103,10 @@ const actions = {
 	}),
 	updateVisuals: () => ({
 		type: 'UpdateTreeVisuals',
+	}),
+	updateWindowSize: (size) => ({
+		type: 'UpdateWindowSize',
+		size,
 	}),
 	updateRect: (rect) => ({
 		type: 'UpdateTreeRect',
@@ -185,7 +194,7 @@ export function reducer(originalState = getDefaultState(), action) {
 				action.evt.preventDefault()
 				return endDragging(state, getPosition(action.evt.changedTouches[0]))
 			}
-			
+
 			// If there's one, start dragging.
 			if (action.evt.touches.length === 1) {
 				action.evt.preventDefault()
@@ -231,6 +240,33 @@ export function reducer(originalState = getDefaultState(), action) {
 				zoom: state.data.zoom,
 				dragging: state.data.dragging,
 			}
+			return state
+		}
+
+		case 'UpdateWindowSize': {
+			// Determine by how much we need to adjust the zoom factor.
+			const oldSize = state.data.windowSize
+			const newSize = action.size
+			let factor = 1
+			const screenWasSmall = oldSize.x <= phoneLandscapeWidth
+			const screenIsSmall = newSize.x <= phoneLandscapeWidth
+			if (screenWasSmall && !screenIsSmall) {
+				factor*= 1.2
+			} else if (!screenWasSmall && screenIsSmall) {
+				factor/= 1.2
+			}
+
+			// Adjust the zoom factor, if necessary.
+			if (factor !== 1) {
+				const centerPoint = { // As center-point for our zoom, we use the point at the top middle of the container rectangle.
+					x: state.data.containerRect.left + state.data.containerRect.width/2,
+					y: state.data.containerRect.top,
+				}
+				state = setZoom(state, state.data.zoom*factor, centerPoint)
+			}
+
+			// Remember the new window size.
+			state.data.windowSize = deepClone(action.size)
 			return state
 		}
 
@@ -353,7 +389,7 @@ function startPinching(state, p1, p2) {
 }
 function updatePinching(state, p1, p2) {
 	const distance = getDistance(p1, p2)
-	const newZoom = state.data.initialZoom*distance/state.data.initialZoomDistance
+	const newZoom = state.data.initialZoom * distance / state.data.initialZoomDistance
 	const centerPoint = getMiddle(p1, p2)
 	return setZoom(state, newZoom, centerPoint)
 }
@@ -361,7 +397,7 @@ function stopPinching(state, p1, p2) {
 	state = updatePinching(state, p1, p2)
 	delete state.data.initialZoomDistance
 	delete state.data.initialZoom
-	return state 
+	return state
 }
 // applyScrollZoom is called when the user scrolls with the scroll wheel and presses the right button to zoom.
 function applyScrollZoom(state, evt) {
@@ -371,8 +407,8 @@ function applyScrollZoom(state, evt) {
 
 	// Determine the new zoom level.
 	if (evt.deltaY > 0)
-		return setZoom(state, state.data.zoom/zoomFactor, getPosition(evt))
-	return setZoom(state, state.data.zoom*zoomFactor, getPosition(evt))
+		return setZoom(state, state.data.zoom / zoomFactor, getPosition(evt))
+	return setZoom(state, state.data.zoom * zoomFactor, getPosition(evt))
 }
 // setZoom applies an actual zoom value.
 function setZoom(state, zoom, centerPoint) {
@@ -426,7 +462,7 @@ function updatePositionVelocity(state) {
 
 	// If there is still a velocity, or we're not inside the rectangle, then apply more updates later.
 	axes.forEach(axis => {
-		state.data.requireUpdate = state.data.requireUpdate || 
+		state.data.requireUpdate = state.data.requireUpdate ||
 			state.data.velocity[axis] !== 0 ||
 			state.data.position[axis] < getMinCoordinate(state, axis) ||
 			state.data.position[axis] > getMaxCoordinate(state, axis)
@@ -490,9 +526,9 @@ function getMinCoordinate(state, axis) {
 	if (axis === 'y') {
 		return state.data.rect.top * state.data.zoom
 	}
-	const minX = state.data.rect.left * state.data.zoom + state.data.containerRect.width/2
-	const maxX = state.data.rect.right * state.data.zoom - state.data.containerRect.width/2
-	return Math.min(minX, (minX + maxX)/2)
+	const minX = state.data.rect.left * state.data.zoom + state.data.containerRect.width / 2
+	const maxX = state.data.rect.right * state.data.zoom - state.data.containerRect.width / 2
+	return Math.min(minX, (minX + maxX) / 2)
 }
 function getMaxCoordinate(state, axis) {
 	if (axis === 'y') {
@@ -500,9 +536,9 @@ function getMaxCoordinate(state, axis) {
 		const maxY = state.data.rect.bottom * state.data.zoom - state.data.containerRect.height
 		return Math.max(maxY, minY)
 	}
-	const minX = state.data.rect.left * state.data.zoom + state.data.containerRect.width/2
-	const maxX = state.data.rect.right * state.data.zoom - state.data.containerRect.width/2
-	return Math.max(maxX, (minX + maxX)/2)
+	const minX = state.data.rect.left * state.data.zoom + state.data.containerRect.width / 2
+	const maxX = state.data.rect.right * state.data.zoom - state.data.containerRect.width / 2
+	return Math.max(maxX, (minX + maxX) / 2)
 }
 // getViewPosition returns the position of the tree in left/top coordinates, given the position in our regular coordinate system.
 function getViewPosition(state) {

@@ -14,6 +14,15 @@ export function getPosition(evt) {
 	throw new Error('Could not get position from given event.')
 }
 
+// getWindowSize returns the size of the current viewport in a browser-compatible way. It may not always be fully accurate: if window.innerWidth (and height) doesn't work, it uses the document client width. This is a different width, as it doesn't measure any potential scroll bar that may appear. However, the CSS media width parameter does take into account the width including scroll bar. So then funny stuff may happen. Most browsers support innerWidth though, so we should be fine.
+export function getWindowSize() {
+	const body = document.body || document.getElementsByTagName('body')[0]
+	return {
+		x: window.innerWidth || document.documentElement.clientWidth || body.clientWidth,
+		y: window.innerHeight|| document.documentElement.clientHeight|| body.clientHeight,
+	}
+}
+
 // bound will give the closest number to x in the interval [min, max].
 export function bound(x, min, max) {
 	if (max < min)
