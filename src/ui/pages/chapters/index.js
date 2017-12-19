@@ -1,15 +1,17 @@
 import React from 'react'
 
-// Define the width and height of chapter blocks inside the content tree. These should match the width and height inside CSS.
-const size = {
+// Define some size settings.
+
+const size = { // The width and height of chapter blocks inside the content tree. These should match the width and height inside CSS.
 	x: 320,
 	y: 80,
 }
-// Define the margins used in horizontal and vertical directions between blocks in the tree. Note that the y-margin may be used twice if there is a horizontal line running between blocks.
-const margin = {
+
+const margin = { // The margins used in horizontal and vertical directions between blocks in the tree. Note that the y-margin may be used twice if there is a horizontal line running between blocks.
 	x: 20,
 	y: 20,
 }
+const cornerRadius = 16 // The radius of the corners in the content tree.
 
 // Define all the chapters. There are a few important parameters to define.
 // - title is the text shown in the chapter block of the content tree.
@@ -325,5 +327,22 @@ const treeRect = {
 	height: bottom - top,
 }
 
+// Export important parameters.
 export default chapters
 export { size, margin, chapterArray, treeRect }
+
+// getTreeLine returns an SVG path from one (parent) chapter to another (child) chapter.
+export function getTreeLine(parent, child) {
+	// Check if the blocks are aligned.
+	if (parent.position.x === child.position.x)
+		return <line className="treeLine" key={parent.name+'-'+child.name} x1={parent.position.x} y1={parent.position.y} x2={child.position.x} y2={child.position.y} />
+	const direction = (child.position.x > parent.position.x ? 1 : -1)
+	return <path className="treeLine" key={parent.name+'-'+child.name} d={`
+		M${parent.position.x} ${parent.position.y + size.y}
+		v${margin.y - cornerRadius}
+		a${cornerRadius} ${cornerRadius} 0 0 ${direction === 1 ? 0 : 1} ${cornerRadius*direction} ${cornerRadius}
+		h${child.position.x - parent.position.x - 2*cornerRadius*direction}
+		a${cornerRadius} ${cornerRadius} 0 0 ${direction === 1 ? 1 : 0} ${cornerRadius*direction} ${cornerRadius}
+		V${child.position.y}
+	`} />
+}

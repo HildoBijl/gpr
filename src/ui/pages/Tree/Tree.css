@@ -1,5 +1,4 @@
 .treeContainer {
-  background: green;
   cursor: move;
   cursor: grab;
   cursor: -moz-grab;
@@ -33,9 +32,27 @@
   text-align: center;
   width: 320px;
 }
+.treeContainer svg {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  position: absolute;
+  z-index: -1;
+}
+.treeContainer svg .treeLine {
+  fill: none;
+  stroke-width: 4px;
+}
 .lightTheme .tree .chapter {
   background: #8bf;
 }
+.lightTheme svg .treeLine {
+  stroke: #8bf;
+}
 .darkTheme .tree .chapter {
   background: #125;
+}
+.darkTheme svg .treeLine {
+  stroke: #125;
 }

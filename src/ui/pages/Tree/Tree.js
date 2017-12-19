@@ -5,9 +5,8 @@ import { connect } from 'react-redux'
 import classnames from 'classnames'
 
 import treeActions from '../../../redux/tree.js'
-import chapters, { chapterArray, size, margin, treeRect } from '../chapters'
+import { chapterArray, size, treeRect, getTreeLine } from '../chapters'
 import { getWindowSize } from '../../../logic/util.js'
-import { phoneLandscapeWidth } from '../../shared/params.js'
 
 class Tree extends Component {
 	constructor() {
@@ -110,6 +109,18 @@ class Tree extends Component {
 							top: chapter.position.y + 'px',
 						}}
 					>{chapter.title}</div>)}
+					<svg style={{
+						height: treeRect.height + 'px',
+						width: treeRect.width + 'px',
+						left: treeRect.left + 'px',
+						top: treeRect.top + 'px',
+					}} viewBox={`${treeRect.left} ${treeRect.top} ${treeRect.width} ${treeRect.height}`}>
+						{chapterArray.map(chapter => chapter.children.length === 0 ? '' : (
+								<g key={chapter.name}>
+									{chapter.children.map(child => getTreeLine(chapter, child))}
+								</g>
+						))}
+					</svg>
 				</div>
 			</div>
 		)
