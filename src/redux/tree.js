@@ -21,6 +21,8 @@ const zoomFactor = 1.1 // [-]. The amplification factor when zooming in/out on t
 const scrollAmount = 75 // Pixels. The amount of pixels you scroll for each tick of the scroll wheel.
 const maxZoom = 2 // [-]. The maximum zoom factor.
 
+const maxClickDrag = 10 // The maximum number of pixels which the user can drag over while it's still considered to be a click.
+
 const getDefaultState = () => ({
 	data: {
 		position: {
@@ -58,6 +60,9 @@ const getDefaultState = () => ({
 		requireUpdate: true, // A boolean to indicate whether something has changed in the data, requiring an update of the visuals.
 		initialZoomDistance: undefined, // When the user uses two fingers to pinch, this is the distance between the two fingers (touches). It is used to determine whether the fingers went closer together (zoom out) or further apart (zoom in).
 		initialZoom: undefined, // The initial zoom present when the user starts pinching.
+		activeChapter: undefined, // The name of the chapter that's currently active. If undefined, no chapter is active.
+		previousActiveChapter: undefined, // The name of the chapter that was previously active. We use this to make sure the hiding of chapters also has proper styling.
+		validClick: false, // When the mouse goes down (or a touch starts) the user may be clicking on a chapter or dragging the screen. We're going to keep track of whether it's the first or the latter. It's not a click when the user drags the mouse/finger for more than the specified threshold. In that case we set validClick to false, and any subsequent mouseUp event is not considered a click.
 	},
 	visuals: {
 		position: {
@@ -66,6 +71,16 @@ const getDefaultState = () => ({
 		},
 		zoom: 1,
 		dragging: false,
+		activeChapter: undefined,
+		validClick: false,
+		treeRect: {
+			left: 0,
+			top: 0,
+			right: 0,
+			bottom: 0,
+			width: 0,
+			height: 0,
+		},
 	},
 })
 
@@ -101,6 +116,38 @@ const actions = {
 		type: 'TreeScroll',
 		evt,
 	}),
+	clickChapterTitle: (name, evt) => ({
+		type: 'ClickTreeChapterTitle',
+		name,
+		evt,
+	}),
+	clickChapterDescription: (name, evt) => (
+    (dispatch, getState) => {
+			// If there is not a valid click (the user drags instead of clicks) then do nothing.
+			if (!getState().tree.data.validClick)
+				return
+			// Deal with the mouseup or endtouch event in the regular way.
+			if (evt.type === 'mouseup') {
+				dispatch({
+					type: 'EndTreeDragging',
+					evt,
+				})
+			} else {
+				dispatch({
+					type: 'EndTreeTouch',
+					evt,
+				})
+			}
+			// Go to the chapter page.
+			dispatch({
+				type: 'CHAPTER',
+				payload: {
+					chapter: name,
+					section: 1, // TODO: Potentially remove this, and let the chapter figure out which section to go to.
+				}
+			})
+		}
+	),
 	updateVisuals: () => ({
 		type: 'UpdateTreeVisuals',
 	}),
@@ -141,7 +188,13 @@ export function reducer(originalState = getDefaultState(), action) {
 			if (!state.data.dragging)
 				return originalState
 
-			// Stop listening for mouse moves, and apply the final dragging position.
+			// If, after the dragging, we still have a valid click, then the user didn't really drag but only click. This means that we need to deactivate whatever chapter was active.
+			if (state.data.validClick && !action.evt.processedByTree) {
+				state.data.previousActiveChapter = state.data.activeChapter
+				state.data.activeChapter = undefined
+			}
+
+			// Apply the final dragging position.
 			action.evt.preventDefault()
 			return endDragging(state, getPosition(action.evt))
 		}
@@ -191,6 +244,13 @@ export function reducer(originalState = getDefaultState(), action) {
 		case 'EndTreeTouch': {
 			// Check the number of touches. If there's zero, end the drag.
 			if (action.evt.touches.length === 0 && state.data.dragging) {
+				// If, after the dragging, we still have a valid click, then the user didn't really drag but only click. This means that we need to deactivate whatever chapter was active.
+				if (state.data.validClick && !action.evt.processedByTree) {
+					state.data.previousActiveChapter = state.data.activeChapter
+					state.data.activeChapter = undefined
+				}
+				
+				// End the dragging.
 				action.evt.preventDefault()
 				return endDragging(state, getPosition(action.evt.changedTouches[0]))
 			}
@@ -198,7 +258,9 @@ export function reducer(originalState = getDefaultState(), action) {
 			// If there's one, start dragging.
 			if (action.evt.touches.length === 1) {
 				action.evt.preventDefault()
-				return startDragging(state, getPosition(action.evt.touches[0]))
+				state = startDragging(state, getPosition(action.evt.touches[0]))
+				state.data.validClick = false
+				return state
 			}
 
 			// If there's two, start pinching.
@@ -224,6 +286,23 @@ export function reducer(originalState = getDefaultState(), action) {
 			return applyScroll(state, action.evt)
 		}
 
+		case 'ClickTreeChapterTitle': {
+			// Check if it is a valid click. That is, the mouse didn't move a lot after going down. If not, do nothing.
+			if (!state.data.validClick)
+				return originalState
+			
+			// If the given chapter was active, deactivate it. Otherwise activate it.
+			if (state.data.activeChapter === action.name) {
+				state.data.previousActiveChapter = state.data.activeChapter
+				state.data.activeChapter = undefined
+			} else {
+				state.data.previousActiveChapter = state.data.activeChapter
+				state.data.activeChapter = action.name
+			}
+			action.evt.processedByTree = true // Remember in the event object that we already saw it pass by.
+			return state
+		}
+		
 		// Adjust the visuals based on the state data. And update the state data itself while we're at it.
 		case 'UpdateTreeVisuals': {
 			// Check if we need an update. When nothing has happened, then we don't update.
@@ -239,6 +318,10 @@ export function reducer(originalState = getDefaultState(), action) {
 				position: position,
 				zoom: state.data.zoom,
 				dragging: state.data.dragging,
+				activeChapter: state.data.activeChapter,
+				previousActiveChapter: state.data.previousActiveChapter,
+				validClick: state.data.validClick,
+				treeRect: state.data.rect,
 			}
 			return state
 		}
@@ -282,6 +365,13 @@ export function reducer(originalState = getDefaultState(), action) {
 			return state
 		}
 
+		case 'TREE': { // When we get to this page, make sure that some parameters have default values, which they might not have if the user already visited the tree before.
+			state.data.dragging = false
+			state.data.validClick = false
+			state.data.activeChapter = undefined
+			return state
+		}
+
 		default: {
 			return originalState
 		}
@@ -295,12 +385,17 @@ function startDragging(state, clickPosition) {
 	state.data.clickPosition = clickPosition // Remember where we clicked, so we can calculate how much has been dragged.
 	state.data.velocity = { x: 0, y: 0 } // Freeze any potential sliding of the tree.
 	state.data.requireUpdate = true
+	state.data.validClick = true // Note that this drag could also still be a click.
 	return state
 }
 function updateDragging(state, mousePosition) {
 	// If there's no dragging, then don't do anything.
 	if (!state.data.dragging)
 		return state
+	
+	// Check if the user has been dragging so much that we cannot consider the mouse-down-and-up a valid click anymore.
+	if (state.data.validClick && getDistance(mousePosition, state.data.clickPosition) > maxClickDrag)
+		state.data.validClick = false
 
 	// Calculate the new position.
 	const newPosition = {}
@@ -385,6 +480,7 @@ function startPinching(state, p1, p2) {
 	const distance = getDistance(p1, p2)
 	state.data.initialZoomDistance = distance
 	state.data.initialZoom = state.data.zoom
+	state.data.validClick = false // Make sure that none of the touches will count as a click in any way.
 	return state
 }
 function updatePinching(state, p1, p2) {

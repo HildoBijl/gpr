@@ -1,11 +1,16 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-const Chapter = (props) => (
-	<div>
-		<p>This is going to be chapter {props.chapter}, section {props.section}.</p>
-	</div>
-)
+import chapters from '../chapters'
+
+const Chapter = (props) => {
+	const chapter = chapters[props.chapter]
+	return (
+		<div>
+			<p>This is going to be chapter <strong>{(chapters[props.chapter] || { title: 'Unknown chapter'}).title}</strong>, section {props.section}.</p>
+		</div>
+	)
+}
 
 const stateMap = (state) => ({
 	chapter: state.location.payload.chapter,

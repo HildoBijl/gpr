@@ -51,6 +51,20 @@ chapters.fundamentalassumptions = {
 	},
 }
 
+chapters.samplingfunctions = {
+	title: 'Sampling functions from a Gaussian process',
+	description: (
+		<div>
+			<p>One way to look at a Gaussian process is as a distribution over functions. And if it is a distribution, then we can draw samples from this distribution. This is called 'sampling', and in this small add-on chapter we figure out how it works.</p>
+		</div>
+	),
+	parents: [chapters.fundamentalassumptions],
+	position: {
+		x: chapters.fundamentalassumptions.position.x - (size.x + margin.x),
+		y: chapters.fundamentalassumptions.position.y + size.y + 2*margin.y,
+	},
+}
+
 chapters.addingdata = {
 	title: 'Adding measurement data to make predictions',
 	description: (
@@ -61,22 +75,8 @@ chapters.addingdata = {
 	),
 	parents: [chapters.fundamentalassumptions],
 	position: {
-		x: chapters.fundamentalassumptions.position.x,
-		y: chapters.fundamentalassumptions.position.y + size.y + 2*margin.y,
-	},
-}
-
-chapters.samplingfunctions = {
-	title: 'Sampling functions from a Gaussian process',
-	description: (
-		<div>
-			<p>One way to look at a Gaussian process is as a distribution over functions. And if it is a distribution, then we can draw samples from this distribution. This is called 'sampling', and in this small add-on chapter we figure out how it works.</p>
-		</div>
-	),
-	parents: [chapters.fundamentalassumptions],
-	position: {
-		x: chapters.addingdata.position.x - (size.x + margin.x),
-		y: chapters.addingdata.position.y,
+		x: chapters.samplingfunctions.position.x + (size.x + margin.x),
+		y: chapters.samplingfunctions.position.y,
 	},
 }
 
@@ -189,8 +189,8 @@ chapters.stochastictestinputs = {
 	title: 'Using stochastic (noisy) test input points',
 	description: (
 		<div>
-			<p></p>
-			<p></p>
+			<p>Suppose you're approximating a function. With Gaussian process regression you can, for any given input point, find the posterior distribution of the corresponding function value. But what if you don't exactly know the input you're dealing with? You only know its distribution?</p>
+			<p>In this case things become a whole lot more complicated. It requires integrating (marginalizing) over all possible input points. When the input point has a Gaussian distribution, we can analytically find the posterior mean and covariance. This chapter explains how to do that.</p>
 		</div>
 	),
 	parents: [chapters.addingdata],
@@ -204,8 +204,8 @@ chapters.stochasticmeasurementinputs = {
 	title: 'Using stochastic (noisy) measurement input points',
 	description: (
 		<div>
-			<p></p>
-			<p></p>
+			<p>Suppose we're approximating a function. When measuring this function, there may be noise on the output. But there may just as well be noise on the input point we're trying to apply. When this happens, Gaussian process regression is unable to deal with this.</p>
+			<p>This chapter studies the exact problems we run into when dealing with this problem. In addition, we look at a few workarounds. We study a few approximations that allow us to still take into account stochastic measurement input points.</p>
 		</div>
 	),
 	parents: [chapters.stochastictestinputs],
@@ -335,7 +335,9 @@ export { size, margin, chapterArray, treeRect }
 export function getTreeLine(parent, child) {
 	// Check if the blocks are aligned.
 	if (parent.position.x === child.position.x)
-		return <line className="treeLine" key={parent.name+'-'+child.name} x1={parent.position.x} y1={parent.position.y} x2={child.position.x} y2={child.position.y} />
+		return <line className="treeLine" key={parent.name+'-'+child.name} x1={parent.position.x} y1={parent.position.y + size.y} x2={child.position.x} y2={child.position.y} />
+	
+	// Blocks are not aligned. We need to make arcs in the line.
 	const direction = (child.position.x > parent.position.x ? 1 : -1)
 	return <path className="treeLine" key={parent.name+'-'+child.name} d={`
 		M${parent.position.x} ${parent.position.y + size.y}

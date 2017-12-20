@@ -11,26 +11,71 @@
   user-select: none;
   width: 100%;
 }
-.treeContainer.dragging {
-  cursor: grabbing;
-  cursor: -moz-grabbing;
-  cursor: -webkit-grabbing;
-}
 .treeContainer .tree {
   cursor: pointer;
   position: absolute;
 }
 .treeContainer .tree .chapter {
-  border-radius: 8px;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.26);
+  overflow: hidden;
+  position: absolute;
+  transition: height 0.4s;
+  width: 320px;
+  z-index: 0;
+}
+.treeContainer .tree .chapter .title {
+  background: inherit;
+  border-radius: 16px 16px 0 0;
   display: flex;
   flex-flow: column nowrap;
-  font-weight: bold;
   height: 80px;
   justify-content: center;
-  padding: 10px 20px;
-  position: absolute;
+  position: relative;
+  z-index: 2;
+}
+.treeContainer .tree .chapter .title p {
+  font-weight: bold;
+  line-height: 1.5;
+  margin: 0;
+  padding: 10px 0;
   text-align: center;
-  width: 320px;
+}
+.treeContainer .tree .chapter .description {
+  border-radius: 0 0 16px 16px;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 0.9em;
+  justify-content: flex-end;
+  padding: 10px 20px 10px 10px;
+  position: relative;
+  text-align: justify;
+  transition: top 0.4s;
+  z-index: 1;
+}
+.treeContainer .tree .chapter .description p {
+  line-height: 1.15;
+  margin: 0 0 6px 0;
+}
+.treeContainer .tree .chapter .description p.study {
+  font-weight: bold;
+  margin: 0;
+  text-align: right;
+}
+.treeContainer .tree .chapter .description:hover p.study {
+  text-decoration: underline;
+}
+.treeContainer .tree .chapter.previousActive {
+  z-index: 1;
+}
+.treeContainer .tree .chapter.active {
+  z-index: 2;
+}
+.treeContainer .tree .chapter.active .title {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.26);
+}
+.treeContainer .tree .chapter.active .description {
+  display: block;
 }
 .treeContainer svg {
   cursor: move;
@@ -44,15 +89,53 @@
   fill: none;
   stroke-width: 4px;
 }
+.treeContainer.dragging {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+.treeContainer.dragging svg {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+.treeContainer.dragging.invalidClick .tree {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+@media (min-width: 960.01px) {
+  .treeContainer .svg .treeLine {
+    filter: url(#shadow);
+  }
+}
+.lightTheme .tree {
+  color: #fff;
+}
 .lightTheme .tree .chapter {
-  background: #8bf;
+  background: #013;
 }
-.lightTheme svg .treeLine {
-  stroke: #8bf;
-}
-.darkTheme .tree .chapter {
+.lightTheme .tree .chapter .description {
   background: #125;
 }
-.darkTheme svg .treeLine {
+.lightTheme .tree .chapter .description p.study {
+  color: #bbb;
+}
+.lightTheme svg .treeLine {
   stroke: #125;
+}
+.darkTheme .tree {
+  color: #000;
+}
+.darkTheme .tree .chapter {
+  background: #adf;
+}
+.darkTheme .tree .chapter .description {
+  background: #def;
+}
+.darkTheme .tree .chapter .description p.study {
+  color: #888;
+}
+.darkTheme svg .treeLine {
+  stroke: #adf;
 }

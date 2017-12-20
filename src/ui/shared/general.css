@@ -21,3 +21,6 @@ a:active,
 a:focus {
   outline: none;
 }
+strong {
+  font-weight: bold;
+}

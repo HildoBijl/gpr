@@ -5,6 +5,8 @@ import About from './About/About.js'
 import Chapter from './Chapter/Chapter.js'
 import NotFound from './NotFound/NotFound.js'
 
+import chapters from './chapters'
+
 const pages = {
 	HOME: {
 		component: Home,
@@ -25,7 +27,7 @@ const pages = {
 	},
 	CHAPTER: {
 		component: Chapter,
-		title: (payload) => `Chapter ${payload.chapter}, section ${payload.section}`,
+		title: (payload) => `${(chapters[payload.chapter] || { title: 'Unknown chapter'}).title}, section ${payload.section}`,
 	},
 	NOTFOUND: {
 		component: NotFound,
@@ -33,3 +35,9 @@ const pages = {
 	},
 }
 export default pages
+
+export function getTitle(page, payload) {
+	if (typeof(page.title) === 'function')
+		return page.title(payload)
+	return page.title
+}

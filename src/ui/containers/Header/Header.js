@@ -5,7 +5,7 @@ import Link from 'redux-first-router-link'
 import { connect } from 'react-redux'
 import { Helmet } from 'react-helmet'
 
-import pages from '../../pages'
+import pages, { getTitle } from '../../pages'
 import logo from '../../../logo.svg'
 import MenuItem from '../../components/MenuItem/MenuItem.js'
 import Tree from '../../icons/Tree.js'
@@ -21,9 +21,9 @@ const Header = (props) => {
 					<Link to={{ type: 'HOME' }} className="logoLink">
 						<img src={logo} alt="logo" className="logo" />
 					</Link>
-					<h1>{page.title}</h1>
+					<h1>{getTitle(page, props.payload)}</h1>
 					<Helmet>
-						<title>{page.skipPrefix ? '' : 'Gaussian Process Regression - '}{page.title}</title>
+						<title>{page.skipPrefix ? '' : 'Gaussian Process Regression - '}{getTitle(page, props.payload)}</title>
 					</Helmet>
 				</div>
 				<nav className="menu">
@@ -37,6 +37,7 @@ const Header = (props) => {
 }
 
 const stateMap = (state) => ({
-	locationType: state.location.type
+	locationType: state.location.type,
+	payload: state.location.payload,
 })
 export default connect(stateMap)(Header)

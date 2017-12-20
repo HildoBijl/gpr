@@ -8,6 +8,9 @@ import treeActions from '../../../redux/tree.js'
 import { chapterArray, size, treeRect, getTreeLine } from '../chapters'
 import { getWindowSize } from '../../../logic/util.js'
 
+const minPadding = 12 // The minimum horizontal padding of the chapter titles.
+const maxPadding = size.x/4 // The maximum horizontal padding of the chapter titles.
+
 class Tree extends Component {
 	constructor() {
 		super()
@@ -34,6 +37,9 @@ class Tree extends Component {
 
 		// Start the update loop to get animations.
 		this.updateVisuals()
+
+		// Adjust the blocks to make them look pretty.
+		this.setUpChapters()
 	}
 
 	componentWillUnmount() {
@@ -66,13 +72,49 @@ class Tree extends Component {
 	endDragging(evt) {
 		this.props.endDragging(evt)
 		document.removeEventListener('mousemove', this.props.updateDragging)
-		document.removeEventListener('touchmove', this.props.updateDragging)
 	}
 
 	checkSize(evt) {
 		this.props.updateTreeRect(this.getTreeRect())
 		this.props.updateTreeContainerRect(this.getTreeContainerRect())
 		this.props.updateWindowSize(getWindowSize()) // Make sure to do this only after the tree rectangles are is set. They are needed for the function to properly work.
+	}
+
+	setUpChapters() {
+		// Walk through the chapters, preparing each one individually.
+		for (var name in this.chapterBlocks) {
+			// Extract the objects for this chapter.
+			const block = this.chapterBlocks[name]
+			const title = block.firstChild
+			const p = title.firstChild
+			const description = block.lastChild
+
+			// Increase the horizontal padding to the largest point before the height of the chapter title increases (because of an extra line). This makes the text more centered. Do this through an efficient binary search.
+			let min = minPadding
+			let max = maxPadding
+			p.style.paddingLeft = p.style.paddingRight = min + 'px'
+			const startingHeight = p.offsetHeight // Measure the initial height.
+			while (max - min > 1) {
+				// Try a certain padding and see if it adds another line.
+				p.style.paddingLeft = p.style.paddingRight = ((max + min)/2) + 'px'
+				if (p.offsetHeight > startingHeight)
+					max = (max + min)/2 // The tried padding would add another line. Look at smaller paddings by reducing the max.
+				else
+					min = (max + min)/2 // The tried padding does not add another line. Look at bigger paddings by increasing the min.
+			}
+			p.style.paddingLeft = p.style.paddingRight = min + 'px'
+
+			// Add event listeners to check for clicks.
+			title.addEventListener('mouseup', this.props.clickChapterTitle.bind(null, name))
+			title.addEventListener('touchend', this.props.clickChapterTitle.bind(null, name))
+			description.addEventListener('mouseup', this.props.clickChapterDescription.bind(null, name))
+			description.addEventListener('touchend', this.props.clickChapterDescription.bind(null, name))
+
+			// Check the height of the chapter description.
+			block.descriptionHeight = description.offsetHeight
+			block.style.height = (size.y) + 'px'
+			description.style.top = (-block.descriptionHeight) + 'px'
+		}
 	}
 
 	getTreeRect() {
@@ -94,31 +136,84 @@ class Tree extends Component {
 	render() {
 		const scale = this.props.zoom
 		const shift = this.props.position
-		this.chapterBlocks = {}
+		if (!this.chapterBlocks)
+			this.chapterBlocks = {}
+
 		return (
-			<div className={classnames('treeContainer', { 'dragging': !!this.props.dragging })} ref={obj => this.treeContainer = obj}>
+			<div className={classnames(
+				'treeContainer',
+				{ 'dragging': !!this.props.dragging },
+				{ 'invalidClick': !this.props.validClick },
+			)} ref={obj => this.treeContainer = obj}>
 				<div className="tree" id="tree" style={{
 					transform: `matrix(${scale},0,0,${scale},${shift.x},${shift.y})`,
 				}} ref={obj => this.tree = obj}>
-					{chapterArray.map(chapter => <div
-						key={chapter.name}
-						className="chapter"
-						ref={obj => this.chapterBlocks[chapter.name] = obj}
-						style={{
-							left: (chapter.position.x - size.x / 2) + 'px',
-							top: chapter.position.y + 'px',
-						}}
-					>{chapter.title}</div>)}
+					{chapterArray.map(chapter => {
+						// Check if we already know the HTML block for this chapter, and if we know the height of the description. If so, apply the proper height.
+						const active = chapter.name === this.props.activeChapter
+						const previousActive = chapter.name === this.props.previousActiveChapter
+						const block = this.chapterBlocks[chapter.name]
+						if (block) {
+							const description = block.lastChild
+							block.style.height = ((active ? block.descriptionHeight : 0) + size.y) + 'px'
+							description.style.top = (active ? 0 : -block.descriptionHeight) + 'px'
+						}
+
+						return (
+							<div
+								key={chapter.name}
+								className={classnames(
+									'chapter',
+									{ 'active': active },
+									{ 'previousActive': previousActive },
+								)}
+								ref={obj => this.chapterBlocks[chapter.name] = obj}
+								style={{
+									left: (chapter.position.x - size.x / 2) + 'px',
+									top: chapter.position.y + 'px',
+								}}
+							>
+								<div className="title">
+									<p>{chapter.title}</p>
+								</div>
+								<div className="description">
+									{chapter.description}
+									<p className="study">Study this chapter</p>
+								</div>
+							</div>
+						)
+					})}
 					<svg style={{
 						height: treeRect.height + 'px',
 						width: treeRect.width + 'px',
 						left: treeRect.left + 'px',
 						top: treeRect.top + 'px',
 					}} viewBox={`${treeRect.left} ${treeRect.top} ${treeRect.width} ${treeRect.height}`}>
+						<defs>
+							<filter
+								xmlns="http://www.w3.org/2000/svg"
+								id="shadow"
+								filterUnits="userSpaceOnUse"
+								x={this.props.treeRect.left}
+								y={this.props.treeRect.top}
+								width={this.props.treeRect.width}
+								height={this.props.treeRect.height}
+							>
+								<feGaussianBlur in="SourceAlpha" stdDeviation="4"/> 
+								<feOffset dx="0" dy="2" result="offsetblur"/>
+								<feComponentTransfer>
+									<feFuncA type="linear" slope="0.26"/>
+								</feComponentTransfer>
+								<feMerge> 
+									<feMergeNode/>
+									<feMergeNode in="SourceGraphic"/> 
+								</feMerge>
+							</filter>
+						</defs>
 						{chapterArray.map(chapter => chapter.children.length === 0 ? '' : (
-								<g key={chapter.name}>
-									{chapter.children.map(child => getTreeLine(chapter, child))}
-								</g>
+							<g key={chapter.name}>
+								{chapter.children.map(child => getTreeLine(chapter, child))}
+							</g>
 						))}
 					</svg>
 				</div>
@@ -138,6 +233,8 @@ const actionMap = (dispatch) => ({
 	updateTouch: (evt) => dispatch(treeActions.updateTouch(evt)),
 	endTouch: (evt) => dispatch(treeActions.endTouch(evt)),
 	scroll: (evt) => dispatch(treeActions.scroll(evt)),
+	clickChapterTitle: (name, evt) => dispatch(treeActions.clickChapterTitle(name, evt)),
+	clickChapterDescription: (name, evt) => dispatch(treeActions.clickChapterDescription(name, evt)),
 	updateVisuals: (evt) => dispatch(treeActions.updateVisuals(evt)),
 	updateWindowSize: (size) => dispatch(treeActions.updateWindowSize(size)),
 	updateTreeRect: (rect) => dispatch(treeActions.updateRect(rect)),
