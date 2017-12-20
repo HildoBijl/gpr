@@ -75,14 +75,13 @@ class Tree extends Component {
 	}
 
 	checkSize(evt) {
-		this.props.updateTreeRect(this.getTreeRect())
 		this.props.updateTreeContainerRect(this.getTreeContainerRect())
 		this.props.updateWindowSize(getWindowSize()) // Make sure to do this only after the tree rectangles are is set. They are needed for the function to properly work.
 	}
 
 	setUpChapters() {
 		// Walk through the chapters, preparing each one individually.
-		for (var name in this.chapterBlocks) {
+		for (let name in this.chapterBlocks) {
 			// Extract the objects for this chapter.
 			const block = this.chapterBlocks[name]
 			const title = block.firstChild
@@ -115,13 +114,15 @@ class Tree extends Component {
 			block.style.height = (size.y) + 'px'
 			description.style.top = (-block.descriptionHeight) + 'px'
 		}
+
+		// Gather the description block heights and send them to redux.
+		const descriptionHeights = {}
+		for (let name in this.chapterBlocks) {
+			descriptionHeights[name] = this.chapterBlocks[name].descriptionHeight
+		}
+		this.props.updateTreeDescriptionHeights(descriptionHeights)
 	}
 
-	getTreeRect() {
-		return {
-			...treeRect, // TODO: ADD ADJUSTABLE HEIGHT BASED ON WHAT OPENS UP.
-		}
-	}
 	getTreeContainerRect() {
 		return {
 			width: this.treeContainer.offsetWidth,
@@ -237,7 +238,7 @@ const actionMap = (dispatch) => ({
 	clickChapterDescription: (name, evt) => dispatch(treeActions.clickChapterDescription(name, evt)),
 	updateVisuals: (evt) => dispatch(treeActions.updateVisuals(evt)),
 	updateWindowSize: (size) => dispatch(treeActions.updateWindowSize(size)),
-	updateTreeRect: (rect) => dispatch(treeActions.updateRect(rect)),
+	updateTreeDescriptionHeights: (rect) => dispatch(treeActions.updateDescriptionHeights(rect)),
 	updateTreeContainerRect: (rect) => dispatch(treeActions.updateContainerRect(rect)),
 })
 export default connect(stateMap, actionMap)(Tree)

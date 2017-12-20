@@ -84,7 +84,7 @@ chapters.lineartransformations = {
 	title: 'Linear transformations of a Gaussian process',
 	description: (
 		<div>
-			<p>Function can be transformed. We can shift them horizontally, vertically, multiply them, and so forth. But we can also take their derivatives and integrals. Those are in fact also linear operations.</p>
+			<p>Functions can be transformed. We can shift them horizontally, vertically, multiply them, and so forth. These are all linear operations. But we can also take their derivatives and integrals, which are also linear operations.</p>
 			<p>With a Gaussian process being a distribution over functions, we can do the same to Gaussian processes. How does it affect them? Specifically, how does it affect their mean and covariance functions? That's what we'll study in this add-on chapter.</p>
 		</div>
 	),
@@ -100,7 +100,7 @@ chapters.hyperparameters = {
 	description: (
 		<div>
 			<p>Previously, we have assumed that nearby input points result in similar function values. But what does 'nearby' mean? This depends on our length scales, which are part of our set of hyperparameters. We can define these length scales ourselves, but we can also get them from our data.</p>
-			<p>The key is studying the so-called likelihood. The likelihood is a measure of how well our measurement data corresponds with out assumptions. By optimizing it, we can automatically find which length scales correspond the best with our measurement data.</p>
+			<p>The key is studying the so-called likelihood. The likelihood is a measure of how well our measurement data corresponds with our assumptions. By optimizing it, we can automatically find which length scales correspond the best with our measurement data.</p>
 		</div>
 	),
 	parents: [chapters.addingdata],
@@ -308,7 +308,7 @@ for (var chapterName in chapters) {
 
 // Turn the chapters into an array, which allows us to display them with React more easily.
 const chapterArray = []
-for (var name in chapters) {
+for (let name in chapters) {
 	chapterArray.push(chapters[name])
 }
 

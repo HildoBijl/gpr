@@ -7,7 +7,7 @@ const Chapter = (props) => {
 	const chapter = chapters[props.chapter]
 	return (
 		<div>
-			<p>This is going to be chapter <strong>{(chapters[props.chapter] || { title: 'Unknown chapter'}).title}</strong>, section {props.section}.</p>
+			<p>This is going to be chapter <strong>{(chapter || { title: 'Unknown chapter'}).title}</strong>, section {props.section}.</p>
 		</div>
 	)
 }

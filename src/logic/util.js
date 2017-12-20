@@ -1,4 +1,4 @@
-const axes = ['x','y']
+const axes = ['x', 'y']
 
 // deepClone gives a clone of an object, where every sub-object is also cloned.
 export function deepClone(obj) {
@@ -19,7 +19,7 @@ export function getWindowSize() {
 	const body = document.body || document.getElementsByTagName('body')[0]
 	return {
 		x: window.innerWidth || document.documentElement.clientWidth || body.clientWidth,
-		y: window.innerHeight|| document.documentElement.clientHeight|| body.clientHeight,
+		y: window.innerHeight || document.documentElement.clientHeight || body.clientHeight,
 	}
 }
 
@@ -32,14 +32,14 @@ export function bound(x, min, max) {
 
 // getDistance returns the distance between two points.
 export function getDistance(p1, p2) {
-	return Math.sqrt(axes.reduce((sum,axis) => sum + (p1[axis] - p2[axis]) ** 2, 0))
+	return Math.sqrt(axes.reduce((sum, axis) => sum + (p1[axis] - p2[axis]) ** 2, 0))
 }
 
 // getMiddle returns the point in the middle between two points.
 export function getMiddle(p1, p2) {
 	const p = {}
 	axes.forEach(axis => {
-		p[axis] = (p1[axis] + p2[axis])/2
+		p[axis] = (p1[axis] + p2[axis]) / 2
 	})
 	return p
 }
@@ -54,4 +54,38 @@ export function getEigenvalues(a, b, c) {
 		(-b + dRoot) / (2 * a),
 		(-b - dRoot) / (2 * a),
 	]
+}
+
+// Bezier returns the position on a Bezier curve with the given coordinates. Usage is through `let bezier = new Bezier(0.25,0,0.25,1); bezier.get(part);`. See http://greweb.me/2012/02/bezier-curve-based-easing-functions-from-concept-to-implementation/ for background.
+export function Bezier(mX1, mY1, mX2, mY2) {
+	this.get = function (aX) {
+		if (mX1 === mY1 && mX2 === mY2) return aX; // linear
+		return CalcBezier(GetTForX(aX), mY1, mY2);
+	}
+
+	function A(aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
+	function B(aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
+	function C(aA1) { return 3.0 * aA1; }
+
+	// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+	function CalcBezier(aT, aA1, aA2) {
+		return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+	}
+
+	// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+	function GetSlope(aT, aA1, aA2) {
+		return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+	}
+
+	function GetTForX(aX) {
+		// Newton raphson iteration
+		var aGuessT = aX;
+		for (var i = 0; i < 4; ++i) {
+			var currentSlope = GetSlope(aGuessT, mX1, mX2);
+			if (currentSlope === 0.0) return aGuessT;
+			var currentX = CalcBezier(aGuessT, mX1, mX2) - aX;
+			aGuessT -= currentX / currentSlope;
+		}
+		return aGuessT;
+	}
 }

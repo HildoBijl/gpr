@@ -87,7 +87,7 @@
 }
 .treeContainer svg .treeLine {
   fill: none;
-  stroke-width: 4px;
+  stroke-width: 5px;
 }
 .treeContainer.dragging {
   cursor: grabbing;
