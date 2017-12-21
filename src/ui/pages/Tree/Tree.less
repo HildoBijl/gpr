@@ -42,6 +42,36 @@
 					margin: 0;
 					padding: 10px 0; // The horizontal padding will be overwritten by Javascript in Tree.js.
 					text-align: center;
+					transition: margin-bottom 0.4s 0.1s;
+				}
+
+				svg {
+					bottom: 8px;
+					height: 8px;
+					margin: auto;
+					left: 50%;
+					opacity: 0;
+					overflow: visible;
+					position: absolute;
+					transform: translateX(-50%) scaleY(1);
+					transition: opacity 0.4s, transform 0.4s;
+					width: 12px;
+
+					path {
+						stroke-width: 1px;
+					}
+				}
+
+				&:hover {
+					p {
+						margin-bottom: 8px;
+						transition: margin-bottom 0.4s;
+					}
+
+					svg {
+						opacity: 1;
+						transition: opacity 0.4s 0.1s, transform 0.4s;	
+					}
 				}
 			}
 
@@ -51,7 +81,7 @@
 				flex-flow: column nowrap;
 				font-size: 0.9em;
 				justify-content: flex-end;
-				padding: 10px 20px 10px 10px;
+				padding: 12px 12px 9px;
 				position: relative;
 				text-align: justify;
 				transition: top 0.4s;
@@ -63,14 +93,38 @@
 
 					&.study {
 						font-weight: bold;
-						margin: 0;
+						margin: 8px 0 0 0;
+						opacity: 0.5;
 						text-align: right;
+						transition: opacity 0.4s 0.15s, margin-right 0.4s 0.15s;
+					}
+				}
+
+				svg {
+					height: 12px;
+					opacity: 0;
+					overflow: visible;
+					position: absolute;
+					right: 14px;
+					bottom: 2.5px;
+					transform: translateY(-50%);
+					transition: opacity 0.4s;
+					width: 8px;
+
+					path {
+						stroke-width: 1px;
 					}
 				}
 
 				&:hover {
 					p.study {
-						text-decoration: underline;
+						margin-right: 20px;
+						opacity: 1;
+						transition: opacity 0.4s, margin-right 0.4s;
+					}
+					svg {
+						opacity: 1;
+						transition: opacity 0.4s 0.15s;
 					}
 				}
 			}
@@ -84,6 +138,10 @@
 
 				.title {
 					box-shadow: 0 2px 4px rgba(0,0,0,.26); // Only add a shadow when the description is active, so the shadow falls on the description.
+
+					svg {
+						transform: translateX(-50%) scaleY(-1);
+					}
 				}
 
 				.description {
@@ -93,7 +151,7 @@
 		}
 	}
 
-	svg {
+	svg.treeBackground {
 		cursor: move; // Fallback if grab cursor is unsupported.
 		cursor: grab;
 		cursor: -moz-grab;
@@ -112,7 +170,7 @@
 		cursor: -moz-grabbing;
 		cursor: -webkit-grabbing;
 
-		svg {		
+		svg.treeBackground {		
 			cursor: grabbing;
 			cursor: -moz-grabbing;
 			cursor: -webkit-grabbing;
@@ -131,7 +189,7 @@
 // On desktops, apply SVG filters. Do not do so on phones, because SVG filters are computationally heavy and some phone can't take that.
 @media @desktop {
 	.treeContainer {
-		.svg {
+		svg.treeBackground {
 			.treeLine {
 				filter: url(#shadow);
 			}
@@ -146,10 +204,24 @@
 		.chapter {
 			background: #013;
 
+			.title {
+				svg {
+					path {
+						fill: #fff;
+						stroke: #fff;
+					}
+				}
+			}
 			.description {
 				background: #125;
 				p.study {
-					color: #bbb;
+					color: #fff;
+				}
+				svg {
+					path {
+						fill: #fff;
+						stroke: #fff;
+					}
 				}
 			}
 		}
@@ -167,10 +239,24 @@
 		.chapter {
 			background: #adf;
 
+			.title {
+				svg {
+					path {
+						fill: #000;
+						stroke: #000;
+					}
+				}
+			}
 			.description {
 				background: #def;
 				p.study {
-					color: #888;
+					color: #000;
+				}
+				svg {
+					path {
+						fill: #000;
+						stroke: #000;
+					}
 				}
 			}
 		}

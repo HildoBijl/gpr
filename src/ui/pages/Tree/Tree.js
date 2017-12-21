@@ -176,15 +176,21 @@ class Tree extends Component {
 							>
 								<div className="title">
 									<p>{chapter.title}</p>
+									<svg className="titleArrow" viewBox="0 0 20 20" preserveAspectRatio="none">
+										<path d="M0 0 l10 20 l10 -20z" />
+									</svg>
 								</div>
 								<div className="description">
 									{chapter.description}
 									<p className="study">Study this chapter</p>
+									<svg className="descriptionArrow" viewBox="0 0 20 20" preserveAspectRatio="none">
+										<path d="M0 0 l20 10 l-20 10z" />
+									</svg>
 								</div>
 							</div>
 						)
 					})}
-					<svg style={{
+					<svg className="treeBackground" style={{
 						height: treeRect.height + 'px',
 						width: treeRect.width + 'px',
 						left: treeRect.left + 'px',
