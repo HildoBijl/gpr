@@ -291,10 +291,10 @@ chapters.sisonig = {
 }
 
 // Walk through the chapters, adding some extra data.
-for (var chapterName in chapters) {
+for (let name in chapters) {
 	// Add the chapter names to the chapters, so they know what their names are.
-	const chapter = chapters[chapterName]
-	chapter.name = chapterName
+	const chapter = chapters[name]
+	chapter.name = name
 
 	// Make sure that the chapter has a children array, and ensure each block is aware of its children.
 	if (!chapter.children)

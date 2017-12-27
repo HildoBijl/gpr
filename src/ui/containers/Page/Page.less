@@ -7,20 +7,52 @@
 	flex-grow: 1;
 	overflow: hidden;
 
+	padding: 20px 8px;
+	@media @phoneLandscape {
+		padding: 20px 16px;
+	}
+	@media @desktop {
+		padding: 28px 24px;
+	}
+
 	.content {
 		display: flex;
 		flex-flow: column nowrap;
 		flex-grow: 1;
 		margin: auto;
 		max-width: @maxWidth;
+		position: relative;
 		width: 100%;
 
-		padding: 20px 8px;
-		@media @phoneLandscape {
-			padding: 20px 16px;
-		}
-		@media @desktop {
-			padding: 28px 24px;
+		& > div {
+			position: absolute;
+			top: 0;
+			z-index: 1;
+
+			&.pageFade-appear {
+				opacity: 0.01;
+				&.pageFade-appear-active {
+					opacity: 1;
+					transition: opacity 0.2s;
+				}
+			}
+
+			&.pageFade-enter {
+				opacity: 0.01;
+				&.pageFade-enter-active {
+					opacity: 1;
+					transition: opacity 0.2s;
+				}
+			}
+
+			&.pageFade-leave {
+				opacity: 1;
+				z-index: 2;
+				&.pageFade-leave-active {
+					opacity: 0.01;
+					transition: opacity 0.2s;
+				}
+			}
 		}
 
 		h1 {

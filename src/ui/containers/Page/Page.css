@@ -4,6 +4,17 @@
   flex-flow: column nowrap;
   flex-grow: 1;
   overflow: hidden;
+  padding: 20px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .page {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .page {
+    padding: 28px 24px;
+  }
 }
 .page .content {
   display: flex;
@@ -11,18 +22,35 @@
   flex-grow: 1;
   margin: auto;
   max-width: 1200px;
+  position: relative;
   width: 100%;
-  padding: 20px 8px;
 }
-@media (min-width: 480.01px) and (max-width: 960px) {
-  .page .content {
-    padding: 20px 16px;
-  }
+.page .content > div {
+  position: absolute;
+  top: 0;
+  z-index: 1;
 }
-@media (min-width: 960.01px) {
-  .page .content {
-    padding: 28px 24px;
-  }
+.page .content > div.pageFade-appear {
+  opacity: 0.01;
+}
+.page .content > div.pageFade-appear.pageFade-appear-active {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.page .content > div.pageFade-enter {
+  opacity: 0.01;
+}
+.page .content > div.pageFade-enter.pageFade-enter-active {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.page .content > div.pageFade-leave {
+  opacity: 1;
+  z-index: 2;
+}
+.page .content > div.pageFade-leave.pageFade-leave-active {
+  opacity: 0.01;
+  transition: opacity 0.2s;
 }
 .page .content h1 {
   font-weight: bold;

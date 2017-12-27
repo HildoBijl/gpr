@@ -2,6 +2,7 @@ import './Page.css'
 
 import React from 'react'
 import { connect } from 'react-redux'
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 import pages from '../../pages'
 
@@ -9,9 +10,17 @@ const Page = (props) => {
 	const page = pages[props.locationType] || pages.NOTFOUND
 	return (
 		<main className="page">
-			<div className="content">
-				<page.component />
-			</div>
+			<ReactCSSTransitionGroup
+				component="div"
+				className="content"
+				transitionName="pageFade"
+				transitionAppear={true}
+				transitionAppearTimeout={200}
+				transitionEnterTimeout={200}
+				transitionLeaveTimeout={200}
+			>
+				<page.component key={page.name}/>
+			</ReactCSSTransitionGroup>
 		</main>
 	)
 }

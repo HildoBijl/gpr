@@ -40,7 +40,7 @@
   margin: 0;
   padding: 10px 0;
   text-align: center;
-  transition: margin-bottom 0.4s 0.1s;
+  transition: margin-bottom 0.4s 0.15s;
 }
 .treeContainer .tree .chapter .title svg {
   bottom: 8px;
@@ -63,7 +63,7 @@
 }
 .treeContainer .tree .chapter .title:hover svg {
   opacity: 1;
-  transition: opacity 0.4s 0.1s, transform 0.4s;
+  transition: opacity 0.4s 0.15s, transform 0.4s;
 }
 .treeContainer .tree .chapter .description {
   border-radius: 0 0 16px 16px;
@@ -122,9 +122,6 @@
 }
 .treeContainer .tree .chapter.active .title svg {
   transform: translateX(-50%) scaleY(-1);
-}
-.treeContainer .tree .chapter.active .description {
-  display: block;
 }
 .treeContainer svg.treeBackground {
   cursor: move;

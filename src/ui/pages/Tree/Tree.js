@@ -140,89 +140,91 @@ class Tree extends Component {
 		if (!this.chapterBlocks)
 			this.chapterBlocks = {}
 
+		// Set up the tree container. We use different divs for the outer container (which will get classes added to it by the parent ReactCSSTransitionGroup), the inner container (which gets its classes added here) and the tree container (which will be transformed/scaled). These all need to be separate, to make things work properly.
 		return (
-			<div className={classnames(
-				'treeContainer',
-				{ 'dragging': !!this.props.dragging },
-				{ 'invalidClick': !this.props.validClick },
-			)} ref={obj => this.treeContainer = obj}>
-				<div className="tree" id="tree" style={{
-					transform: `matrix(${scale},0,0,${scale},${shift.x},${shift.y})`,
-				}} ref={obj => this.tree = obj}>
-					{chapterArray.map(chapter => {
-						// Check if we already know the HTML block for this chapter, and if we know the height of the description. If so, apply the proper height.
-						const active = chapter.name === this.props.activeChapter
-						const previousActive = chapter.name === this.props.previousActiveChapter
-						const block = this.chapterBlocks[chapter.name]
-						if (block) {
-							const description = block.lastChild
-							block.style.height = ((active ? block.descriptionHeight : 0) + size.y) + 'px'
-							description.style.top = (active ? 0 : -block.descriptionHeight) + 'px'
-						}
+			<div className="treeContainer" ref={obj => this.treeContainer = obj}>
+				<div className={classnames(
+					{ 'dragging': !!this.props.dragging },
+					{ 'invalidClick': !this.props.validClick },
+				)}>
+					<div className="tree" id="tree" style={{
+						transform: `matrix(${scale},0,0,${scale},${shift.x},${shift.y})`,
+					}} ref={obj => this.tree = obj}>
+						{chapterArray.map(chapter => {
+							// Check if we already know the HTML block for this chapter, and if we know the height of the description. If so, apply the proper height.
+							const active = chapter.name === this.props.activeChapter
+							const previousActive = chapter.name === this.props.previousActiveChapter
+							const block = this.chapterBlocks[chapter.name]
+							if (block) {
+								const description = block.lastChild
+								block.style.height = ((active ? block.descriptionHeight : 0) + size.y) + 'px'
+								description.style.top = (active ? 0 : -block.descriptionHeight) + 'px'
+							}
 
-						return (
-							<div
-								key={chapter.name}
-								className={classnames(
-									'chapter',
-									{ 'active': active },
-									{ 'previousActive': previousActive },
-								)}
-								ref={obj => this.chapterBlocks[chapter.name] = obj}
-								style={{
-									left: (chapter.position.x - size.x / 2) + 'px',
-									top: chapter.position.y + 'px',
-								}}
-							>
-								<div className="title">
-									<p>{chapter.title}</p>
-									<svg className="titleArrow" viewBox="0 0 20 20" preserveAspectRatio="none">
-										<path d="M0 0 l10 20 l10 -20z" />
-									</svg>
+							return (
+								<div
+									key={chapter.name}
+									className={classnames(
+										'chapter',
+										{ 'active': active },
+										{ 'previousActive': previousActive },
+									)}
+									ref={obj => this.chapterBlocks[chapter.name] = obj}
+									style={{
+										left: (chapter.position.x - size.x / 2) + 'px',
+										top: chapter.position.y + 'px',
+									}}
+								>
+									<div className="title">
+										<p>{chapter.title}</p>
+										<svg className="titleArrow" viewBox="0 0 20 20" preserveAspectRatio="none">
+											<path d="M0 0 l10 20 l10 -20z" />
+										</svg>
+									</div>
+									<div className="description">
+										{chapter.description}
+										<p className="study">Study this chapter</p>
+										<svg className="descriptionArrow" viewBox="0 0 20 20" preserveAspectRatio="none">
+											<path d="M0 0 l20 10 l-20 10z" />
+										</svg>
+									</div>
 								</div>
-								<div className="description">
-									{chapter.description}
-									<p className="study">Study this chapter</p>
-									<svg className="descriptionArrow" viewBox="0 0 20 20" preserveAspectRatio="none">
-										<path d="M0 0 l20 10 l-20 10z" />
-									</svg>
-								</div>
-							</div>
-						)
-					})}
-					<svg className="treeBackground" style={{
-						height: treeRect.height + 'px',
-						width: treeRect.width + 'px',
-						left: treeRect.left + 'px',
-						top: treeRect.top + 'px',
-					}} viewBox={`${treeRect.left} ${treeRect.top} ${treeRect.width} ${treeRect.height}`}>
-						<defs>
-							<filter
-								xmlns="http://www.w3.org/2000/svg"
-								id="shadow"
-								filterUnits="userSpaceOnUse"
-								x={this.props.treeRect.left}
-								y={this.props.treeRect.top}
-								width={this.props.treeRect.width}
-								height={this.props.treeRect.height}
-							>
-								<feGaussianBlur in="SourceAlpha" stdDeviation="4"/> 
-								<feOffset dx="0" dy="2" result="offsetblur"/>
-								<feComponentTransfer>
-									<feFuncA type="linear" slope="0.26"/>
-								</feComponentTransfer>
-								<feMerge> 
-									<feMergeNode/>
-									<feMergeNode in="SourceGraphic"/> 
-								</feMerge>
-							</filter>
-						</defs>
-						{chapterArray.map(chapter => chapter.children.length === 0 ? '' : (
-							<g key={chapter.name}>
-								{chapter.children.map(child => getTreeLine(chapter, child))}
-							</g>
-						))}
-					</svg>
+							)
+						})}
+						<svg className="treeBackground" style={{
+							height: treeRect.height + 'px',
+							width: treeRect.width + 'px',
+							left: treeRect.left + 'px',
+							top: treeRect.top + 'px',
+						}} viewBox={`${treeRect.left} ${treeRect.top} ${treeRect.width} ${treeRect.height}`}>
+							<defs>
+								<filter
+									xmlns="http://www.w3.org/2000/svg"
+									id="shadow"
+									filterUnits="userSpaceOnUse"
+									x={this.props.treeRect.left}
+									y={this.props.treeRect.top}
+									width={this.props.treeRect.width}
+									height={this.props.treeRect.height}
+								>
+									<feGaussianBlur in="SourceAlpha" stdDeviation="4"/> 
+									<feOffset dx="0" dy="2" result="offsetblur"/>
+									<feComponentTransfer>
+										<feFuncA type="linear" slope="0.26"/>
+									</feComponentTransfer>
+									<feMerge> 
+										<feMergeNode/>
+										<feMergeNode in="SourceGraphic"/> 
+									</feMerge>
+								</filter>
+							</defs>
+							{chapterArray.map(chapter => chapter.children.length === 0 ? '' : (
+								<g key={chapter.name}>
+									{chapter.children.map(child => getTreeLine(chapter, child))}
+								</g>
+							))}
+						</svg>
+					</div>
 				</div>
 			</div>
 		)

@@ -12,8 +12,17 @@ const Chapter = (props) => {
 	)
 }
 
-const stateMap = (state) => ({
-	chapter: state.location.payload.chapter,
-	section: state.location.payload.section,
-})
+const stateMap = (state) => {
+	// Determine which payload contains chapter information. When fading out the page, we can use the previous payload.
+	let payload = {}
+	if (state.location.payload.chapter)
+		payload = state.location.payload
+	else if (state.location.prev.payload && state.location.prev.payload.chapter)
+		payload = state.location.prev.payload
+	
+	return {
+		chapter: payload.chapter,
+		section: payload.section,
+	}
+}
 export default connect(stateMap)(Chapter)

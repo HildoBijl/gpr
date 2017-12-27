@@ -34,6 +34,9 @@ const pages = {
 		title: 'Oops ...',
 	},
 }
+for (let name in pages) {
+	pages[name].name = name
+}
 export default pages
 
 export function getTitle(page, payload) {

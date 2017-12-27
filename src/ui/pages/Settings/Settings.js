@@ -8,7 +8,7 @@ import Checkbox from '../../components/Checkbox/Checkbox.js'
 import settingsActions from '../../../redux/settings.js'
 
 const Settings = (props) => (
-	<div className="page settings">
+	<div className="settings">
 		<h2>Extra content</h2>
 		<Checkbox
 			label="Include explanations and guides to figures"
