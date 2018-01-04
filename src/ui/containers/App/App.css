@@ -3,13 +3,20 @@
   flex-flow: column nowrap;
   justify-content: flex-start;
   min-height: 100%;
+  overflow: hidden;
   transition: background-color 400ms, color 400ms;
 }
 .app.lightTheme {
   background: #eee;
-  color: #222;
+  color: #111;
+}
+.app.lightTheme a {
+  color: #13a;
 }
 .app.darkTheme {
   background: #222;
   color: #eee;
+}
+.app.darkTheme a {
+  color: #9ae;
 }

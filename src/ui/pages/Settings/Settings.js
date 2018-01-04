@@ -22,16 +22,17 @@ const Settings = (props) => (
 		/>
 		<p className="addedNote"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> This requires knowledge of both probability theory and linear algebra</p>
 		<Checkbox
-			label="Include derivations of equations (will be added later)"
+			label="Include derivations of equations (Not available yet)"
 			checked={props.settings.showDerivations}
 			changeFunction={(newVal) => props.applySettings({ showDerivations: newVal })}
-			disabled={!props.settings.showEquations}
+			disabled={true || !props.settings.showEquations}
 		/>
 		<h2>Other preferences</h2>
 		<Checkbox
-			label="Enable this app for offline use"
+			label="Enable this app for offline use (Not available yet)"
 			checked={props.settings.enableOfflineUse}
 			changeFunction={(newVal) => props.applySettings({ enableOfflineUse: newVal })}
+			disabled={true}
 		/>
 		<Checkbox
 			label="Use alternative dark theme"
@@ -39,9 +40,10 @@ const Settings = (props) => (
 			changeFunction={(newVal) => props.applySettings({ theme: newVal ? 'darkTheme' : 'lightTheme' })}
 		/>
 		<Checkbox
-			label="Show progress in the content tree"
+			label="Show progress in the content tree (Not available yet)"
 			checked={props.settings.showProgress}
 			changeFunction={(newVal) => props.applySettings({ showProgress: newVal })}
+			disabled={true}
 		/>
 	</div>
 )

@@ -1,4 +1,4 @@
-.menuItem {
+.app header nav a.menuItem {
   align-items: center;
   color: inherit;
   cursor: pointer;
@@ -13,42 +13,42 @@
   width: 40px;
 }
 @media (min-width: 480.01px) and (max-width: 960px) {
-  .menuItem {
+  .app header nav a.menuItem {
     width: 50px;
   }
 }
 @media (min-width: 960.01px) {
-  .menuItem {
+  .app header nav a.menuItem {
     width: 80px;
   }
 }
-.menuItem.active {
+.app header nav a.menuItem.active {
   cursor: auto;
 }
-.menuItem:hover,
-.menuItem.active {
+.app header nav a.menuItem:hover,
+.app header nav a.menuItem.active {
   opacity: 1;
 }
-.menuItem .icon {
+.app header nav a.menuItem .icon {
   height: 30px;
   width: 30px;
 }
 @media (min-width: 960.01px) {
-  .menuItem .icon {
+  .app header nav a.menuItem .icon {
     height: 36px;
     width: 36px;
   }
 }
-.menuItem .icon svg {
+.app header nav a.menuItem .icon svg {
   fill: currentColor;
 }
-.menuItem .label {
+.app header nav a.menuItem .label {
   display: none;
   font-size: 0.8em;
   margin-top: 7px;
 }
 @media (min-width: 960.01px) {
-  .menuItem .label {
+  .app header nav a.menuItem .label {
     display: block;
   }
 }

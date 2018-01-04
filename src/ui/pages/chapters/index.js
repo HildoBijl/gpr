@@ -16,6 +16,7 @@ const cornerRadius = 16 // The radius of the corners in the content tree.
 // Define all the chapters. There are a few important parameters to define.
 // - title is the text shown in the chapter block of the content tree.
 // - description is the extra text shown in the content tree when a user clicks on a chapter.
+// - sections is an array with section titles, used for navigation purposes.
 // - parent is an array of the chapters that need to be learned before you can start this chapter. It is used to draw lines in the content tree.
 // - tree is the coordinates of this chapter inside the content tree. The x-coordinate always denotes the middle of the block, while the y-coordinate denotes the top of the block.
 
@@ -29,6 +30,10 @@ chapters.whatisgpr = {
 			<p>Keep in mind: we're not going to study how any of it works just yet. That's for the later chapters. This chapter is just a sneak peek, but a very important one to start with.</p>
 		</div>
 	),
+	sections: [
+		'Section title 1',
+		'Section heading 2',
+	],
 	parents: [],
 	position: {
 		x: 0,

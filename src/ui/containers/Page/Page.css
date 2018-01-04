@@ -79,6 +79,7 @@
   }
 }
 .page .content p {
+  line-height: 1.42857143;
   margin: 6px 0 10px;
 }
 .page .content h1:first-child,

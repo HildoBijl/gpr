@@ -18,7 +18,11 @@ body {
   }
 }
 
-a {			
+a {
+  text-decoration: none;
+  &:hover, &:active {
+    text-decoration: underline;
+  }
   &, &:active, &:focus { // To prevent a dotted border from appearing after clicking on the link.
     outline: none;
   }

@@ -1,0 +1,38 @@
+.page .content .chapterPage {
+  position: relative;
+}
+.page .content .chapterPage .content footer hr {
+  border: 0;
+  height: 2px;
+  margin: 20px 0 16px 0;
+}
+.page .content .chapterPage .content.chapterFade-appear {
+  opacity: 0.01;
+}
+.page .content .chapterPage .content.chapterFade-appear.chapterFade-appear-active {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.page .content .chapterPage .content.chapterFade-enter {
+  opacity: 0.01;
+}
+.page .content .chapterPage .content.chapterFade-enter.chapterFade-enter-active {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.page .content .chapterPage .content.chapterFade-leave {
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  z-index: 1;
+}
+.page .content .chapterPage .content.chapterFade-leave.chapterFade-leave-active {
+  opacity: 0.01;
+  transition: opacity 0.2s;
+}
+.lightTheme .page .content .chapterPage footer hr {
+  background-image: linear-gradient(to right, #eee, #888, #eee);
+}
+.darkTheme .page .content .chapterPage footer hr {
+  background-image: linear-gradient(to right, #222, #999, #222);
+}

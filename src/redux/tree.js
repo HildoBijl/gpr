@@ -140,8 +140,7 @@ const actions = {
 				type: 'CHAPTER',
 				payload: {
 					chapter: name,
-					section: 1, // TODO: Potentially remove this, and let the chapter figure out which section to go to.
-				}
+				},
 			})
 		}
 	),

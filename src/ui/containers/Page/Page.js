@@ -7,6 +7,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 import pages from '../../pages'
 
 const Page = (props) => {
+	// Determine the page, as well as the key to give to the page to ensure new pages are considered as unique.
 	const page = pages[props.locationType] || pages.NOTFOUND
 	return (
 		<main className="page">
@@ -26,6 +27,7 @@ const Page = (props) => {
 }
 
 const stateMap = (state) => ({
-	locationType: state.location.type
+	locationType: state.location.type,
+	payload: state.location.payload,
 })
 export default connect(stateMap)(Page)

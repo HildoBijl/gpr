@@ -12,26 +12,32 @@ const pages = {
 		component: Home,
 		title: 'Gaussian Process Regression',
 		skipPrefix: true, // Do not use a prefix in the <title>.
+		path: '/',
 	},
 	TREE: {
 		component: Tree,
 		title: 'Content Tree',
+		path: '/contents',
 	},
 	SETTINGS: {
 		component: Settings,
 		title: 'Settings',
+		path: '/settings',
 	},
 	ABOUT: {
 		component: About,
 		title: 'About this tutorial',
+		path: '/about',
 	},
 	CHAPTER: {
 		component: Chapter,
-		title: (payload) => `${(chapters[payload.chapter] || { title: 'Unknown chapter'}).title}, section ${payload.section}`,
+		title: (payload) => `${(chapters[payload.chapter] || { title: 'Unknown chapter'}).title}`,
+		path: '/chapter/:chapter/:section?',
 	},
 	NOTFOUND: {
 		component: NotFound,
 		title: 'Oops ...',
+		path: '/notfound',
 	},
 }
 for (let name in pages) {
@@ -44,3 +50,11 @@ export function getTitle(page, payload) {
 		return page.title(payload)
 	return page.title
 }
+
+// Set up a routes object that can be used by redux-first-router.
+const routes = {}
+for (let name in pages) {
+	if (pages[name].path)
+		routes[name] = pages[name].path
+}
+export { routes }

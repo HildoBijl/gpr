@@ -4,7 +4,7 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import reduxThunk from 'redux-thunk'
 import createHistory from 'history/createBrowserHistory'
 
-import routes from '../routes.js'
+import routes from '../ui/pages'
 import * as reducers from './reducers.js'
 
 // Set up the Redux store in the default way.

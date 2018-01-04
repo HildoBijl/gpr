@@ -1,0 +1,58 @@
+.page .content .chapterPage {
+	position: relative;
+
+	.content {
+		footer {
+			hr {
+				border: 0; 
+				height: 2px; 
+				margin: 20px 0 16px 0
+			}
+		}
+
+		&.chapterFade-appear {
+			opacity: 0.01;
+			&.chapterFade-appear-active {
+				opacity: 1;
+				transition: opacity 0.2s;
+			}
+		}
+
+		&.chapterFade-enter {
+			opacity: 0.01;
+			&.chapterFade-enter-active {
+				opacity: 1;
+				transition: opacity 0.2s;
+			}
+		}
+
+		&.chapterFade-leave {
+			opacity: 1;
+			position: absolute;
+			top: 0;
+			z-index: 1;
+			&.chapterFade-leave-active {
+				opacity: 0.01;
+				transition: opacity 0.2s;
+			}
+		}
+	}
+}
+.lightTheme {
+	.page .content .chapterPage {
+		footer {
+			hr {
+				background-image: linear-gradient(to right, #eee, #888, #eee)
+			}
+		}
+	}
+}
+.darkTheme {
+	.page .content .chapterPage {
+		footer {
+			hr {
+				background-image: linear-gradient(to right, #222, #999, #222)
+			}
+		}
+	}
+}
