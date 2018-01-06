@@ -1,0 +1,53 @@
+@import '../../shared/params.less';
+
+.spinner {
+	height: 100px;
+	margin: auto;
+	width: 100px;
+	position: relative;
+	
+	div {
+		animation: spinner linear 0.8s infinite;
+		border-radius: 100%;
+		height: 24px;
+		left: 46px;
+		position: absolute;
+		top: 0px;
+		transform-origin: 4px 50px;
+		width: 8px;
+
+		.children (@i) when (@i > 0) {
+			&:nth-child(@{i}) {
+				animation-delay: unit(-0.8 + @i * 0.05,s);
+				transform: rotate(unit((@i * 360 / 16),deg));
+			}
+			.children(@i - 1);
+		}
+		.children(16);
+	}
+}
+
+.lightTheme {
+	.spinner {
+		div {
+			background: @lightThemeColor;
+		}
+	}
+}
+.darkTheme {
+	.spinner {
+		div {
+			background: @darkThemeColor;
+		}
+	}
+}
+
+// Keyframes for animation.
+@keyframes spinner {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

@@ -124,13 +124,18 @@ class Tree extends Component {
 	}
 
 	getTreeContainerRect() {
+		// The container may not know its own offsetTop or offsetLeft. If it doesn't (and returns 0) then we check the parent.
+		const width = this.treeContainer.offsetWidth || this.treeContainer.parentElement.offsetWidth
+		const height = this.treeContainer.offsetHeight || this.treeContainer.parentElement.offsetHeight
+		const left = this.treeContainer.offsetLeft || this.treeContainer.parentElement.offsetLeft
+		const top = this.treeContainer.offsetTop || this.treeContainer.parentElement.offsetTop
 		return {
-			width: this.treeContainer.offsetWidth,
-			height: this.treeContainer.offsetHeight,
-			left: this.treeContainer.offsetLeft,
-			top: this.treeContainer.offsetTop,
-			right: this.treeContainer.offsetLeft + this.treeContainer.offsetWidth,
-			bottom: this.treeContainer.offsetTop + this.treeContainer.offsetHeight,
+			width,
+			height,
+			left,
+			top,
+			right: left + width,
+			bottom: top + height,
 		}
 	}
 

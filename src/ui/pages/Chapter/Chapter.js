@@ -6,6 +6,7 @@ import { redirect } from 'redux-first-router'
 import Link from 'redux-first-router-link'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
+import Spinner from '../../components/Spinner/Spinner.js'
 import chapters from '../chapters'
 import { bound } from '../../../logic/util.js'
 
@@ -100,9 +101,6 @@ class Chapter extends Component {
 				return this.renderFailedSection() // Should not occur.
 		}
 	}
-
-
-
 	renderUnknownChapter() {
 		return <p>Oops ... the URL you gave does not point to a valid chapter. Try the <Link to={{ type: 'TREE' }}>Contents Tree</Link> to find what you're looking for.</p>
 	}
@@ -111,7 +109,11 @@ class Chapter extends Component {
 		return <p>The chapter <strong>{chapter.title}</strong> is still being written. Check back later for further updates. Until then, head back to the <Link to={{ type: 'TREE' }}>Contents Tree</Link>.</p>
 	}
 	renderLoadingSection() {
-		return <p>Loading section ... todo: add loading screen.</p>
+		return (
+			<div className="loading">
+				<Spinner />
+			</div>
+		)
 	}
 	renderFailedSection() {
 		return <p>Oops ... I could not load the relevant section for you. Maybe there's a problem with your internet connection? If not, the problem could also be on my side. Check back later, or drop me a note if the problem persists.</p>

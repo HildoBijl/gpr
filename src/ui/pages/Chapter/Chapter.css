@@ -1,6 +1,10 @@
 .page .content .chapterPage {
   position: relative;
 }
+.page .content .chapterPage .content .loading {
+  padding-top: 80px;
+  text-align: center;
+}
 .page .content .chapterPage .content footer hr {
   border: 0;
   height: 2px;
