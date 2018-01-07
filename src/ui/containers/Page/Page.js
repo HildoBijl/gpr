@@ -13,7 +13,7 @@ const Page = (props) => {
 		<main className="page">
 			<ReactCSSTransitionGroup
 				component="div"
-				className="content"
+				className="pageFader"
 				transitionName="pageFade"
 				transitionAppear={true}
 				transitionAppearTimeout={200}

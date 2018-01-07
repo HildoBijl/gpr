@@ -5,6 +5,7 @@
 	cursor: grab;
 	cursor: -moz-grab;
 	cursor: -webkit-grab;
+	display: flex;
 	flex-grow: 1;
 	font-size: 13px;
 	height: 100%;
@@ -13,134 +14,138 @@
 	user-select: none;
 	width: 100%;
 
-	.tree {
-		cursor: pointer;
-		position: absolute;
+	.treeInnerContainer {
+		flex-grow: 1;
 
-		.chapter {
-			border-radius: 16px;
-			box-shadow: 0 2px 4px rgba(0,0,0,.26); // Note: these should also be set in the SVG filter effects in the Tree.js file.
-			overflow: hidden;
+		.tree {
+			cursor: pointer;
 			position: absolute;
-			transition: height 0.4s;
-			width: 320px;
-			z-index: 0;
 
-			.title {
-				background: inherit;
-				border-radius: 16px 16px 0 0;
-				display: flex;
-				flex-flow: column nowrap;
-				height: 80px;
-				justify-content: center;
-				position: relative; // This is to make the shadow fall onto the description as well.
-				z-index: 2;
-
-				p {
-					font-weight: bold;
-					line-height: 1.5;
-					margin: 0;
-					padding: 10px 0; // The horizontal padding will be overwritten by Javascript in Tree.js.
-					text-align: center;
-					transition: margin-bottom 0.4s 0.15s;
-				}
-
-				svg {
-					bottom: 8px;
-					height: 8px;
-					margin: auto;
-					left: 50%;
-					opacity: 0;
-					overflow: visible;
-					position: absolute;
-					transform: translateX(-50%) scaleY(1);
-					transition: opacity 0.4s, transform 0.4s;
-					width: 12px;
-
-					path {
-						stroke-width: 1px;
-					}
-				}
-
-				&:hover {
-					p {
-						margin-bottom: 8px;
-						transition: margin-bottom 0.4s;
-					}
-
-					svg {
-						opacity: 1;
-						transition: opacity 0.4s 0.15s, transform 0.4s;	
-					}
-				}
-			}
-
-			.description {
-				border-radius: 0 0 16px 16px;
-				display: flex;
-				flex-flow: column nowrap;
-				font-size: 0.9em;
-				justify-content: flex-end;
-				padding: 12px 12px 9px;
-				position: relative;
-				text-align: justify;
-				transition: top 0.4s;
-				z-index: 1;
-
-				p {
-					line-height: 1.15;
-					margin: 0 0 6px 0;
-
-					&.study {
-						font-weight: bold;
-						margin: 8px 0 0 0;
-						opacity: 0.5;
-						text-align: right;
-						transition: opacity 0.4s 0.15s, margin-right 0.4s 0.15s;
-					}
-				}
-
-				svg {
-					height: 12px;
-					opacity: 0;
-					overflow: visible;
-					position: absolute;
-					right: 14px;
-					bottom: 2.5px;
-					transform: translateY(-50%);
-					transition: opacity 0.4s;
-					width: 8px;
-
-					path {
-						stroke-width: 1px;
-					}
-				}
-
-				&:hover {
-					p.study {
-						margin-right: 20px;
-						opacity: 1;
-						transition: opacity 0.4s, margin-right 0.4s;
-					}
-					svg {
-						opacity: 1;
-						transition: opacity 0.4s 0.15s;
-					}
-				}
-			}
-
-			&.previousActive {
-				z-index: 1;
-			}
-
-			&.active {
-				z-index: 2;
+			.chapter {
+				border-radius: 16px;
+				box-shadow: 0 2px 4px rgba(0,0,0,.26); // Note: these should also be set in the SVG filter effects in the Tree.js file.
+				overflow: hidden;
+				position: absolute;
+				transition: height 0.4s;
+				width: 320px;
+				z-index: 0;
 
 				.title {
-					box-shadow: 0 2px 4px rgba(0,0,0,.26); // Only add a shadow when the description is active, so the shadow falls on the description.
+					background: inherit;
+					border-radius: 16px 16px 0 0;
+					display: flex;
+					flex-flow: column nowrap;
+					height: 80px;
+					justify-content: center;
+					position: relative; // This is to make the shadow fall onto the description as well.
+					z-index: 2;
+
+					p {
+						font-weight: bold;
+						line-height: 1.5;
+						margin: 0;
+						padding: 10px 0; // The horizontal padding will be overwritten by Javascript in Tree.js.
+						text-align: center;
+						transition: margin-bottom 0.4s 0.15s;
+					}
 
 					svg {
-						transform: translateX(-50%) scaleY(-1);
+						bottom: 8px;
+						height: 8px;
+						margin: auto;
+						left: 50%;
+						opacity: 0;
+						overflow: visible;
+						position: absolute;
+						transform: translateX(-50%) scaleY(1);
+						transition: opacity 0.4s, transform 0.4s;
+						width: 12px;
+
+						path {
+							stroke-width: 1px;
+						}
+					}
+
+					&:hover {
+						p {
+							margin-bottom: 8px;
+							transition: margin-bottom 0.4s;
+						}
+
+						svg {
+							opacity: 1;
+							transition: opacity 0.4s 0.15s, transform 0.4s;	
+						}
+					}
+				}
+
+				.description {
+					border-radius: 0 0 16px 16px;
+					display: flex;
+					flex-flow: column nowrap;
+					font-size: 0.9em;
+					justify-content: flex-end;
+					padding: 12px 12px 9px;
+					position: relative;
+					text-align: justify;
+					transition: top 0.4s;
+					z-index: 1;
+
+					p {
+						line-height: 1.15;
+						margin: 0 0 6px 0;
+
+						&.study {
+							font-weight: bold;
+							margin: 8px 0 0 0;
+							opacity: 0.5;
+							text-align: right;
+							transition: opacity 0.4s 0.15s, margin-right 0.4s 0.15s;
+						}
+					}
+
+					svg {
+						height: 12px;
+						opacity: 0;
+						overflow: visible;
+						position: absolute;
+						right: 14px;
+						bottom: 2.5px;
+						transform: translateY(-50%);
+						transition: opacity 0.4s;
+						width: 8px;
+
+						path {
+							stroke-width: 1px;
+						}
+					}
+
+					&:hover {
+						p.study {
+							margin-right: 20px;
+							opacity: 1;
+							transition: opacity 0.4s, margin-right 0.4s;
+						}
+						svg {
+							opacity: 1;
+							transition: opacity 0.4s 0.15s;
+						}
+					}
+				}
+
+				&.previousActive {
+					z-index: 1;
+				}
+
+				&.active {
+					z-index: 2;
+
+					.title {
+						box-shadow: 0 2px 4px rgba(0,0,0,.26); // Only add a shadow when the description is active, so the shadow falls on the description.
+
+						svg {
+							transform: translateX(-50%) scaleY(-1);
+						}
 					}
 				}
 			}

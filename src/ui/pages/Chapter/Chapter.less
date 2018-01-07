@@ -1,50 +1,113 @@
-.page .content .chapterPage {
+@import '../../shared/params.less';
+
+.page .pageFader div.chapterFader {
+	padding: 0;
 	position: relative;
 
-	.content {
-		.loading {
-			padding-top: 80px;
-			text-align: center;
-		}
+	.tabs {
+		box-shadow: 0 2px 4px rgba(0,0,0,.26);
 
-		footer {
-			hr {
-				border: 0; 
-				height: 2px; 
-				margin: 20px 0 16px 0
+		.tab {
+			font-size: 0.9em !important; // Use !important to override annoying inline styles applied by the component itself.
+			text-transform: none !important;
+			white-space: normal; // To allow tabs to break into two lines.
+
+			& > div > div {
+				height: 40px !important;
+				@media @desktop {
+					height: 48px !important;
+				}
+			}
+
+			// Which text to display on the tabs depends on the screen size.
+			.title {
+				display: none;
+			}
+			.sectioning {
+				display: none;
+			}
+			.number {
+				display: inline-block;
+			}
+			@media @phoneLandscape {
+				.title {
+					display: none;
+				}
+				.sectioning {
+					display: inline-block;
+				}
+				.number {
+					display: none;
+				}
+			}
+			@media @desktop {
+				.title {
+					display: inline-block;
+				}
+				.sectioning {
+					display: none;
+				}
+				.number {
+					display: none;
+				}
 			}
 		}
+	}
 
-		&.chapterFade-appear {
-			opacity: 0.01;
-			&.chapterFade-appear-active {
-				opacity: 1;
-				transition: opacity 0.2s;
-			}
+	.section {
+		.pagePadding;
+	}
+
+	.loading {
+		padding-top: 80px;
+		text-align: center;
+	}
+
+	footer {
+		hr {
+			border: 0; 
+			height: 2px; 
+			margin: 20px 0 16px 0
 		}
+	}
 
-		&.chapterFade-enter {
-			opacity: 0.01;
-			&.chapterFade-enter-active {
-				opacity: 1;
-				transition: opacity 0.2s;
-			}
-		}
-
-		&.chapterFade-leave {
+	&.chapterFade-appear {
+		opacity: 0.01;
+		&.chapterFade-appear-active {
 			opacity: 1;
-			position: absolute;
-			top: 0;
-			z-index: 1;
-			&.chapterFade-leave-active {
-				opacity: 0.01;
-				transition: opacity 0.2s;
-			}
+			transition: opacity 0.2s;
+		}
+	}
+
+	&.chapterFade-enter {
+		opacity: 0.01;
+		&.chapterFade-enter-active {
+			opacity: 1;
+			transition: opacity 0.2s;
+		}
+	}
+
+	&.chapterFade-leave {
+		opacity: 1;
+		position: absolute;
+		top: 0;
+		z-index: 1;
+		&.chapterFade-leave-active {
+			opacity: 0.01;
+			transition: opacity 0.2s;
 		}
 	}
 }
 .lightTheme {
-	.page .content .chapterPage {
+	.page .pageFader div.chapterFader {
+		.tabs {
+			& > div:first-child {
+				background-color: darken(@lightThemeColor, 15%) !important;
+			}
+			& > div:nth-child(2) > div {
+				background-color: lighten(@lightThemeColor, 15%) !important;
+			}
+		}
 		footer {
 			hr {
 				background-image: linear-gradient(to right, #eee, #888, #eee)
@@ -53,7 +116,15 @@
 	}
 }
 .darkTheme {
-	.page .content .chapterPage {
+	.page .pageFader div.chapterFader {
+		.tabs {
+			& > div:first-child {
+				background-color: darken(@lightThemeColor, 20%) !important;
+			}
+			& > div:nth-child(2) > div {
+				background-color: @lightThemeColor !important;
+			}
+		}
 		footer {
 			hr {
 				background-image: linear-gradient(to right, #222, #999, #222)

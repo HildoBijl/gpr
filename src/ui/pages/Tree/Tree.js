@@ -124,19 +124,9 @@ class Tree extends Component {
 	}
 
 	getTreeContainerRect() {
-		// The container may not know its own offsetTop or offsetLeft. If it doesn't (and returns 0) then we check the parent.
-		const width = this.treeContainer.offsetWidth || this.treeContainer.parentElement.offsetWidth
-		const height = this.treeContainer.offsetHeight || this.treeContainer.parentElement.offsetHeight
-		const left = this.treeContainer.offsetLeft || this.treeContainer.parentElement.offsetLeft
-		const top = this.treeContainer.offsetTop || this.treeContainer.parentElement.offsetTop
-		return {
-			width,
-			height,
-			left,
-			top,
-			right: left + width,
-			bottom: top + height,
-		}
+		// We use getBoundingClientRect instead of offsetTop/offsetHeight to get the rect, because the latter is rather difficult with all the relatively positioned elements that we're having.
+		const innerContainer = this.treeContainer.children[0]
+		return innerContainer.getBoundingClientRect()
 	}
 
 	render() {
@@ -149,6 +139,7 @@ class Tree extends Component {
 		return (
 			<div className="treeContainer" ref={obj => this.treeContainer = obj}>
 				<div className={classnames(
+					'treeInnerContainer',
 					{ 'dragging': !!this.props.dragging },
 					{ 'invalidClick': !this.props.validClick },
 				)}>

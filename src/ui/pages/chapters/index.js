@@ -33,6 +33,7 @@ chapters.whatisgpr = {
 	sections: [
 		'Section title 1',
 		'Section heading 2',
+		'Third heading title is very long actually, that it spans two lines because it does not fit',
 	],
 	parents: [],
 	position: {

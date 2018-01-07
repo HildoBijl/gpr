@@ -1,21 +1,23 @@
+.pagePadding {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .pagePadding {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .pagePadding {
+    padding: 28px 24px;
+  }
+}
 .page {
   align-self: stretch;
   display: flex;
   flex-flow: column nowrap;
   flex-grow: 1;
-  padding: 20px 8px;
 }
-@media (min-width: 480.01px) and (max-width: 960px) {
-  .page {
-    padding: 20px 16px;
-  }
-}
-@media (min-width: 960.01px) {
-  .page {
-    padding: 28px 24px;
-  }
-}
-.page .content {
+.page .pageFader {
   display: flex;
   flex-flow: column nowrap;
   flex-grow: 1;
@@ -24,67 +26,80 @@
   position: relative;
   width: 100%;
 }
-.page .content > div.pageFade-appear {
+.page .pageFader > div {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .page .pageFader > div {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .page .pageFader > div {
+    padding: 28px 24px;
+  }
+}
+.page .pageFader > div.pageFade-appear {
   opacity: 0.01;
 }
-.page .content > div.pageFade-appear.pageFade-appear-active {
+.page .pageFader > div.pageFade-appear.pageFade-appear-active {
   opacity: 1;
   transition: opacity 0.2s;
 }
-.page .content > div.pageFade-enter {
+.page .pageFader > div.pageFade-enter {
   opacity: 0.01;
 }
-.page .content > div.pageFade-enter.pageFade-enter-active {
+.page .pageFader > div.pageFade-enter.pageFade-enter-active {
   opacity: 1;
   transition: opacity 0.2s;
 }
-.page .content > div.pageFade-leave {
+.page .pageFader > div.pageFade-leave {
   opacity: 1;
   position: absolute;
   top: 0;
   z-index: 1;
 }
-.page .content > div.pageFade-leave.pageFade-leave-active {
+.page .pageFader > div.pageFade-leave.pageFade-leave-active {
   opacity: 0.01;
   transition: opacity 0.2s;
 }
-.page .content h1 {
+.page .pageFader h1 {
   font-weight: bold;
   margin: 32px 0 24px 0;
   font-size: 1.9em;
 }
 @media (min-width: 480.01px) {
-  .page .content h1 {
+  .page .pageFader h1 {
     font-size: 1.9em;
   }
 }
-.page .content h2 {
+.page .pageFader h2 {
   font-weight: bold;
   margin: 24px 0 16px 0;
   font-size: 1.7em;
 }
 @media (min-width: 480.01px) {
-  .page .content h2 {
+  .page .pageFader h2 {
     font-size: 1.7em;
   }
 }
-.page .content h3 {
+.page .pageFader h3 {
   font-weight: bold;
   margin: 16px 0 10px 0;
   font-size: 1.4em;
 }
 @media (min-width: 480.01px) {
-  .page .content h3 {
+  .page .pageFader h3 {
     font-size: 1.4em;
   }
 }
-.page .content p {
+.page .pageFader p {
   line-height: 1.42857143;
   margin: 6px 0 10px;
 }
-.page .content h1:first-child,
-.page .content h2:first-child,
-.page .content h3:first-child,
-.page .content p:first-child {
+.page .pageFader h1:first-child,
+.page .pageFader h2:first-child,
+.page .pageFader h3:first-child,
+.page .pageFader p:first-child {
   margin-top: 0;
 }

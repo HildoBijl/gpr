@@ -1,42 +1,128 @@
-.page .content .chapterPage {
+.pagePadding {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .pagePadding {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .pagePadding {
+    padding: 28px 24px;
+  }
+}
+.page .pageFader div.chapterFader {
+  padding: 0;
   position: relative;
 }
-.page .content .chapterPage .content .loading {
+.page .pageFader div.chapterFader .tabs {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.26);
+}
+.page .pageFader div.chapterFader .tabs .tab {
+  font-size: 0.9em !important;
+  text-transform: none !important;
+  white-space: normal;
+}
+.page .pageFader div.chapterFader .tabs .tab > div > div {
+  height: 40px !important;
+}
+@media (min-width: 960.01px) {
+  .page .pageFader div.chapterFader .tabs .tab > div > div {
+    height: 48px !important;
+  }
+}
+.page .pageFader div.chapterFader .tabs .tab .title {
+  display: none;
+}
+.page .pageFader div.chapterFader .tabs .tab .sectioning {
+  display: none;
+}
+.page .pageFader div.chapterFader .tabs .tab .number {
+  display: inline-block;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .page .pageFader div.chapterFader .tabs .tab .title {
+    display: none;
+  }
+  .page .pageFader div.chapterFader .tabs .tab .sectioning {
+    display: inline-block;
+  }
+  .page .pageFader div.chapterFader .tabs .tab .number {
+    display: none;
+  }
+}
+@media (min-width: 960.01px) {
+  .page .pageFader div.chapterFader .tabs .tab .title {
+    display: inline-block;
+  }
+  .page .pageFader div.chapterFader .tabs .tab .sectioning {
+    display: none;
+  }
+  .page .pageFader div.chapterFader .tabs .tab .number {
+    display: none;
+  }
+}
+.page .pageFader div.chapterFader .section {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .page .pageFader div.chapterFader .section {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .page .pageFader div.chapterFader .section {
+    padding: 28px 24px;
+  }
+}
+.page .pageFader div.chapterFader .loading {
   padding-top: 80px;
   text-align: center;
 }
-.page .content .chapterPage .content footer hr {
+.page .pageFader div.chapterFader footer hr {
   border: 0;
   height: 2px;
   margin: 20px 0 16px 0;
 }
-.page .content .chapterPage .content.chapterFade-appear {
+.page .pageFader div.chapterFader.chapterFade-appear {
   opacity: 0.01;
 }
-.page .content .chapterPage .content.chapterFade-appear.chapterFade-appear-active {
+.page .pageFader div.chapterFader.chapterFade-appear.chapterFade-appear-active {
   opacity: 1;
   transition: opacity 0.2s;
 }
-.page .content .chapterPage .content.chapterFade-enter {
+.page .pageFader div.chapterFader.chapterFade-enter {
   opacity: 0.01;
 }
-.page .content .chapterPage .content.chapterFade-enter.chapterFade-enter-active {
+.page .pageFader div.chapterFader.chapterFade-enter.chapterFade-enter-active {
   opacity: 1;
   transition: opacity 0.2s;
 }
-.page .content .chapterPage .content.chapterFade-leave {
+.page .pageFader div.chapterFader.chapterFade-leave {
   opacity: 1;
   position: absolute;
   top: 0;
   z-index: 1;
 }
-.page .content .chapterPage .content.chapterFade-leave.chapterFade-leave-active {
+.page .pageFader div.chapterFader.chapterFade-leave.chapterFade-leave-active {
   opacity: 0.01;
   transition: opacity 0.2s;
 }
-.lightTheme .page .content .chapterPage footer hr {
+.lightTheme .page .pageFader div.chapterFader .tabs > div:first-child {
+  background-color: #0a1e64 !important;
+}
+.lightTheme .page .pageFader div.chapterFader .tabs > div:nth-child(2) > div {
+  background-color: #1f4ce9 !important;
+}
+.lightTheme .page .pageFader div.chapterFader footer hr {
   background-image: linear-gradient(to right, #eee, #888, #eee);
 }
-.darkTheme .page .content .chapterPage footer hr {
+.darkTheme .page .pageFader div.chapterFader .tabs > div:first-child {
+  background-color: #08174d !important;
+}
+.darkTheme .page .pageFader div.chapterFader .tabs > div:nth-child(2) > div {
+  background-color: #13a !important;
+}
+.darkTheme .page .pageFader div.chapterFader footer hr {
   background-image: linear-gradient(to right, #222, #999, #222);
 }

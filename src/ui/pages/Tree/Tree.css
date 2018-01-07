@@ -1,8 +1,22 @@
+.pagePadding {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .pagePadding {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .pagePadding {
+    padding: 28px 24px;
+  }
+}
 .treeContainer {
   cursor: move;
   cursor: grab;
   cursor: -moz-grab;
   cursor: -webkit-grab;
+  display: flex;
   flex-grow: 1;
   font-size: 13px;
   height: 100%;
@@ -11,11 +25,14 @@
   user-select: none;
   width: 100%;
 }
-.treeContainer .tree {
+.treeContainer .treeInnerContainer {
+  flex-grow: 1;
+}
+.treeContainer .treeInnerContainer .tree {
   cursor: pointer;
   position: absolute;
 }
-.treeContainer .tree .chapter {
+.treeContainer .treeInnerContainer .tree .chapter {
   border-radius: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.26);
   overflow: hidden;
@@ -24,7 +41,7 @@
   width: 320px;
   z-index: 0;
 }
-.treeContainer .tree .chapter .title {
+.treeContainer .treeInnerContainer .tree .chapter .title {
   background: inherit;
   border-radius: 16px 16px 0 0;
   display: flex;
@@ -34,7 +51,7 @@
   position: relative;
   z-index: 2;
 }
-.treeContainer .tree .chapter .title p {
+.treeContainer .treeInnerContainer .tree .chapter .title p {
   font-weight: bold;
   line-height: 1.5;
   margin: 0;
@@ -42,7 +59,7 @@
   text-align: center;
   transition: margin-bottom 0.4s 0.15s;
 }
-.treeContainer .tree .chapter .title svg {
+.treeContainer .treeInnerContainer .tree .chapter .title svg {
   bottom: 8px;
   height: 8px;
   margin: auto;
@@ -54,18 +71,18 @@
   transition: opacity 0.4s, transform 0.4s;
   width: 12px;
 }
-.treeContainer .tree .chapter .title svg path {
+.treeContainer .treeInnerContainer .tree .chapter .title svg path {
   stroke-width: 1px;
 }
-.treeContainer .tree .chapter .title:hover p {
+.treeContainer .treeInnerContainer .tree .chapter .title:hover p {
   margin-bottom: 8px;
   transition: margin-bottom 0.4s;
 }
-.treeContainer .tree .chapter .title:hover svg {
+.treeContainer .treeInnerContainer .tree .chapter .title:hover svg {
   opacity: 1;
   transition: opacity 0.4s 0.15s, transform 0.4s;
 }
-.treeContainer .tree .chapter .description {
+.treeContainer .treeInnerContainer .tree .chapter .description {
   border-radius: 0 0 16px 16px;
   display: flex;
   flex-flow: column nowrap;
@@ -77,18 +94,18 @@
   transition: top 0.4s;
   z-index: 1;
 }
-.treeContainer .tree .chapter .description p {
+.treeContainer .treeInnerContainer .tree .chapter .description p {
   line-height: 1.15;
   margin: 0 0 6px 0;
 }
-.treeContainer .tree .chapter .description p.study {
+.treeContainer .treeInnerContainer .tree .chapter .description p.study {
   font-weight: bold;
   margin: 8px 0 0 0;
   opacity: 0.5;
   text-align: right;
   transition: opacity 0.4s 0.15s, margin-right 0.4s 0.15s;
 }
-.treeContainer .tree .chapter .description svg {
+.treeContainer .treeInnerContainer .tree .chapter .description svg {
   height: 12px;
   opacity: 0;
   overflow: visible;
@@ -99,28 +116,28 @@
   transition: opacity 0.4s;
   width: 8px;
 }
-.treeContainer .tree .chapter .description svg path {
+.treeContainer .treeInnerContainer .tree .chapter .description svg path {
   stroke-width: 1px;
 }
-.treeContainer .tree .chapter .description:hover p.study {
+.treeContainer .treeInnerContainer .tree .chapter .description:hover p.study {
   margin-right: 20px;
   opacity: 1;
   transition: opacity 0.4s, margin-right 0.4s;
 }
-.treeContainer .tree .chapter .description:hover svg {
+.treeContainer .treeInnerContainer .tree .chapter .description:hover svg {
   opacity: 1;
   transition: opacity 0.4s 0.15s;
 }
-.treeContainer .tree .chapter.previousActive {
+.treeContainer .treeInnerContainer .tree .chapter.previousActive {
   z-index: 1;
 }
-.treeContainer .tree .chapter.active {
+.treeContainer .treeInnerContainer .tree .chapter.active {
   z-index: 2;
 }
-.treeContainer .tree .chapter.active .title {
+.treeContainer .treeInnerContainer .tree .chapter.active .title {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.26);
 }
-.treeContainer .tree .chapter.active .title svg {
+.treeContainer .treeInnerContainer .tree .chapter.active .title svg {
   transform: translateX(-50%) scaleY(-1);
 }
 .treeContainer svg.treeBackground {
