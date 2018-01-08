@@ -48,7 +48,7 @@ class Chapter extends Component {
 
 		// Initialize relevant arrays and start the loading through the imports.
 		this.sections = new Array(chapter.sections.length).fill(undefined)
-		this.setState(new Array(chapter.sections.length).fill('loading'))
+		this.setState({ status: new Array(chapter.sections.length).fill('loading') })
 		this.sections.forEach((_, ind) => {
 			const section = ind + 1
 			import(`../chapters/${chapter.name}/${section}`)
@@ -100,7 +100,9 @@ class Chapter extends Component {
 					transitionEnterTimeout={200}
 					transitionLeaveTimeout={200}
 				>
-					{this.getPage()}
+					<div key={this.props.chapter} className="chapterContainer">
+						{this.getPage()}
+					</div>
 				</ReactCSSTransitionGroup>
 			</MuiThemeProvider>
 		)
@@ -132,7 +134,7 @@ class Chapter extends Component {
 		// Render the sections, each depending on whether it's been loaded already or not.
 		const sections = (
 			<div key="sections" className="sections">
-				<SwipeableViews className="swiper" index={this.props.section - 1} onChangeIndex={this.adjustSection}>
+				<SwipeableViews className="swiper" index={this.props.section - 1} onChangeIndex={this.adjustSection} animateHeight={true}>
 					{chapter.sections.map((_, ind) => {
 						const status = this.state.status[ind]
 						switch (status) {
@@ -153,11 +155,19 @@ class Chapter extends Component {
 		return [tabs, sections]
 	}
 	renderUnknownChapter() {
-		return <p className="section">Oops ... the URL you gave does not point to a valid chapter. Try the <Link to={{ type: 'TREE' }}>Contents Tree</Link> to find what you're looking for.</p>
+		return (
+			<div className="chapterStub">
+				<p>Oops ... the URL you gave does not point to a valid chapter. Try the <Link to={{ type: 'TREE' }}>Contents Tree</Link> to find what you're looking for.</p>
+			</div>
+		)
 	}
 	renderChapterStub() {
 		const chapter = chapters[this.props.chapter]
-		return <p className="section">The chapter <strong>{chapter.title}</strong> is still being written. Check back later for further updates. Until then, head back to the <Link to={{ type: 'TREE' }}>Contents Tree</Link>.</p>
+		return (
+			<div className="chapterStub">
+				<p>The chapter <strong>{chapter.title}</strong> is still being written. Check back later for further updates. Until then, head back to the <Link to={{ type: 'TREE' }}>Contents Tree</Link>.</p>
+			</div>
+		)
 	}
 	renderLoadingSection(ind) {
 		return (
@@ -170,23 +180,22 @@ class Chapter extends Component {
 		return <p key={ind}>Oops ... I could not load the relevant section for you. Maybe there's a problem with your internet connection? If not, the problem could also be on my side. Check back later, or drop me a note if the problem persists.</p>
 	}
 	renderLoadedSection(ind) {
-		const chapter = chapters[this.props.chapter]
 		const Section = this.sections[ind]
 		return (
 			<div key={ind} className="section">
-				<h2>{chapter.sections[ind]}</h2>
 				<Section />
-				{this.renderNextSectionLink()}
+				{this.renderNextSectionLink(ind)}
 			</div>
 		)
 	}
-	renderNextSectionLink() {
+	renderNextSectionLink(ind) {
 		const chapter = chapters[this.props.chapter]
+		const section = ind + 1
 		let message
-		if (this.props.section === chapter.sections.length) {
+		if (section === chapter.sections.length) {
 			message = <p>Congrats! You made it through the full chapter. Head back to the <Link to={{ type: 'TREE' }}>Contents Tree</Link>.</p>
 		} else {
-			const newSection = this.props.section + 1
+			const newSection = section + 1
 			message = <p>Continue reading the next section, <Link to={{ type: 'CHAPTER', payload: { chapter: this.props.chapter, section: newSection } }}>{chapter.sections[newSection - 1]}</Link></p>
 		}
 

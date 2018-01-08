@@ -9,7 +9,7 @@ import { chapterArray, size, treeRect, getTreeLine } from '../chapters'
 import { getWindowSize } from '../../../logic/util.js'
 
 const minPadding = 12 // The minimum horizontal padding of the chapter titles.
-const maxPadding = size.x/4 // The maximum horizontal padding of the chapter titles.
+const maxPadding = size.x / 4 // The maximum horizontal padding of the chapter titles.
 
 class Tree extends Component {
 	constructor() {
@@ -33,6 +33,7 @@ class Tree extends Component {
 
 		// Listen to screen resizes.
 		this.checkSize()
+		setTimeout(this.checkSize, 0) // We need to delay this checking of the size. The reason is that the page fades, and that if we call this right before the fade, we get wrong information. Suppose that we're fading from another page to this tree. When this is first called, the tree has entered the page, but the tree and the old page do not have their fade classes yet. So the old page is not hidden (well, positioned absolutely) yet. They're still contesting for the same page space. As a result, the tree will appear to be a bit smaller. If we check a bit later, after the fade classes have been added, things should be fine.
 		window.addEventListener('resize', this.checkSize)
 
 		// Start the update loop to get animations.
@@ -95,11 +96,11 @@ class Tree extends Component {
 			const startingHeight = p.offsetHeight // Measure the initial height.
 			while (max - min > 1) {
 				// Try a certain padding and see if it adds another line.
-				p.style.paddingLeft = p.style.paddingRight = ((max + min)/2) + 'px'
+				p.style.paddingLeft = p.style.paddingRight = ((max + min) / 2) + 'px'
 				if (p.offsetHeight > startingHeight)
-					max = (max + min)/2 // The tried padding would add another line. Look at smaller paddings by reducing the max.
+					max = (max + min) / 2 // The tried padding would add another line. Look at smaller paddings by reducing the max.
 				else
-					min = (max + min)/2 // The tried padding does not add another line. Look at bigger paddings by increasing the min.
+					min = (max + min) / 2 // The tried padding does not add another line. Look at bigger paddings by increasing the min.
 			}
 			p.style.paddingLeft = p.style.paddingRight = min + 'px'
 
@@ -126,7 +127,8 @@ class Tree extends Component {
 	getTreeContainerRect() {
 		// We use getBoundingClientRect instead of offsetTop/offsetHeight to get the rect, because the latter is rather difficult with all the relatively positioned elements that we're having.
 		const innerContainer = this.treeContainer.children[0]
-		return innerContainer.getBoundingClientRect()
+		const { width, height, left, top, right, bottom } = innerContainer.getBoundingClientRect() // We only want certain parts of the rect. This is to prevent Firefox from doing funny stuff at times.
+		return { width, height, left, top, right, bottom }
 	}
 
 	render() {
@@ -203,14 +205,14 @@ class Tree extends Component {
 									width={this.props.treeRect.width}
 									height={this.props.treeRect.height}
 								>
-									<feGaussianBlur in="SourceAlpha" stdDeviation="4"/> 
-									<feOffset dx="0" dy="2" result="offsetblur"/>
+									<feGaussianBlur in="SourceAlpha" stdDeviation="4" />
+									<feOffset dx="0" dy="2" result="offsetblur" />
 									<feComponentTransfer>
-										<feFuncA type="linear" slope="0.26"/>
+										<feFuncA type="linear" slope="0.26" />
 									</feComponentTransfer>
-									<feMerge> 
-										<feMergeNode/>
-										<feMergeNode in="SourceGraphic"/> 
+									<feMerge>
+										<feMergeNode />
+										<feMergeNode in="SourceGraphic" />
 									</feMerge>
 								</filter>
 							</defs>

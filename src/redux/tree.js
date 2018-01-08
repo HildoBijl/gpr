@@ -697,8 +697,6 @@ function pullFunction(diff) {
 	return dynamics.pullScale * Math.log(diff / dynamics.pullScale + 1)
 }
 
-
-
 // getCurrentTreeRect calculates the tree rectangle based on the default size of the tree and on which block is expanded. If a block is expanded, we need to ensure that its description is properly shown.
 function getCurrentTreeRect(state) {
 	const currentTreeRect = deepClone(treeRect)

@@ -4,8 +4,8 @@ import Link from 'redux-first-router-link'
 const Section = () => {
 	return (
 		<div>
-			<p>Section 1!</p>
-			<p><Link to={{ type: 'CHAPTER', payload: { chapter: 'fundamentalassumptions' } }}>Go to the next chapter</Link></p>
+			<p>Section 2...</p>
+			<p><Link to={{ type: 'CHAPTER', payload: { chapter: 'whatisgpr', section: 3 } }}>Go to the previous chapter</Link></p>
 		</div>
 	)
 }

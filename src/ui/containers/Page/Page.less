@@ -10,13 +10,14 @@
 		display: flex;
 		flex-flow: column nowrap;
 		flex-grow: 1;
-		margin: auto;
-		max-width: @maxWidth;
 		position: relative; // To ensure proper (absolute) positioning on page fading.
 		width: 100%;
 
 		& > div {
 			.pagePadding;
+			margin: 0 auto;
+			max-width: @maxWidth;
+			width: 100%;
 
 			&.pageFade-appear {
 				opacity: 0.01;
@@ -35,9 +36,12 @@
 			}
 
 			&.pageFade-leave {
+				left: 50%;
 				opacity: 1;
 				position: absolute;
 				top: 0;
+				transform: translateX(-50%);
+				width: 100%;
 				z-index: 1;
 				&.pageFade-leave-active {
 					opacity: 0.01;

@@ -12,104 +12,139 @@
   }
 }
 .page .pageFader div.chapterFader {
+  max-width: none;
   padding: 0;
   position: relative;
 }
-.page .pageFader div.chapterFader .tabs {
+.page .pageFader div.chapterFader .chapterContainer .tabs {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.26);
 }
-.page .pageFader div.chapterFader .tabs .tab {
+.page .pageFader div.chapterFader .chapterContainer .tabs > div {
+  margin: auto;
+  max-width: 1200px;
+  width: 100%;
+}
+.page .pageFader div.chapterFader .chapterContainer .tabs .tab {
   font-size: 0.9em !important;
   text-transform: none !important;
   white-space: normal;
 }
-.page .pageFader div.chapterFader .tabs .tab > div > div {
+.page .pageFader div.chapterFader .chapterContainer .tabs .tab > div > div {
   height: 40px !important;
+  padding: 0 6px;
 }
 @media (min-width: 960.01px) {
-  .page .pageFader div.chapterFader .tabs .tab > div > div {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab > div > div {
     height: 48px !important;
+    padding: 0 12px;
   }
 }
-.page .pageFader div.chapterFader .tabs .tab .title {
+.page .pageFader div.chapterFader .chapterContainer .tabs .tab .title {
   display: none;
 }
-.page .pageFader div.chapterFader .tabs .tab .sectioning {
+.page .pageFader div.chapterFader .chapterContainer .tabs .tab .sectioning {
   display: none;
 }
-.page .pageFader div.chapterFader .tabs .tab .number {
+.page .pageFader div.chapterFader .chapterContainer .tabs .tab .number {
   display: inline-block;
 }
 @media (min-width: 480.01px) and (max-width: 960px) {
-  .page .pageFader div.chapterFader .tabs .tab .title {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab .title {
     display: none;
   }
-  .page .pageFader div.chapterFader .tabs .tab .sectioning {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab .sectioning {
     display: inline-block;
   }
-  .page .pageFader div.chapterFader .tabs .tab .number {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab .number {
     display: none;
   }
 }
 @media (min-width: 960.01px) {
-  .page .pageFader div.chapterFader .tabs .tab .title {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab .title {
     display: inline-block;
   }
-  .page .pageFader div.chapterFader .tabs .tab .sectioning {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab .sectioning {
     display: none;
   }
-  .page .pageFader div.chapterFader .tabs .tab .number {
+  .page .pageFader div.chapterFader .chapterContainer .tabs .tab .number {
     display: none;
   }
 }
-.page .pageFader div.chapterFader .section {
+.page .pageFader div.chapterFader .chapterContainer .chapterStub {
   padding: 15px 8px;
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 100%;
 }
 @media (min-width: 480.01px) and (max-width: 960px) {
-  .page .pageFader div.chapterFader .section {
+  .page .pageFader div.chapterFader .chapterContainer .chapterStub {
     padding: 20px 16px;
   }
 }
 @media (min-width: 960.01px) {
-  .page .pageFader div.chapterFader .section {
+  .page .pageFader div.chapterFader .chapterContainer .chapterStub {
     padding: 28px 24px;
   }
 }
-.page .pageFader div.chapterFader .loading {
+.page .pageFader div.chapterFader .chapterContainer .sections {
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 100%;
+}
+.page .pageFader div.chapterFader .chapterContainer .section {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .page .pageFader div.chapterFader .chapterContainer .section {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .page .pageFader div.chapterFader .chapterContainer .section {
+    padding: 28px 24px;
+  }
+}
+.page .pageFader div.chapterFader .chapterContainer .loading {
   padding-top: 80px;
   text-align: center;
 }
-.page .pageFader div.chapterFader footer hr {
+.page .pageFader div.chapterFader .chapterContainer footer hr {
   border: 0;
   height: 2px;
   margin: 20px 0 16px 0;
 }
-.page .pageFader div.chapterFader.chapterFade-appear {
+.page .pageFader div.chapterFader .chapterContainer.chapterFade-appear {
   opacity: 0.01;
 }
-.page .pageFader div.chapterFader.chapterFade-appear.chapterFade-appear-active {
+.page .pageFader div.chapterFader .chapterContainer.chapterFade-appear.chapterFade-appear-active {
   opacity: 1;
   transition: opacity 0.2s;
 }
-.page .pageFader div.chapterFader.chapterFade-enter {
+.page .pageFader div.chapterFader .chapterContainer.chapterFade-enter {
   opacity: 0.01;
 }
-.page .pageFader div.chapterFader.chapterFade-enter.chapterFade-enter-active {
+.page .pageFader div.chapterFader .chapterContainer.chapterFade-enter.chapterFade-enter-active {
   opacity: 1;
   transition: opacity 0.2s;
 }
-.page .pageFader div.chapterFader.chapterFade-leave {
+.page .pageFader div.chapterFader .chapterContainer.chapterFade-leave {
+  left: 50%;
   opacity: 1;
   position: absolute;
   top: 0;
+  transform: translateX(-50%);
+  width: 100%;
   z-index: 1;
 }
-.page .pageFader div.chapterFader.chapterFade-leave.chapterFade-leave-active {
+.page .pageFader div.chapterFader .chapterContainer.chapterFade-leave.chapterFade-leave-active {
   opacity: 0.01;
   transition: opacity 0.2s;
 }
+.lightTheme .page .pageFader div.chapterFader .tabs {
+  background-color: #0a1e64;
+}
 .lightTheme .page .pageFader div.chapterFader .tabs > div:first-child {
-  background-color: #0a1e64 !important;
+  background-color: transparent !important;
 }
 .lightTheme .page .pageFader div.chapterFader .tabs > div:nth-child(2) > div {
   background-color: #1f4ce9 !important;
@@ -117,8 +152,11 @@
 .lightTheme .page .pageFader div.chapterFader footer hr {
   background-image: linear-gradient(to right, #eee, #888, #eee);
 }
+.darkTheme .page .pageFader div.chapterFader .tabs {
+  background-color: #08174d;
+}
 .darkTheme .page .pageFader div.chapterFader .tabs > div:first-child {
-  background-color: #08174d !important;
+  background-color: transparent !important;
 }
 .darkTheme .page .pageFader div.chapterFader .tabs > div:nth-child(2) > div {
   background-color: #13a !important;

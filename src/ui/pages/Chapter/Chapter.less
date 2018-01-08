@@ -1,108 +1,136 @@
 @import '../../shared/params.less';
 
 .page .pageFader div.chapterFader {
+	max-width: none;
 	padding: 0;
 	position: relative;
 
-	.tabs {
-		box-shadow: 0 2px 4px rgba(0,0,0,.26);
+	.chapterContainer {
+		.tabs {
+			box-shadow: 0 2px 4px rgba(0,0,0,.26);
 
-		.tab {
-			font-size: 0.9em !important; // Use !important to override annoying inline styles applied by the component itself.
-			text-transform: none !important;
-			white-space: normal; // To allow tabs to break into two lines.
+			& > div {
+				margin: auto;
+				max-width: @maxWidth;
+				width: 100%;
+			}
 
-			& > div > div {
-				height: 40px !important;
+			.tab {
+				font-size: 0.9em !important; // Use !important to override annoying inline styles applied by the component itself.
+				text-transform: none !important;
+				white-space: normal; // To allow tabs to break into two lines.
+
+				& > div > div {
+					height: 40px !important;
+					padding: 0 6px;
+					@media @desktop {
+						height: 48px !important;
+						padding: 0 12px;
+					}
+				}
+
+				// Which text to display on the tabs depends on the screen size.
+				.title {
+					display: none;
+				}
+				.sectioning {
+					display: none;
+				}
+				.number {
+					display: inline-block;
+				}
+				@media @phoneLandscape {
+					.title {
+						display: none;
+					}
+					.sectioning {
+						display: inline-block;
+					}
+					.number {
+						display: none;
+					}
+				}
 				@media @desktop {
-					height: 48px !important;
-				}
-			}
-
-			// Which text to display on the tabs depends on the screen size.
-			.title {
-				display: none;
-			}
-			.sectioning {
-				display: none;
-			}
-			.number {
-				display: inline-block;
-			}
-			@media @phoneLandscape {
-				.title {
-					display: none;
-				}
-				.sectioning {
-					display: inline-block;
-				}
-				.number {
-					display: none;
-				}
-			}
-			@media @desktop {
-				.title {
-					display: inline-block;
-				}
-				.sectioning {
-					display: none;
-				}
-				.number {
-					display: none;
+					.title {
+						display: inline-block;
+					}
+					.sectioning {
+						display: none;
+					}
+					.number {
+						display: none;
+					}
 				}
 			}
 		}
-	}
 
-	.section {
-		.pagePadding;
-	}
-
-	.loading {
-		padding-top: 80px;
-		text-align: center;
-	}
-
-	footer {
-		hr {
-			border: 0; 
-			height: 2px; 
-			margin: 20px 0 16px 0
+		.chapterStub {
+			.pagePadding;
+			margin: 0 auto;
+			max-width: @maxWidth;
+			width: 100%;
 		}
-	}
 
-	&.chapterFade-appear {
-		opacity: 0.01;
-		&.chapterFade-appear-active {
-			opacity: 1;
-			transition: opacity 0.2s;
+		.sections {
+			margin: 0 auto;
+			max-width: @maxWidth;
+			width: 100%;
 		}
-	}
 
-	&.chapterFade-enter {
-		opacity: 0.01;
-		&.chapterFade-enter-active {
-			opacity: 1;
-			transition: opacity 0.2s;
+		.section {
+			.pagePadding;
 		}
-	}
 
-	&.chapterFade-leave {
-		opacity: 1;
-		position: absolute;
-		top: 0;
-		z-index: 1;
-		&.chapterFade-leave-active {
+		.loading {
+			padding-top: 80px;
+			text-align: center;
+		}
+
+		footer {
+			hr {
+				border: 0; 
+				height: 2px; 
+				margin: 20px 0 16px 0
+			}
+		}
+
+		&.chapterFade-appear {
 			opacity: 0.01;
-			transition: opacity 0.2s;
+			&.chapterFade-appear-active {
+				opacity: 1;
+				transition: opacity 0.2s;
+			}
+		}
+
+		&.chapterFade-enter {
+			opacity: 0.01;
+			&.chapterFade-enter-active {
+				opacity: 1;
+				transition: opacity 0.2s;
+			}
+		}
+
+		&.chapterFade-leave {
+			left: 50%;
+			opacity: 1;
+			position: absolute;
+			top: 0;
+			transform: translateX(-50%);
+			width: 100%;
+			z-index: 1;
+			&.chapterFade-leave-active {
+				opacity: 0.01;
+				transition: opacity 0.2s;
+			}
 		}
 	}
 }
 .lightTheme {
 	.page .pageFader div.chapterFader {
 		.tabs {
+			background-color: darken(@lightThemeColor, 15%);
 			& > div:first-child {
-				background-color: darken(@lightThemeColor, 15%) !important;
+				background-color: transparent !important;
 			}
 			& > div:nth-child(2) > div {
 				background-color: lighten(@lightThemeColor, 15%) !important;
@@ -118,8 +146,9 @@
 .darkTheme {
 	.page .pageFader div.chapterFader {
 		.tabs {
+			background-color: darken(@lightThemeColor, 20%);
 			& > div:first-child {
-				background-color: darken(@lightThemeColor, 20%) !important;
+				background-color: transparent !important;
 			}
 			& > div:nth-child(2) > div {
 				background-color: @lightThemeColor !important;

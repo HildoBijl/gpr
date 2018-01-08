@@ -50,6 +50,12 @@ chapters.fundamentalassumptions = {
 			<p>That's what this chapter is about. We're going to start with examining what functions we want to get, and then step by step define their distribution.</p>
 		</div>
 	),
+	sections: [
+		'Parzival',
+		'Arth3mis',
+		'Aech',
+		'Daito/Shoto',
+	],
 	parents: [chapters.whatisgpr],
 	position: {
 		x: chapters.whatisgpr.position.x,
