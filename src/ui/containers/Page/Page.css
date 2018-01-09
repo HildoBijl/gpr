@@ -107,3 +107,15 @@
 .page .pageFader p:first-child {
   margin-top: 0;
 }
+.lightTheme .success {
+  color: #262;
+}
+.lightTheme .error {
+  color: #922;
+}
+.darkTheme .success {
+  color: #484;
+}
+.darkTheme .error {
+  color: #a33;
+}

@@ -35,7 +35,6 @@ export default actions
  */
 
 export function reducer(settings = defaultSettings, action) {
-	window.idb = idbKeyval
   switch (action.type) {
 		case 'ApplySettings': {
 			// If no settings were provided, do nothing.

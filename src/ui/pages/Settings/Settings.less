@@ -1,6 +1,18 @@
-.page .content {
+.page .settings {
 	p.addedNote {
 		font-size: 0.85em;
-		margin: 6px 4px 10px;
+		margin: 6px 4px 10px 8px;
+
+		&.offlineUseStatus {
+			max-height: 20px;
+			overflow: hidden;
+			transition: max-height 0.4s, margin 0.4s;
+
+			&.empty {
+				margin-bottom: -3px; // Half of the smallest vertical margins of the checkbox container, to make sure the space between the checkboxes remains identical.
+				margin-top: -3px;
+				max-height: 0;
+			}
+		}
 	}
 }
