@@ -1,5 +1,6 @@
 import '../../shared/reset.css'
 import '../../shared/general.css'
+import '../../font-awesome/less/font-awesome.css'
 import './App.css'
 
 import React, { Component } from 'react'
