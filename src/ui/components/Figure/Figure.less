@@ -1,0 +1,112 @@
+@import '../../shared/params.less';
+
+.figure {
+	border-radius: 8px;
+	margin: 12px 6px;
+	position: relative;
+
+	.figureCounter {
+		font-size: 0.9em;
+		position: absolute;
+		right: 7px;
+		top: 4px;
+		z-index: 1;
+	}
+	.plots {
+		align-items: flex-start;
+		display: flex;
+		flex-flow: row wrap;
+		justify-content: space-between;
+		padding: 8px;
+		position: relative;
+		z-index: 2;
+
+		svg {
+			background: rgba(255,0,0,0.1); // TODO: REMOVE THIS LINE.
+			display: block;
+			max-width: 800px;
+			width: 100%;
+
+			&:only-child {
+				margin: auto;
+			}
+
+			@media @phonePortrait {
+				&.half:not(:last-child) {
+					margin-bottom: 8px;
+				}
+			}
+			&.half {
+				@media @landscape {
+					width: calc(~"50% - 4px");
+				}
+			}
+
+			// TODO: CHECK THE FOLLOWING.
+			.tick {
+				stroke: #fff;
+
+				line {
+					stroke: #fff;
+				}
+			}
+			.domain {
+				stroke: #fff;
+			}
+
+			circle { // TODO: REMOVE THIS STUFF.
+				cursor: pointer;
+				fill: #e53;
+			}
+
+			// Allow for the hiding of various parts.
+			&.noAxes .axis {
+				display: none;
+			}
+			&.noNumbers .tick text {
+				display: none;
+			}
+		}
+	}
+}
+
+.figureGuide {
+	position: relative;
+
+	&::before {
+		content: '';
+		height: 100%;
+		left: -7px;
+		position: absolute;
+		top: 0;
+		width: 3px;
+	}
+
+	p:last-child {
+		margin-bottom: 0;
+	}
+}
+
+// Coloring
+.figure {
+	background: #070707;
+	color: #fff;
+
+	.figureCounter {
+		color: #888;
+	}
+}
+.lightTheme {
+	.figureGuide {
+		&::before {
+			background: @lightFigureGuideColor;
+		}
+	}
+}
+.darkTheme {
+	.figureGuide {
+		&::before {
+			background: @darkFigureGuideColor;
+		}
+	}
+}

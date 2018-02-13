@@ -1,3 +1,5 @@
+@import '../../shared/params.less';
+
 .page .settings {
 	p.addedNote {
 		font-size: 0.85em;
@@ -14,5 +16,24 @@
 				max-height: 0;
 			}
 		}
+	}
+
+	.circle {
+		border-radius: 50%;
+		display: inline-block;
+		height: 14px;
+		margin: 0 0 -2px 6px;
+		width: 14px;
+	}
+}
+
+.lightTheme .page .settings {
+	.circle {
+		background: @lightFigureGuideColor;
+	}
+}
+.darkTheme .page .settings {
+	.circle {
+		background: @darkFigureGuideColor;
 	}
 }

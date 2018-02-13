@@ -31,9 +31,9 @@ chapters.whatisgpr = {
 		</div>
 	),
 	sections: [
-		'Section title 1',
-		'Section heading 2',
-		'Third heading title is very long actually, that it spans two lines because it does not fit',
+		'What is regression?',
+		'A distribution over functions',
+		'Finding structure in data',
 	],
 	parents: [],
 	position: {
@@ -51,10 +51,10 @@ chapters.fundamentalassumptions = {
 		</div>
 	),
 	sections: [
-		'Parzival',
-		'Arth3mis',
-		'Aech',
-		'Daito/Shoto',
+		'Why make assumptions?',
+		'A single value',
+		'Two values',
+		'Infinitely many values',
 	],
 	parents: [chapters.whatisgpr],
 	position: {
@@ -85,6 +85,12 @@ chapters.addingdata = {
 			<p>We're going to study the case without measurement noise first. Taking into account noise is just a small extra step, which we take right after. We'll also study various ways to intuitively grasp the concept of Gaussian process regression.</p>
 		</div>
 	),
+	sections: [
+		'One measurement, one prediction',
+		'Multiple measurements,\n multiple predictions',
+		'Measurement noise',
+		'An alternative view:\n merging distributions',
+	],
 	parents: [chapters.fundamentalassumptions],
 	position: {
 		x: chapters.samplingfunctions.position.x + (size.x + margin.x),

@@ -1,3 +1,16 @@
+.pagePadding {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .pagePadding {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .pagePadding {
+    padding: 28px 24px;
+  }
+}
 .page .settings p.addedNote {
   font-size: 0.85em;
   margin: 6px 4px 10px 8px;
@@ -11,4 +24,17 @@
   margin-bottom: -3px;
   margin-top: -3px;
   max-height: 0;
+}
+.page .settings .circle {
+  border-radius: 50%;
+  display: inline-block;
+  height: 14px;
+  margin: 0 0 -2px 6px;
+  width: 14px;
+}
+.lightTheme .page .settings .circle {
+  background: #d81;
+}
+.darkTheme .page .settings .circle {
+  background: #d81;
 }

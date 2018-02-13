@@ -1,31 +1,11 @@
 import React from 'react'
 
 const Section = () => {
-	return <div>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-		<p>Section 3...</p>
-	</div>
+	return (
+		<div>
+			<p>This section is still being written. Check back later to see if it's been added.</p>
+		</div>
+	)
 }
 
 export default Section

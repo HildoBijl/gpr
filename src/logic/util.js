@@ -1,3 +1,5 @@
+// This is a random utility file, containing a not necessarily related assortment of useful functions.
+
 const axes = ['x', 'y']
 
 // deepClone gives a clone of an object, where every sub-object is also cloned.
@@ -23,11 +25,41 @@ export function getWindowSize() {
 	}
 }
 
+// applyFunction will apply the given function to each of the elements of the given array.
+export function applyFunction(fun, arr) {
+	if (typeof(fun) !== 'function')
+		throw new Error('The given function was not a function.')
+		if (!Array.isArray(arr))
+			throw new Error('The given array was not an array.')
+	return arr.map(v => fun(v))
+}
+
+// applyFunctionToPairs will apply the given function to each pair of the elements from the given array(s). The result will be a two-dimensional array (matrix). If only one array is given, the second array is assumed to be equal to the first, and the resulting matrix will be symmetrical.
+export function applyFunctionToPairs(fun, arr1, arr2) {
+	// Check the input.
+	if (typeof(fun) !== 'function')
+		throw new Error('The given function was not a function.')
+	if (!Array.isArray(arr1))
+		throw new Error('The given array was not an array.')
+	if (arr2 === undefined)
+		arr2 = arr1
+	if (!Array.isArray(arr2))
+		throw new Error('The second given array was not an array.')
+	
+	// Process the result.
+	return arr1.map(v1 => applyFunction((v2) => fun(v1,v2), arr2))
+}
+
 // bound will give the closest number to x in the interval [min, max].
 export function bound(x, min, max) {
 	if (max < min)
 		throw new Error(`The bound function was called with 'max' larger than 'min'.`)
 	return Math.max(min, Math.min(max, x))
+}
+
+// getRange(min, max, numPoints) return an array with numPoints numbers, equally distributed between min and max. For instance, getRange(3,9,5) will give [3, 4.5, 6, 7.5, 9].
+export function getRange(min, max, numPoints) {
+  return (new Array(numPoints)).fill(0).map((v, i) => min + (max - min) * i / (numPoints - 1))
 }
 
 // getDistance returns the distance between two points.

@@ -119,9 +119,10 @@ class Chapter extends Component {
 		const tabs = (
 			<Tabs key="tabs" className="tabs" value={this.props.section - 1} onChange={this.adjustSection}>
 				{chapter.sections.map((sectionTitle, ind) => {
+					const titleWithEnters = sectionTitle.split('\n').map((item, key) => <span key={key}>{item}<br/></span> )
 					const label = (
 						<div>
-							<span className="title">{sectionTitle}</span>
+							<span className="title">{titleWithEnters}</span>
 							<span className="sectioning">Section {ind + 1}</span>
 							<span className="number">{ind + 1}</span>
 						</div>
@@ -177,13 +178,17 @@ class Chapter extends Component {
 		)
 	}
 	renderFailedSection(ind) {
-		return <p key={ind}>Oops ... I could not load the relevant section for you. Maybe there's a problem with your internet connection? If not, the problem could also be on my side. Check back later, or drop me a note if the problem persists.</p>
+		return (
+			<div className="chapterStub" key={ind}>
+				<p>Oops ... I could not load the relevant section for you. Maybe there's a problem with your internet connection? If not, the problem could also be on my side. Check back later, or drop me a note if the problem persists.</p>
+			</div>
+		)
 	}
 	renderLoadedSection(ind) {
 		const Section = this.sections[ind]
 		return (
 			<div key={ind} className="section">
-				<Section />
+				<Section index={ind} />
 				{this.renderNextSectionLink(ind)}
 			</div>
 		)

@@ -1,0 +1,99 @@
+.pagePadding {
+  padding: 15px 8px;
+}
+@media (min-width: 480.01px) and (max-width: 960px) {
+  .pagePadding {
+    padding: 20px 16px;
+  }
+}
+@media (min-width: 960.01px) {
+  .pagePadding {
+    padding: 28px 24px;
+  }
+}
+.figure {
+  border-radius: 8px;
+  margin: 12px 6px;
+  position: relative;
+}
+.figure .figureCounter {
+  font-size: 0.9em;
+  position: absolute;
+  right: 7px;
+  top: 4px;
+  z-index: 1;
+}
+.figure .plots {
+  align-items: flex-start;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  padding: 8px;
+  position: relative;
+  z-index: 2;
+}
+.figure .plots svg {
+  background: rgba(255, 0, 0, 0.1);
+  display: block;
+  max-width: 800px;
+  width: 100%;
+}
+.figure .plots svg:only-child {
+  margin: auto;
+}
+@media (max-width: 480px) {
+  .figure .plots svg.half:not(:last-child) {
+    margin-bottom: 8px;
+  }
+}
+@media (min-width: 480.01px) {
+  .figure .plots svg.half {
+    width: calc(50% - 4px);
+  }
+}
+.figure .plots svg .tick {
+  stroke: #fff;
+}
+.figure .plots svg .tick line {
+  stroke: #fff;
+}
+.figure .plots svg .domain {
+  stroke: #fff;
+}
+.figure .plots svg circle {
+  cursor: pointer;
+  fill: #e53;
+}
+.figure .plots svg.noAxes .axis {
+  display: none;
+}
+.figure .plots svg.noNumbers .tick text {
+  display: none;
+}
+.figureGuide {
+  position: relative;
+}
+.figureGuide::before {
+  content: '';
+  height: 100%;
+  left: -7px;
+  position: absolute;
+  top: 0;
+  width: 3px;
+}
+.figureGuide p:last-child {
+  margin-bottom: 0;
+}
+.figure {
+  background: #070707;
+  color: #fff;
+}
+.figure .figureCounter {
+  color: #888;
+}
+.lightTheme .figureGuide::before {
+  background: #d81;
+}
+.darkTheme .figureGuide::before {
+  background: #d81;
+}
