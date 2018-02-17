@@ -15,10 +15,6 @@ import SamplePlot from './figures/samplePlot.js'
 class Section extends Component {
 	constructor() {
 		super()
-		// TODO
-	}
-	componentDidMount() {
-		// TODO
 	}
 
 	// reset is called prior to every render, and it resets figure numbers, equation numbers and such.

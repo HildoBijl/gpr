@@ -1,28 +1,32 @@
 // transitioner is a class that transitions a value over time. When a new value is set (through setValue) it remembers the old value and the time at which the new value was set. Then, when the value is asked (through getValue) it properly transitions from the old value to the new value, based on the current time.
 // The constructor gets a settings object with several properties.
-// - transitionTime [default 1000] is the time in milliseconds to apply the transition. Afterwards, the given value is simply returned.
+// - transitionTime [default 400] is the time in milliseconds to apply the transition. Afterwards, the given value is simply returned.
 // - transitionType [default 'ease'] is the type of transition. Only a limited number of types is supported so far, so if you need something, you may have to add it yourself first.
 
 import { Bezier } from './util.js'
 
-export default class transitioner {
+export default class Transitioner {
 	constructor(settings) {
 		this.settings = {
-			transitionTime: 1000,
+			transitionTime: 400,
 			transitionType: 'ease',
 			...settings,
 		}
 	}
 
+	// setValue sets the value which the transitioner should move towards to. It returns the object itself, so you can use `value = new Transitioner().setValue(10)` or something similar.
 	setValue(value) {
 		// Check input.
-		if (!Number.isInteger(value))
+		if (isNaN(value))
 			throw new Error('Invalid data type: the transitioner was given a value that is not a number.')
+		if (value === this.value)
+			return
 
 		// Store the value and remember the time.
 		this.oldValue = this.getValue()
 		this.value = value
 		this.lastSetAt = performance.now()
+		return this
 	}
 
 	getValue() {

@@ -10,25 +10,27 @@ import { getRange } from '../../../../../logic/util.js'
 
 import Figure from '../../../../components/Figure/Figure.js'
 
-import transitioner from '../../../../../logic/transitioner.js'
+import Transitioner from '../../../../../logic/transitioner.js'
 
 // TODO NEXT:
 // [Done] Figure out how gradients work within SVG. An alternative is to use canvas, but having two methods will be a hassle. Edit: custom gradients in SVG suck. Use canvas instead.
 // [Done] Figure out how to get overflow with SVG but only for certain elements. Solution: set overflow: visible for the SVG block and apply a mask for SVG groups that should not have overflow.
 // [Done] Make the plot dynamic. Allow the adding of points. Make sure things update properly.
-// - Allow for smooth updating of the plot, transitioning the mean line and the variances. This is difficult, as it requires the calculation of hundreds of values that need to be updated at every animation frame. The trick would be to first transform the prediction into a combination of [mean, std]. Then plug these values into a transitioner-object. This is a to-be-designed object, which remembers the old value, the old time, the new value and the transition time, as well as the transition type. It has a getValue() function that returns the current value, and a setValue() function that allows the adjustment of values. (All transition objects have the same settings? To easily allow a change in transition time/type or so?) This allows it to transition values. Then, based on these transitioning values, we update the plot on every animation frame. 
-// Steps:
-// x Upon change, update values and plug them into transitioner.
-// x Set up animation frames within the object. (I think every object can use their own requests, but I'm not entirely sure.)
-// x On every animation frame, get new values from the transitioner and put them (as a simple array) as data into d3.
+// [Done] Allow for smooth updating of the plot, transitioning the mean line and the variances.
 // - Copy the gradient method from the GP presentation script.
 // - Allow potentially dragging points. In this case, updating the plot smoothly is not required anymore. It is useful to still use animation frame requests, instead of rerendering upon every mouseMove event.
-// - Arrange z-indices: make sure measurement points appear on top.
+// [Done] Arrange z-indices: make sure measurement points appear on top. Edit: this depends on the order the elements appear inside the SVG.
 // - Potentially put it all in a GP Plot class, for as much as possible. Add options showAxes, showNumbers, range, the gp that's used, an update feature, whether you can add points, delete points, drag them, and so on.
 
 class Plot extends Component {
 	constructor() {
 		super()
+
+		// Ensure that functions always have the correct `this` parameter, also when called from callbacks.
+		this.addMeasurement = this.addMeasurement.bind(this)
+		this.initializePlot = this.initializePlot.bind(this)
+		this.recalculatePlot = this.recalculatePlot.bind(this)
+		this.updatePlot = this.updatePlot.bind(this)
 
 		this.range = {
 			x: {
@@ -53,15 +55,21 @@ class Plot extends Component {
 			{ input: 3.4, output: -0.4 },
 		]
 
+		this.plotPoints = getRange(this.range.x.min, this.range.x.max, 201)
+
 		this.gp = new GaussianProcess({ covariance: getSquaredExponentialCovarianceFunction({ Vx: 2 ** 2, Vy: 4 ** 2 }), outputNoise: 0.01 })
 	}
 	componentDidMount() {
 		this.initializePlot()
 		this.updatePlot()
-		setInterval(this.addMeasurement.bind(this), 1000);
+		setInterval(this.addMeasurement, 1000)
+		this.animationFrameRequest = window.requestAnimationFrame(this.updatePlot)
 	}
 	componentDidUpdate() {
 		this.updatePlot()
+	}
+	componentWillUnmount() {
+		window.cancelAnimationFrame(this.animationFrameRequest)
 	}
 	addMeasurement() {
 		// Add a measurement (or if not available, remove all measurements) for the GP.
@@ -69,7 +77,7 @@ class Plot extends Component {
 			this.gp.reset()
 		else
 			this.gp.addMeasurement(this.measurements[this.gp.measurements.length])
-		this.updatePlot()
+		this.recalculatePlot()
 	}
 	initializePlot() {
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
@@ -170,26 +178,55 @@ class Plot extends Component {
 			.curve(curveLinear)
 		this.lineFunction1 = line()
 			.x(prediction => this.scale.x(prediction.input))
-			.y(prediction => this.scale.y(prediction.output.mean + 2 * Math.sqrt(prediction.output.variance)))
+			.y(prediction => this.scale.y(prediction.output.mean + 2 * prediction.output.std))
 			.curve(curveLinear)
 		this.lineFunction2 = line()
 			.x(prediction => this.scale.x(prediction.input))
-			.y(prediction => this.scale.y(prediction.output.mean - 2 * Math.sqrt(prediction.output.variance)))
+			.y(prediction => this.scale.y(prediction.output.mean - 2 * prediction.output.std))
 			.curve(curveLinear)
-	}
-	updatePlot() {
-		// Extract the prediction.
+
+		// Set up the initial prediction using transitioners.
 		this.prediction = this.gp.getPrediction({
-			input: getRange(this.range.x.min, this.range.x.max, 201)
+			input: this.plotPoints
+		}).map(point => ({
+			input: point.input,
+			output: {
+				mean: new Transitioner().setValue(point.output.mean),
+				std: new Transitioner().setValue(Math.sqrt(point.output.variance)),
+			},
+		}))
+		window.p = this.prediction
+		window.t = Transitioner
+	}
+	recalculatePlot() {
+		// Extract the prediction.
+		const newPrediction = this.gp.getPrediction({
+			input: this.plotPoints
 		})
+		window.newPrediction = newPrediction
+		newPrediction.forEach((point, i) => {
+			this.prediction[i].output.mean.setValue(point.output.mean)
+			this.prediction[i].output.std.setValue(Math.sqrt(point.output.variance))
+		})
+
 		// TODO: REMOVE
 		window.gpt = this.gp
 		window.prediction = this.prediction
+	}
+	updatePlot() {
+		// Extract the current prediction data from the transitioners.
+		const currentPrediction = this.prediction.map(point => ({
+			input: point.input,
+			output: {
+				mean: point.output.mean.getValue(),
+				std: point.output.std.getValue(),
+			}
+		}))
 
 		// Set up the line for the mean.
 		const lines = this.meanContainer
 			.selectAll('path')
-			.data(new Array(3).fill(this.prediction))
+			.data(new Array(3).fill(currentPrediction))
 		lines.enter()
 			.append('path')
 			.attr('stroke', 'blue')
@@ -200,18 +237,6 @@ class Plot extends Component {
 		lines.exit()
 			.remove()
 
-		// And lines for the variance.
-		// this.meanLine = this.meanContainer.append('path')
-		// 	.attr('d', this.lineFunction1(this.prediction))
-		// 	.attr('stroke', 'blue')
-		// 	.attr('stroke-width', 1)
-		// 	.attr('fill', 'none')
-		// this.meanLine = this.meanContainer.append('path')
-		// 	.attr('d', this.lineFunction2(this.prediction))
-		// 	.attr('stroke', 'blue')
-		// 	.attr('stroke-width', 1)
-		// 	.attr('fill', 'none')
-
 		// Set up the measurement points, first adding new ones, then updating existing ones and finally removing old ones.
 		const points = this.measurementContainer
 			.selectAll('circle')
@@ -219,12 +244,15 @@ class Plot extends Component {
 		points.enter() // New points.
 			.append('circle')
 			.attr('r', '6')
-			// .on('click', (bin) => this.props.setStatisticsBounds([bin.x0, bin.x1]))
+			// .on('click', (data) => this.someFunction(data))
 			.merge(points) // New and existing points.
 			.attr('cx', point => this.scale.x(point.input))
 			.attr('cy', point => this.scale.y(point.output))
 		points.exit() // Outdated points.
 			.remove()
+		
+		// Schedule the next update.
+		this.animationFrameRequest = window.requestAnimationFrame(this.updatePlot)
 	}
 	getBounds(type) {
 		return [
