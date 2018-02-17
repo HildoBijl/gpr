@@ -8,7 +8,7 @@ import { line, curveLinear } from 'd3-shape'
 import GaussianProcess, { getSquaredExponentialCovarianceFunction } from '../../../../../logic/gaussianProcess.js'
 import { getRange } from '../../../../../logic/util.js'
 
-import Figure from '../../../../components/Figure/Figure.js'
+import Figure, { SubFigure } from '../../../../components/Figure/Figure.js'
 
 import Transitioner from '../../../../../logic/transitioner.js'
 
@@ -22,7 +22,7 @@ import Transitioner from '../../../../../logic/transitioner.js'
 // [Done] Arrange z-indices: make sure measurement points appear on top. Edit: this depends on the order the elements appear inside the SVG.
 // - Potentially put it all in a GP Plot class, for as much as possible. Add options showAxes, showNumbers, range, the gp that's used, an update feature, whether you can add points, delete points, drag them, and so on.
 
-class Plot extends Component {
+class SamplePlot extends Component {
 	constructor() {
 		super()
 
@@ -60,7 +60,9 @@ class Plot extends Component {
 		this.gp = new GaussianProcess({ covariance: getSquaredExponentialCovarianceFunction({ Vx: 2 ** 2, Vy: 4 ** 2 }), outputNoise: 0.01 })
 	}
 	componentDidMount() {
-		this.initializePlot()
+		if (!this.initialized)
+			this.initializePlot()
+		this.initialized = true
 		this.updatePlot()
 		setInterval(this.addMeasurement, 1000)
 		this.animationFrameRequest = window.requestAnimationFrame(this.updatePlot)
@@ -93,6 +95,21 @@ class Plot extends Component {
 			x: scaleLinear().domain([this.range.x.min, this.range.x.max]).range([0, 1000]),
 			y: scaleLinear().domain([this.range.y.min, this.range.y.max]).range([750, 0]),
 		}
+
+		const canvas = this.canvas
+		this.context = this.canvas.getContext('2d')
+		const context = this.context
+		var centerX = canvas.width / 2
+		var centerY = canvas.height / 2
+		var radius = 375
+
+		context.beginPath()
+		context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
+		context.fillStyle = 'green'
+		context.fill()
+		context.lineWidth = 5
+		context.strokeStyle = '#003300'
+		context.stroke()
 
 		// Set up the gradients.
 		// const rects = this.gradientContainer
@@ -195,8 +212,6 @@ class Plot extends Component {
 				std: new Transitioner().setValue(Math.sqrt(point.output.variance)),
 			},
 		}))
-		window.p = this.prediction
-		window.t = Transitioner
 	}
 	recalculatePlot() {
 		// Extract the prediction.
@@ -208,10 +223,6 @@ class Plot extends Component {
 			this.prediction[i].output.mean.setValue(point.output.mean)
 			this.prediction[i].output.std.setValue(Math.sqrt(point.output.variance))
 		})
-
-		// TODO: REMOVE
-		window.gpt = this.gp
-		window.prediction = this.prediction
 	}
 	updatePlot() {
 		// Extract the current prediction data from the transitioners.
@@ -230,7 +241,7 @@ class Plot extends Component {
 		lines.enter()
 			.append('path')
 			.attr('stroke', 'blue')
-			.attr('stroke-width', (p,i) => (i === 0 ? 2 : 1))
+			.attr('stroke-width', (p, i) => (i === 0 ? 2 : 1))
 			.attr('fill', 'none')
 			.merge(lines)
 			.attr('d', (p, i) => (i === 0 ? this.lineFunction(p) : i === 1 ? this.lineFunction1(p) : this.lineFunction2(p)))
@@ -250,34 +261,31 @@ class Plot extends Component {
 			.attr('cy', point => this.scale.y(point.output))
 		points.exit() // Outdated points.
 			.remove()
-		
+
 		// Schedule the next update.
 		this.animationFrameRequest = window.requestAnimationFrame(this.updatePlot)
-	}
-	getBounds(type) {
-		return [
-			this.gp.measurements.reduce((result, m) => (result === undefined || m[type] < result ? m[type] : result), undefined),
-			this.gp.measurements.reduce((result, m) => (result === undefined || m[type] > result ? m[type] : result), undefined),
-		]
 	}
 	render() {
 		return (
 			<Figure section={this.props.section}>
-				<svg id="samplePlot" viewBox="0 0 1000 750" className="noNumbers">
-					<defs>
-						<linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-							<stop offset="0%" style={{ stopColor: 'rgb(17,51,187)', stopOpacity: '0' }} />
-							<stop offset="50%" style={{ stopColor: 'rgb(17,51,187)', stopOpacity: '1' }} />
-							<stop offset="100%" style={{ stopColor: 'rgb(17,51,187)', stopOpacity: '0' }} />
-						</linearGradient>
-						<mask id="screen">
-							<rect x="0" y="0" width="1000" height="750" fill="#fff" />
-						</mask>
-					</defs>
-				</svg>
+				<SubFigure>
+					<svg id="samplePlot" viewBox="0 0 1000 750" className="noNumbers">
+						<defs>
+							<linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+								<stop offset="0%" style={{ stopColor: 'rgb(17,51,187)', stopOpacity: '0' }} />
+								<stop offset="50%" style={{ stopColor: 'rgb(17,51,187)', stopOpacity: '1' }} />
+								<stop offset="100%" style={{ stopColor: 'rgb(17,51,187)', stopOpacity: '0' }} />
+							</linearGradient>
+							<mask id="screen">
+								<rect x="0" y="0" width="1000" height="750" fill="#fff" />
+							</mask>
+						</defs>
+					</svg>
+					<canvas ref={obj => { this.canvas = obj }} width="1000" height="750" />
+				</SubFigure>
 			</Figure>
 		)
 	}
 }
 
-export default Plot
+export default SamplePlot

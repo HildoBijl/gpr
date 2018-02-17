@@ -23,7 +23,7 @@
   top: 4px;
   z-index: 1;
 }
-.figure .plots {
+.figure .subFigures {
   align-items: flex-start;
   display: flex;
   flex-flow: row wrap;
@@ -32,53 +32,72 @@
   position: relative;
   z-index: 2;
 }
-.figure .plots svg {
-  background: rgba(255, 0, 0, 0.1);
-  display: block;
+.figure .subFigures .subFigure {
   max-width: 800px;
-  overflow: visible;
+  position: relative;
   width: 100%;
 }
-.figure .plots svg:only-child {
+.figure .subFigures .subFigure:only-child {
   margin: auto;
 }
-.figure .plots svg g.line {
-  overflow: hidden;
-}
-@media (max-width: 480px) {
-  .figure .plots svg.half:not(:last-child) {
-    margin-bottom: 8px;
-  }
-}
 @media (min-width: 480.01px) {
-  .figure .plots svg.half {
+  .figure .subFigures .subFigure.half {
     width: calc(50% - 4px);
   }
 }
-.figure .plots svg .tick {
-  stroke: #fff;
+@media (max-width: 480px) {
+  .figure .subFigures .subFigure.half:not(:last-child) {
+    margin-bottom: 8px;
+  }
 }
-.figure .plots svg .tick line {
-  stroke: #fff;
+.figure .subFigures .subFigure .subFigureInner {
+  padding-bottom: 75%;
+  width: 100%;
 }
-.figure .plots svg .domain {
-  stroke: #fff;
-}
-.figure .plots svg .mean {
-  z-index: 1;
-}
-.figure .plots svg .measurements {
+.figure .subFigures .subFigure .subFigureInner svg {
+  display: block;
+  left: 0;
+  overflow: visible;
+  position: absolute;
+  top: 0;
+  width: 100%;
   z-index: 2;
 }
-.figure .plots svg .measurements circle {
+.figure .subFigures .subFigure .subFigureInner svg g.line {
+  overflow: hidden;
+}
+.figure .subFigures .subFigure .subFigureInner svg .tick {
+  stroke: #fff;
+}
+.figure .subFigures .subFigure .subFigureInner svg .tick line {
+  stroke: #fff;
+}
+.figure .subFigures .subFigure .subFigureInner svg .domain {
+  stroke: #fff;
+}
+.figure .subFigures .subFigure .subFigureInner svg .mean {
+  z-index: 1;
+}
+.figure .subFigures .subFigure .subFigureInner svg .measurements {
+  z-index: 2;
+}
+.figure .subFigures .subFigure .subFigureInner svg .measurements circle {
   cursor: pointer;
   fill: #e53;
 }
-.figure .plots svg.noAxes .axis {
+.figure .subFigures .subFigure .subFigureInner svg.noAxes .axis {
   display: none;
 }
-.figure .plots svg.noNumbers .tick text {
+.figure .subFigures .subFigure .subFigureInner svg.noNumbers .tick text {
   display: none;
+}
+.figure .subFigures .subFigure .subFigureInner canvas {
+  left: 0;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 1;
 }
 .figureGuide {
   position: relative;

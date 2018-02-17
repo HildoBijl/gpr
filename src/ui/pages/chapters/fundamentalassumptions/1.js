@@ -7,10 +7,10 @@ import { getGaussianRand, logDet, getGaussianSample, getGaussianSampleFromCholes
 import GaussianProcess, { getSquaredExponentialCovarianceFunction } from '../../../../logic/gaussianProcess.js'
 import GaussianDistribution from '../../../../logic/gaussianDistribution.js'
 
-import Figure from '../../../components/Figure/Figure.js'
+import Figure, { SubFigure } from '../../../components/Figure/Figure.js'
 import FigureGuide from '../../../components/Figure/FigureGuide.js'
 
-import SamplePlot from './figures/samplePlot.js'
+import TestPlot from './figures/testPlot.js'
 
 class Section extends Component {
 	constructor() {
@@ -31,22 +31,26 @@ class Section extends Component {
 			<div>
 				<p>This section is currently being written.</p>
 				<p>It will have a ton of figures.</p>
-				<SamplePlot section={this}>
-					<p>ToDo: remove this, in favor of the plot.</p>
-				</SamplePlot>
+				<Figure section={this}>
+					<TestPlot />
+				</Figure>
 				<FigureGuide>
 					<p>This explains what the figure does.</p>
 				</FigureGuide>
 				<p>Really pretty ones!</p>
 				<Figure section={this}>
-					<svg viewBox="0 0 1000 750" className="half">
-						<rect x="50" y="500" width="900" height="200" />
-						<rect x="300" y="50" width="400" height="400" />
-					</svg>
-					<svg viewBox="0 0 1000 750" className="half">
-						<rect x="50" y="50" width="900" height="200" />
-						<rect x="300" y="300" width="400" height="400" />
-					</svg>
+					<SubFigure half={true}>
+						<svg viewBox="0 0 1000 750">
+							<rect x="50" y="500" width="900" height="200" />
+							<rect x="300" y="50" width="400" height="400" />
+						</svg>
+					</SubFigure>
+					<SubFigure half={true}>
+						<svg viewBox="0 0 1000 750">
+							<rect x="50" y="50" width="900" height="200" />
+							<rect x="300" y="300" width="400" height="400" />
+						</svg>
+					</SubFigure>
 				</Figure>
 				<p><Link to={{ type: 'CHAPTER', payload: { chapter: 'whatisgpr' } }}>Go to the previous chapter</Link></p>
 			</div>

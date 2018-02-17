@@ -12,7 +12,7 @@
 		top: 4px;
 		z-index: 1;
 	}
-	.plots {
+	.subFigures {
 		align-items: flex-start;
 		display: flex;
 		flex-flow: row wrap;
@@ -21,63 +21,87 @@
 		position: relative;
 		z-index: 2;
 
-		svg {
-			background: rgba(255,0,0,0.1); // TODO: REMOVE THIS LINE.
-			display: block;
+		.subFigure {
 			max-width: 800px;
-			overflow: visible;
+			position: relative;
 			width: 100%;
 
+			// If the plot is the only plot in the figure, center it.
 			&:only-child {
 				margin: auto;
 			}
-
-			g.line {
-				overflow: hidden;
-			}
-
-			@media @phonePortrait {
-				&.half:not(:last-child) {
-					margin-bottom: 8px;
-				}
-			}
+	
+			// If there are two plots, each taking up half the space, then we should put them together in landscape mode. In portrait mode, they instead go below each other.
 			&.half {
 				@media @landscape {
 					width: calc(~"50% - 4px");
 				}
 			}
-
-			// TODO: CHECK THE FOLLOWING.
-			.tick {
-				stroke: #fff;
-
-				line {
-					stroke: #fff;
-				}
-			}
-			.domain {
-				stroke: #fff;
-			}
-
-			// TODO: MAKE THE FOLLOWING MORE GENERIC AND PUT IT IN A GP PLOT LESS FILE.
-			.mean {
-				z-index: 1;
-			}
-			.measurements {
-				z-index: 2;
-				
-				circle { 
-					cursor: pointer;
-					fill: #e53;
+			@media @phonePortrait {
+				&.half:not(:last-child) {
+					margin-bottom: 8px;
 				}
 			}
 
-			// Allow for the hiding of various parts.
-			&.noAxes .axis {
-				display: none;
-			}
-			&.noNumbers .tick text {
-				display: none;
+			.subFigureInner {
+				padding-bottom: 75%;
+				width: 100%;
+
+				svg {
+					display: block;
+					left: 0;
+					overflow: visible;
+					position: absolute;
+					top: 0;
+					width: 100%;
+					z-index: 2;
+		
+					g.line {
+						overflow: hidden;
+					}
+		
+					// TODO: CHECK THE FOLLOWING.
+					.tick {
+						stroke: #fff;
+		
+						line {
+							stroke: #fff;
+						}
+					}
+					.domain {
+						stroke: #fff;
+					}
+		
+					// TODO: MAKE THE FOLLOWING MORE GENERIC AND PUT IT IN A GP PLOT LESS FILE.
+					.mean {
+						z-index: 1;
+					}
+					.measurements {
+						z-index: 2;
+						
+						circle { 
+							cursor: pointer;
+							fill: #e53;
+						}
+					}
+		
+					// Allow for the hiding of various parts.
+					&.noAxes .axis {
+						display: none;
+					}
+					&.noNumbers .tick text {
+						display: none;
+					}
+				}
+		
+				canvas {
+					left: 0;
+					height: 100%;
+					position: absolute;
+					top: 0;
+					width: 100%;
+					z-index: 1;
+				}
 			}
 		}
 	}
