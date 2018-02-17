@@ -98,7 +98,7 @@ export default class GaussianProcess {
 			input: param.input,
 			output: (joint ? 
 				new GaussianDistribution(mean, covariance) :
-				new GaussianDistribution(mean[0], covariance[0][0])
+				new GaussianDistribution(mean[0], covariance[0][0]) // We didn't want a joint distribution, and we also didn't get an array of input points. Just return a single distribution as output.
 			),
 		}
 	}
@@ -114,27 +114,33 @@ export default class GaussianProcess {
 		if (param.input === undefined)
 			throw new Error('Missing parameter: no parameter "input" was passed to the getPrior function.')
 		
-		// Determine the result. How this is done depends on whether we are given a single parameter or an array.
-		const result = {}
-		result.input = param.input
-		if (Array.isArray(param.input)) {
-			result.mean = param.input.map(x => this.mean(x))
-			if (param.includeCovariance)
-				result.covariance = applyFunctionToPairs(param.input, this.covariance)
-			result.standardDeviation = (result.covariance ?
-				math.diag(result.covariance).map(variance => Math.sqrt(variance)) : // If we have a covariance matrix, extract the standard deviation from it.
-				param.input.map(input => Math.sqrt(this.covariance(input, input))) // If not, calculate it afresh.
-			)
-		} else {
-			result.mean = this.mean(param.input)
-			if (param.includeCovariance)
-				result.covariance = this.covariance(param.input, param.input)
-			result.standardDeviation = (result.covariance ?
-				Math.sqrt(result.covariance) : // If we have a covariance matrix, extract the standard deviation from it.
-				Math.sqrt(this.covariance(param.input, param.input)) // If not, calculate it afresh.
-			)
+		// If we do not want a joint distribution, we can simply deal with the points one by one.
+		const joint = param.joint && Array.isArray(param.input)
+		let input = param.input // Short notation for the test input points.
+		if (!joint) {
+			if (Array.isArray(input)) {
+				// We separately predict each point.
+				return input.map(input => this.getPrior({
+					...param,
+					input,
+				}))
+			} else {
+				input = [input] // The rest of the script expects the input to be an array.
+			}
 		}
-		return result
+		
+		// Find the prior mean and covariance matrix.
+		const mean = input.map(x => this.mean(x))
+		const covariance = applyFunctionToPairs(this.covariance, input)
+
+		// Set up final result.
+		return {
+			input: param.input,
+			output: (joint ? 
+				new GaussianDistribution(mean, covariance) :
+				new GaussianDistribution(mean[0], covariance[0][0]) // We didn't want a joint distribution, and we also didn't get an array of input points. Just return a single distribution as output.
+			),
+		}
 	}
 	// TODO: IMPLEMENT ABOVE FUNCTION THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT.
 

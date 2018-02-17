@@ -18,21 +18,7 @@ class Section extends Component {
 		// TODO
 	}
 	componentDidMount() {
-		window.math = math
-		window.GP = GaussianProcess
-		window.se = getSquaredExponentialCovarianceFunction
-		window.gd = GaussianDistribution
-		window.mm = mergeMatrices
-	
-		window.gp = new GaussianProcess({covariance: getSquaredExponentialCovarianceFunction({Vx: 2**2, Vy: 4**2}), outputNoise: 0.01})
-		window.gp.addMeasurement([{input: 2, output: 2}])
-		window.gp.addMeasurement([{input: 4, output: 3}])
-		console.log(window.gp.getPrediction({input:[1,2,3,4,5,6,7,8]}))
-
-		// TODO NEXT: SET UP A NEW COMPONENT FOR A FIRST PLOT. LET IT MAKE ITS OWN SVG, SIMILAR TO THE YAHTZEE PLOT. USE STYLING WITHIN THE FIGURE.LESS FILE. BUT ALSO JUST MAKE AN SVG PLOT, TO FIGURE OUT HOW IT WORKS.
-		// window.gpPlot = new GPPlot({
-		// 	gp: window.gp,
-		// })
+		// TODO
 	}
 
 	// reset is called prior to every render, and it resets figure numbers, equation numbers and such.

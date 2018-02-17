@@ -25,10 +25,15 @@
 			background: rgba(255,0,0,0.1); // TODO: REMOVE THIS LINE.
 			display: block;
 			max-width: 800px;
+			overflow: visible;
 			width: 100%;
 
 			&:only-child {
 				margin: auto;
+			}
+
+			g.line {
+				overflow: hidden;
 			}
 
 			@media @phonePortrait {
@@ -54,9 +59,17 @@
 				stroke: #fff;
 			}
 
-			circle { // TODO: REMOVE THIS STUFF.
-				cursor: pointer;
-				fill: #e53;
+			// TODO: MAKE THE FOLLOWING MORE GENERIC AND PUT IT IN A GP PLOT LESS FILE.
+			.mean {
+				z-index: 1;
+			}
+			.measurements {
+				z-index: 2;
+				
+				circle { 
+					cursor: pointer;
+					fill: #e53;
+				}
 			}
 
 			// Allow for the hiding of various parts.

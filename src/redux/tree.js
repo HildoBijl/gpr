@@ -24,7 +24,7 @@ const maxZoom = 2 // [-]. The maximum zoom factor.
 
 const maxClickDrag = 10 // Pixels. The maximum number of pixels which the user can drag over while it's still considered to be a click.
 const targetingTime = 400 // Milliseconds. The number of milliseconds we take to put the screen on top of a chapter block that just got activated.
-const easer = new Bezier(0.25,0,0,1) // A function that allows is to approximate a Bezier curve. It's used for making the targeting go smoothly.
+const easer = new Bezier(0.25,0,0,1) // A function that allows us to approximate a Bezier curve. It's used for making the targeting go smoothly.
 
 const getDefaultState = () => ({
 	data: {
@@ -51,7 +51,7 @@ const getDefaultState = () => ({
 			y: 0,
 		},
 		dragging: false, // Are we dragging at the moment?
-		lastUpdateAt: new Date(), // The last time we updated the position of the tree. This is necessary during free floating, to apply the right size time steps.
+		lastUpdateAt: performance.now(), // The last time we updated the position of the tree. This is necessary during free floating, to apply the right size time steps.
 		zoom: 1, // The zoom level. 1 means no zoom, 2 means amplification to double size, 0.5 means zooming out to half size.
 		requireUpdate: true, // A boolean to indicate whether something has changed in the data, requiring an update of the visuals.
 		initialZoomDistance: undefined, // When the user uses two fingers to pinch, this is the distance between the two fingers (touches). It is used to determine whether the fingers went closer together (zoom out) or further apart (zoom in).
@@ -303,7 +303,7 @@ export function reducer(originalState = getDefaultState(), action) {
 					const blockHeight = size.y + descriptionHeight
 					state.data.targeting = {
 						oldPosition: deepClone(state.data.position),
-						startTime: new Date(),
+						startTime: performance.now(),
 						target: {
 							x: bound(
 								chapter.position.x*state.data.zoom,
@@ -441,9 +441,9 @@ function updateDragging(state, mousePosition) {
 	})
 
 	// Clear the position storage from old positions and add the new position to it.
-	const time = new Date()
+	const time = performance.now()
 	const oldPositions = state.data.oldPositions
-	while (oldPositions.length > 0 && time - new Date(oldPositions[0].time) > velocityFilterTime) {
+	while (oldPositions.length > 0 && time - oldPositions[0].time > velocityFilterTime) {
 		oldPositions.shift()
 	}
 	oldPositions.push({
@@ -466,8 +466,8 @@ function endDragging(state, mousePosition) {
 
 	// Set up a throwing effect. To do so, calculate the velocity that the tree had before ending the dragging.
 	const reference = state.data.oldPositions[0]
-	const time = new Date()
-	const dt = time - new Date(reference.time)
+	const time = performance.now()
+	const dt = time - reference.time
 	axes.forEach(axis => {
 		state.data.velocity[axis] = dt > 0 ? (state.data.position[axis] - reference.position[axis]) / dt : 0
 	})
@@ -564,14 +564,14 @@ function updatePositionVelocity(state) {
 		return state
 
 	// Check the time since the last update.
-	const time = new Date()
-	const dt = time - new Date(state.data.lastUpdateAt)
+	const time = performance.now()
+	const dt = time - state.data.lastUpdateAt
 	state.data.lastUpdateAt = time
 
 	// Check if there is a target. 
 	if (state.data.targeting) {
 		// Find the time passed since the target was established (as a fraction of the total time) and check if we should already be at the target.
-		const t = (time - new Date(state.data.targeting.startTime))/targetingTime
+		const t = (time - state.data.targeting.startTime)/targetingTime
 		if (t > 1) { // The targeting is done.
 			state.data.position = deepClone(state.data.targeting.target)
 			state.data.targeting = null

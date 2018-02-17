@@ -36,10 +36,14 @@
   background: rgba(255, 0, 0, 0.1);
   display: block;
   max-width: 800px;
+  overflow: visible;
   width: 100%;
 }
 .figure .plots svg:only-child {
   margin: auto;
+}
+.figure .plots svg g.line {
+  overflow: hidden;
 }
 @media (max-width: 480px) {
   .figure .plots svg.half:not(:last-child) {
@@ -60,7 +64,13 @@
 .figure .plots svg .domain {
   stroke: #fff;
 }
-.figure .plots svg circle {
+.figure .plots svg .mean {
+  z-index: 1;
+}
+.figure .plots svg .measurements {
+  z-index: 2;
+}
+.figure .plots svg .measurements circle {
   cursor: pointer;
   fill: #e53;
 }
