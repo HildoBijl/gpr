@@ -15,7 +15,7 @@ export default class CurrentSection extends Section {
 				<p>This section is currently being written.</p>
 				<p>It will have a ton of figures.</p>
 				<Figure section={this}>
-					<InteractivePlot ref={obj => window.test = obj} />
+					<InteractivePlot />
 				</Figure>
 				<FigureGuide>
 					<p>This explains what the figure does.</p>

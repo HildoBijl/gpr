@@ -54,7 +54,6 @@ export default class Plot extends Component {
 			
 			// Extract the (subfigure) container of the plot.
 			this.container = (this.svg || this.canvas).parentElement.parentElement
-			window.svg = this.svg
 
 			// Call any potential custom initialize function.
 			if (this.initialize)
@@ -98,7 +97,6 @@ export default class Plot extends Component {
 
 	// getPositionFromEvent takes an event object and (based on the clientX and clientY parameters) turns it into the internal coordinates which the event took place at.
 	getPositionFromEvent(evt) {
-		window.evt = evt
 		return {
 			x: evt.offsetX / this.container.offsetWidth * this.width,
 			y: evt.offsetY / this.container.offsetHeight * this.height,

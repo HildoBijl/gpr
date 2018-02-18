@@ -68,7 +68,6 @@ export default class GaussianDistribution {
 		if (this.multivariate) {
 			if (!this.chol)
 				this.chol = choleskyDecomposition(this.variance)
-			window.choleskyDecomposition = choleskyDecomposition
 			return getGaussianSampleFromCholesky(this.mean, this.chol)
 		} else {
 			if (!this.chol)
