@@ -71,13 +71,13 @@
 				
 					// Format the D3 axes.
 					.tick {
-						stroke: #fff; // For the axis tick numbers.
+						stroke: currentColor; // For the axis tick numbers.
 						line {
-							stroke: #fff; // For the tick lines.
+							stroke: currentColor; // For the tick lines.
 						}
 					}
 					.domain {
-						stroke: #fff; // For the axes.
+						stroke: currentColor; // For the axes.
 					}
 				}
 		
@@ -113,15 +113,15 @@
 }
 
 // Coloring
-.figure {
-	background: #070707;
-	color: #fff;
-
-	.figureCounter {
-		color: #888;
-	}
-}
 .lightTheme {
+	.figure {
+		background: #222;
+		color: #fff;
+	
+		.figureCounter {
+			color: #888;
+		}
+	}
 	.figureGuide {
 		&::before {
 			background: @lightFigureGuideColor;
@@ -129,6 +129,14 @@
 	}
 }
 .darkTheme {
+	.figure {
+		background: #070707;
+		color: #fff;
+	
+		.figureCounter {
+			color: #888;
+		}
+	}
 	.figureGuide {
 		&::before {
 			background: @darkFigureGuideColor;

@@ -21,7 +21,7 @@ export default class GPPlot extends Plot {
 		// Define settings that may be overwritten by the child class.
 		this.transitionTime = 400
 		this.range = { x: { min: -5, max: 5 }, y: { min: -3, max: 3 } }
-		this.numPlotPoints = 51
+		this.numPlotPoints = 101
 		this.measurementRadius = 6
 
 		// The child class needs to define a Gaussian Process parameter. Here's an example.

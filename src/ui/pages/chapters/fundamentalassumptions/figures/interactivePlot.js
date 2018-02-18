@@ -10,13 +10,13 @@ export default class CurrentPlot extends GPPlot {
 	// - Add a non-exported subclass inside this file, expanding upon the GPPlot and use it in the new renderSubFigures function.
 	// - Make a simple reset button and get it working.
 	// - Apply styling to the control bar.
-	
+
 	constructor() {
 		super()
 
 		// Define important settings.
 		this.id = 'interactivePlot'
-		this.classes['noNumbers'] = true
+		// this.classes['noNumbers'] = true
 		this.classes['pointer'] = true
 		
 		// Set up the plot range.

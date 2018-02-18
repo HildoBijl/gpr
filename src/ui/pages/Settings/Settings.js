@@ -13,11 +13,13 @@ class Settings extends Component {
 	componentDidMount() {
 		this.checkChapterCaching()
 	}
+
 	componentDidUpdate(prevProps) {
 		if (this.props.settings.enableOfflineUse && !prevProps.settings.enableOfflineUse)
 			this.checkChapterCaching()
 	}
 
+	// checkChapterCaching will cache all chapters by importing all their javascript code, but only when this is necessary: when the user told us to do so.
 	checkChapterCaching() {
 		// Do we need a check?
 		if (!this.props.settings.enableOfflineUse)

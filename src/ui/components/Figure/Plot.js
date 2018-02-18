@@ -21,6 +21,9 @@ export default class Plot extends Component {
 	constructor() {
 		super()
 
+		// Set up necessary parameters.
+		this.handler = {} // This will be used to store event handlers for this object.
+
 		// Set up default parameters.
 		this.width = 1000
 		this.height = 750
@@ -46,29 +49,32 @@ export default class Plot extends Component {
 
 	// Upon mounting, initialize the object, if we haven't already done so. Also set up necessary event listeners and animation frame requests.
 	componentDidMount() {
+		// Extract the canvas context, if a canvas is available. (This needs to be done upon every mounting, since a new mounting generally means a new canvas too.)
+		if (this.canvas)
+			this.ctx = this.canvas.getContext('2d') // Note that we cannot use `this.context` as the context parameter is also used behind the scenes by React. It will be cleared.
+		
+		// Extract the (subfigure) container of the plot.
+		this.container = (this.svg || this.canvas).parentElement.parentElement
+
 		// Initialize the plot if we haven't already done so.
 		if (!this.initialized) {
-			// Extract the canvas context, if a canvas is available.
-			if (this.canvas)
-				this.ctx = this.canvas.getContext('2d') // Note that we cannot use `this.context` as the context parameter is also used behind the scenes by React. It will be cleared.
-			
-			// Extract the (subfigure) container of the plot.
-			this.container = (this.svg || this.canvas).parentElement.parentElement
-
-			// Call any potential custom initialize function.
 			if (this.initialize)
 				this.initialize()
-
 			this.initialized = true
 		}
 
 		// Set up event listeners. Also ensure that they get the position of the event as first parameter, using an expanded handler.
 		eventHandlers.forEach(data => {
+			// Check if the corresponding handler is specified by the child class. If not, ignore it.
 			if (!this[data.handler])
-				return // Ignore this event type if the corresponding handler is not specified by a child class.
-			if (!data.expandedHandler)
-				data.expandedHandler = (evt) => this[data.handler](this.getPositionFromEvent(evt), evt)
-			this.container.addEventListener(data.event, data.expandedHandler)
+				return
+			
+			// Check if the handler has already been set up. If not, set it up.
+			if (!this.handler[data.handler])
+				this.handler[data.handler] = (evt) => this[data.handler](this.getPositionFromEvent(evt), evt)
+			
+			// Start listening to the event.
+			this.container.addEventListener(data.event, this.handler[data.handler])
 		})
 
 		// Ensure that the plot is updated regularly.
