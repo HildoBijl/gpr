@@ -10,6 +10,7 @@
 		position: absolute;
 		right: 7px;
 		top: 4px;
+		user-select: none;
 		z-index: 1;
 	}
 	.subFigures {
@@ -42,6 +43,17 @@
 					margin-bottom: 8px;
 				}
 			}
+						
+			// Enable various classes providing extra looks/functionalities.
+			&.noAxes svg .axis {
+				display: none;
+			}
+			&.noNumbers svg .tick text {
+				display: none;
+			}
+			&.pointer svg, &.pointer canvas {
+				cursor: pointer;
+			}
 
 			.subFigureInner {
 				padding-bottom: 75%;
@@ -50,53 +62,29 @@
 				svg {
 					display: block;
 					left: 0;
+					.notSelectable;
 					overflow: visible;
 					position: absolute;
 					top: 0;
 					width: 100%;
 					z-index: 2;
-		
-					g.line {
-						overflow: hidden;
-					}
-		
-					// TODO: CHECK THE FOLLOWING.
+				
+					// Format the D3 axes.
 					.tick {
-						stroke: #fff;
-		
+						stroke: #fff; // For the axis tick numbers.
 						line {
-							stroke: #fff;
+							stroke: #fff; // For the tick lines.
 						}
 					}
 					.domain {
-						stroke: #fff;
-					}
-		
-					// TODO: MAKE THE FOLLOWING MORE GENERIC AND PUT IT IN A GP PLOT LESS FILE.
-					.mean {
-						z-index: 1;
-					}
-					.measurements {
-						z-index: 2;
-						
-						circle { 
-							cursor: pointer;
-							fill: #e53;
-						}
-					}
-		
-					// Allow for the hiding of various parts.
-					&.noAxes .axis {
-						display: none;
-					}
-					&.noNumbers .tick text {
-						display: none;
+						stroke: #fff; // For the axes.
 					}
 				}
 		
 				canvas {
 					left: 0;
 					height: 100%;
+					.notSelectable;
 					position: absolute;
 					top: 0;
 					width: 100%;

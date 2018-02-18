@@ -18,7 +18,7 @@ export default class Transitioner {
 	setValue(value) {
 		// Check input.
 		if (isNaN(value))
-			throw new Error('Invalid data type: the transitioner was given a value that is not a number.')
+			throw new Error(`Invalid data type: the transitioner was given a value that is not a number. It received "${value}".`)
 		if (value === this.value)
 			return
 

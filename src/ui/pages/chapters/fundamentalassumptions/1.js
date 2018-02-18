@@ -1,30 +1,13 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Link from 'redux-first-router-link'
 
-import math from 'mathjs'
-
-import { getGaussianRand, logDet, getGaussianSample, getGaussianSampleFromCholesky, mergeMatrices } from '../../../../logic/math.js'
-import GaussianProcess, { getSquaredExponentialCovarianceFunction } from '../../../../logic/gaussianProcess.js'
-import GaussianDistribution from '../../../../logic/gaussianDistribution.js'
-
+import Section from '../../../components/Section/Section.js'
 import Figure, { SubFigure } from '../../../components/Figure/Figure.js'
 import FigureGuide from '../../../components/Figure/FigureGuide.js'
 
-import TestPlot from './figures/testPlot.js'
+import InteractivePlot from './figures/interactivePlot.js'
 
-class Section extends Component {
-	constructor() {
-		super()
-	}
-
-	// reset is called prior to every render, and it resets figure numbers, equation numbers and such.
-	reset() {
-		this.number = this.props.index + 1
-		this.counters = {
-			figure: 0
-		}
-	}
-
+export default class CurrentSection extends Section {
 	render() {
 		this.reset()
 		return (
@@ -32,23 +15,23 @@ class Section extends Component {
 				<p>This section is currently being written.</p>
 				<p>It will have a ton of figures.</p>
 				<Figure section={this}>
-					<TestPlot />
+					<InteractivePlot ref={obj => window.test = obj} />
 				</Figure>
 				<FigureGuide>
 					<p>This explains what the figure does.</p>
 				</FigureGuide>
-				<p>Really pretty ones!</p>
+				<p>And sometimes pictures are split too, like the two pictures below.</p>
 				<Figure section={this}>
-					<SubFigure half={true}>
+					<SubFigure className="half">
 						<svg viewBox="0 0 1000 750">
-							<rect x="50" y="500" width="900" height="200" />
-							<rect x="300" y="50" width="400" height="400" />
+							<rect x="50" y="500" width="900" height="200" fill="#888" />
+							<rect x="300" y="50" width="400" height="400" fill="#888" />
 						</svg>
 					</SubFigure>
-					<SubFigure half={true}>
+					<SubFigure className="half">
 						<svg viewBox="0 0 1000 750">
-							<rect x="50" y="50" width="900" height="200" />
-							<rect x="300" y="300" width="400" height="400" />
+							<rect x="50" y="50" width="900" height="200" fill="#888" />
+							<rect x="300" y="300" width="400" height="400" fill="#888" />
 						</svg>
 					</SubFigure>
 				</Figure>
@@ -57,5 +40,3 @@ class Section extends Component {
 		)
 	}
 }
-
-export default Section

@@ -2,10 +2,10 @@
 
 import math from 'mathjs'
 
-import { deepClone, applyFunctionToPairs } from './util.js'
-import { getRand, chol, logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix } from './math.js'
+import { applyFunctionToPairs } from './util.js'
+import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix } from './math.js'
 import GaussianDistribution from './gaussianDistribution.js';
-// ToDo: implement getSample with the functions above.
+// ToDo: implement getSample with math functions like getRand, cholesky and such.
 
 export default class GaussianProcess {
 	/*
@@ -161,14 +161,12 @@ export default class GaussianProcess {
 	}
 
 	/*
-	 * addMeasurement will add a single measurement (when given a measurement object) or multiple measurements (when given an array of objects). A measurement must be an object having an input and an output parameter. The input parameter can be anything, but must be acceptible to the mean/covariance function. The output parameter must be a number.
+	 * addMeasurement will add a single measurement (when given a measurement object) or multiple measurements (when given an array of objects). A measurement must be an object having an input and an output parameter. The input parameter can be anything, but must be acceptible to the mean/covariance function. The output parameter must be a number. It returns the index of the measurement that was returned, or if an array of measurements is given, an array of the corresponding indices.
 	 */
 	addMeasurement(measurement) {
 		// If we are given an array of measurements, process them one by one. 
-		if (Array.isArray(measurement)) {
-			measurement.forEach(m => this.addMeasurement(m))
-			return
-		}
+		if (Array.isArray(measurement))
+			return measurement.map(m => this.addMeasurement(m))
 
 		// Add a column to matrices Kmm and the matrix-to-invert Kn.
 		const newColumn = arrayAsColumn(this.measurements.map(oldMeasurement => this.covariance(oldMeasurement.input, measurement.input)))
@@ -216,7 +214,7 @@ export default class GaussianProcess {
 		}
 		
 		// Store the measurement.
-		this.measurements.push(measurement)
+		return this.measurements.push(measurement) - 1
 	}
 
 	/*
@@ -261,166 +259,6 @@ export default class GaussianProcess {
 			Sigma,
 			std,
 		}
-	}
-
-	drawCovarianceFunctions(xs, prediction, canvas) {
-		// First calculate the weights.
-		const xu = prediction.x
-		const lx = this.lx
-		const ly = this.ly
-		const Kuu = covariance(xu, xu, lx, ly)
-		const weights = math.divide(prediction.mu, Kuu)
-		window.w = weights
-
-		// Then plot the covariance functions.
-		const colors = ['red','cyan','#4444ff','purple','yellow','lime','magenta','silver','orange','brown','green','olive']
-		const ctx = canvas.getContext('2d')
-		window.c = []
-		window.x = []
-		xu.forEach((xu,i) => {
-			const weight = weights[i]
-			const covFun = xs.map((xs,j) => weight*covarianceValue(xu,xs,lx,ly))
-			window.c.push(covFun)
-			window.x.push(xs)
-			ctx.beginPath()
-			xs.forEach((xs, j) => (j === 0 ?
-				ctx.moveTo(xs, canvas.height / 2 - covFun[j]) :
-				ctx.lineTo(xs, canvas.height / 2 - covFun[j])
-			))
-			ctx.strokeStyle = colors[i % colors.length]
-			ctx.lineWidth = 2
-			ctx.stroke()
-		})
-	}
-
-	draw(prediction, canvas) {
-		this.drawStd(prediction, canvas)
-		this.drawAxes(canvas)
-		this.drawMean(prediction, canvas)
-		this.drawMeasurements(canvas)
-	}
-
-	drawPointPrediction(prediction, canvas) {
-		this.drawPointStd(prediction, canvas)
-		this.drawAxes(canvas)
-		this.drawMeasurements(canvas)
-	}
-
-	drawStd(prediction, canvas) {
-		const ctx = canvas.getContext('2d')
-		for (let i = 0; i < prediction.x.length - 1; i++) {
-			const x0 = Math.floor(prediction.x[i])
-			const x1 = Math.ceil(prediction.x[i + 1])
-			const w = x1 - x0
-			const h = canvas.height
-			const imgData = ctx.createImageData(w, h)
-			const std0 = prediction.std[i]
-			const std1 = prediction.std[i + 1]
-			const v0 = prediction.mu[i]
-			const v1 = prediction.mu[i + 1]
-			for (let x = x0; x < x1; x++) {
-				const v = v0 + (x - x0) / (x1 - x0) * (v1 - v0)
-				const std = std0 + (x - x0) / (x1 - x0) * (std1 - std0)
-				for (let y = 0; y < h; y++) {
-					const d = v - (h / 2 - y)
-					const ind = ((x - x0) + y * w) * 4
-					imgData.data[ind + 0] = 0
-					imgData.data[ind + 1] = 34
-					imgData.data[ind + 2] = 204
-					imgData.data[ind + 3] = 255 * Math.exp(-0.5 * ((d / std) ** 2))
-				}
-			}
-			ctx.putImageData(imgData, x0, 0);
-		}
-	}
-
-	drawPointStd(prediction, canvas) {
-		const ctx = canvas.getContext('2d')
-		for (let i = 0; i < prediction.x.length; i++) {
-			const x0 = Math.floor(prediction.x[i] - 10)
-			const x1 = Math.ceil(prediction.x[i] + 10)
-			const w = x1 - x0
-			const h = canvas.height
-			const imgData = ctx.createImageData(w, h)
-			for (let x = x0; x < x1; x++) {
-				const v = prediction.mu[i]
-				const std = prediction.std[i]
-				for (let y = 0; y < h; y++) {
-					const d = v - (h / 2 - y)
-					const ind = ((x - x0) + y * w) * 4
-					imgData.data[ind + 0] = 0
-					imgData.data[ind + 1] = 34
-					imgData.data[ind + 2] = 204
-					imgData.data[ind + 3] = 255 * Math.exp(-0.5 * ((d / std) ** 2))
-				}
-			}
-			ctx.putImageData(imgData, x0, 0);
-		}
-	}
-
-	drawAxes(canvas) {
-		// Set axis style.
-		const ctx = canvas.getContext('2d')
-		ctx.strokeStyle = '#ffffff'
-		ctx.lineWidth = 2
-
-		// Set axis position.
-		const x = canvas.width / 4
-		const y = canvas.height / 2
-		const dashLength = 10
-
-		// x-axis.
-		ctx.beginPath()
-		ctx.moveTo(0, y)
-		ctx.lineTo(canvas.width, y)
-		ctx.stroke()
-
-		// x-axis dashes.
-		getRange(0, canvas.width, 9).forEach((v, i) => {
-			ctx.beginPath()
-			ctx.moveTo(v, y)
-			ctx.lineTo(v, y + dashLength)
-			ctx.stroke()
-		})
-
-		// y-axis.
-		ctx.beginPath()
-		ctx.moveTo(x, 0)
-		ctx.lineTo(x, canvas.height)
-		ctx.stroke()
-
-		// y-axis dashes.
-		getRange(0, canvas.height, 7).forEach((v, i) => {
-			ctx.beginPath()
-			ctx.moveTo(x, v)
-			ctx.lineTo(x - dashLength, v)
-			ctx.stroke()
-		})
-	}
-
-	drawMean(prediction, canvas) {
-		const ctx = canvas.getContext('2d')
-		ctx.beginPath()
-		prediction.x.forEach((v, i) => (i === 0 ?
-			ctx.moveTo(prediction.x[i], canvas.height / 2 - prediction.mu[i]) :
-			ctx.lineTo(prediction.x[i], canvas.height / 2 - prediction.mu[i])
-		))
-		ctx.strokeStyle = '#0000ff'
-		ctx.lineWidth = 6
-		ctx.stroke()
-	}
-
-	drawMeasurements(canvas, color = '#ff3355', filter) {
-		const ctx = canvas.getContext('2d')
-		ctx.lineWidth = 6
-		ctx.strokeStyle = color
-		this.xm.forEach((x, i) => {
-			if (filter && !filter(x,i))
-				return
-			ctx.beginPath()
-			ctx.arc(this.xm[i], canvas.height / 2 - this.ym[i], 8, 0, 2 * Math.PI, false)
-			ctx.stroke()
-		})
 	}
 
 	getSample(x, canvas) {

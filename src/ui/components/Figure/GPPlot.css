@@ -1,0 +1,8 @@
+.gpPlot path.mean {
+  fill: none;
+  stroke: #13f;
+  stroke-width: 2;
+}
+.gpPlot circle.measurement {
+  fill: #e53;
+}

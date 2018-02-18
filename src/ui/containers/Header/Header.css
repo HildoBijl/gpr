@@ -11,6 +11,10 @@
     padding: 28px 24px;
   }
 }
+.notSelectable {
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
 .header {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.26);
   width: 100%;
@@ -48,6 +52,7 @@
   flex-flow: row nowrap;
 }
 .header .contents .title .logoLink {
+  user-select: none;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 .header .contents .title .logoLink .logo {

@@ -11,6 +11,10 @@
     padding: 28px 24px;
   }
 }
+.notSelectable {
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
 .page {
   align-self: stretch;
   display: flex;

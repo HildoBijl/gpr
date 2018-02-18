@@ -11,6 +11,10 @@
     padding: 28px 24px;
   }
 }
+.notSelectable {
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
 .figure {
   border-radius: 8px;
   margin: 12px 6px;
@@ -21,6 +25,7 @@
   position: absolute;
   right: 7px;
   top: 4px;
+  user-select: none;
   z-index: 1;
 }
 .figure .subFigures {
@@ -50,6 +55,16 @@
     margin-bottom: 8px;
   }
 }
+.figure .subFigures .subFigure.noAxes svg .axis {
+  display: none;
+}
+.figure .subFigures .subFigure.noNumbers svg .tick text {
+  display: none;
+}
+.figure .subFigures .subFigure.pointer svg,
+.figure .subFigures .subFigure.pointer canvas {
+  cursor: pointer;
+}
 .figure .subFigures .subFigure .subFigureInner {
   padding-bottom: 75%;
   width: 100%;
@@ -57,14 +72,13 @@
 .figure .subFigures .subFigure .subFigureInner svg {
   display: block;
   left: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   overflow: visible;
   position: absolute;
   top: 0;
   width: 100%;
   z-index: 2;
-}
-.figure .subFigures .subFigure .subFigureInner svg g.line {
-  overflow: hidden;
 }
 .figure .subFigures .subFigure .subFigureInner svg .tick {
   stroke: #fff;
@@ -75,25 +89,11 @@
 .figure .subFigures .subFigure .subFigureInner svg .domain {
   stroke: #fff;
 }
-.figure .subFigures .subFigure .subFigureInner svg .mean {
-  z-index: 1;
-}
-.figure .subFigures .subFigure .subFigureInner svg .measurements {
-  z-index: 2;
-}
-.figure .subFigures .subFigure .subFigureInner svg .measurements circle {
-  cursor: pointer;
-  fill: #e53;
-}
-.figure .subFigures .subFigure .subFigureInner svg.noAxes .axis {
-  display: none;
-}
-.figure .subFigures .subFigure .subFigureInner svg.noNumbers .tick text {
-  display: none;
-}
 .figure .subFigures .subFigure .subFigureInner canvas {
   left: 0;
   height: 100%;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   position: absolute;
   top: 0;
   width: 100%;

@@ -5,7 +5,7 @@ import classnames from 'classnames'
 
 export default (props) => {
 	if (!props.section)
-		throw new Error('Missing section: a figure must be told which section is belongs to. Provide a section object along with the figure.')
+		throw new Error('Missing section: a figure must be told which section it belongs to. Provide a section object along with the figure.')
 	const section = props.section
 	section.counters.figure++
 	return (
@@ -25,7 +25,7 @@ export const SubFigure = (props) => {
 	return (
 		<div className={classnames(
 			'subFigure',
-			{ half: props.half },
+			props.className,
 		)}>
 			<div className="subFigureInner" style={{'paddingBottom': `${ratio*100}%`}}>
 				{props.children}
