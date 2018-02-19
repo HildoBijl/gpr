@@ -123,7 +123,7 @@ export default class Plot extends Component {
 		if (!this.useSVG && !this.useCanvas)
 			throw new Error('Plot render error: cannot generate a plot without either an SVG or a canvas.')
 		return (
-			<SubFigure width={this.width} height={this.height} className={classnames(this.classes)}>
+			<SubFigure width={this.width} height={this.height} title={this.props.title} className={classnames(this.classes)}>
 				{this.useSVG ? (
 					<svg id={this.getID()} ref={obj => { this.svg = obj }} viewBox={`0 0 ${this.width} ${this.height}`}>
 						<defs>

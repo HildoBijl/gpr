@@ -27,6 +27,7 @@ export const SubFigure = (props) => {
 			'subFigure',
 			props.className,
 		)}>
+			{props.title ? <div className="title">{props.title}</div> : ''}
 			<div className="subFigureInner" style={{'paddingBottom': `${ratio*100}%`}}>
 				{props.children}
 			</div>

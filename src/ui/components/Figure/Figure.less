@@ -6,7 +6,7 @@
 	position: relative;
 
 	.figureCounter {
-		font-size: 0.9em;
+		font-size: 0.8em;
 		position: absolute;
 		right: 7px;
 		top: 4px;
@@ -18,11 +18,14 @@
 		display: flex;
 		flex-flow: row wrap;
 		justify-content: space-between;
-		padding: 8px;
+		padding: 12px;
 		position: relative;
 		z-index: 2;
 
 		.subFigure {
+			align-items: center;
+			display: flex;
+			flex-flow: column nowrap;
 			max-width: 800px;
 			position: relative;
 			width: 100%;
@@ -35,12 +38,12 @@
 			// If there are two plots, each taking up half the space, then we should put them together in landscape mode. In portrait mode, they instead go below each other.
 			&.half {
 				@media @landscape {
-					width: calc(~"50% - 4px");
+					width: calc(~"50% - 6px");
 				}
 			}
 			@media @phonePortrait {
 				&.half:not(:last-child) {
-					margin-bottom: 8px;
+					margin-bottom: 12px;
 				}
 			}
 						
@@ -55,8 +58,13 @@
 				cursor: pointer;
 			}
 
+			.title {
+				font-size: 0.9em;
+				margin: 2px auto 14px;
+			}
+
 			.subFigureInner {
-				padding-bottom: 75%;
+				position: relative;
 				width: 100%;
 
 				svg {

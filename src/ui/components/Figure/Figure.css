@@ -21,7 +21,7 @@
   position: relative;
 }
 .figure .figureCounter {
-  font-size: 0.9em;
+  font-size: 0.8em;
   position: absolute;
   right: 7px;
   top: 4px;
@@ -33,11 +33,14 @@
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
-  padding: 8px;
+  padding: 12px;
   position: relative;
   z-index: 2;
 }
 .figure .subFigures .subFigure {
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
   max-width: 800px;
   position: relative;
   width: 100%;
@@ -47,12 +50,12 @@
 }
 @media (min-width: 480.01px) {
   .figure .subFigures .subFigure.half {
-    width: calc(50% - 4px);
+    width: calc(50% - 6px);
   }
 }
 @media (max-width: 480px) {
   .figure .subFigures .subFigure.half:not(:last-child) {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
   }
 }
 .figure .subFigures .subFigure.noAxes svg .axis {
@@ -65,8 +68,12 @@
 .figure .subFigures .subFigure.pointer canvas {
   cursor: pointer;
 }
+.figure .subFigures .subFigure .title {
+  font-size: 0.9em;
+  margin: 2px auto 14px;
+}
 .figure .subFigures .subFigure .subFigureInner {
-  padding-bottom: 75%;
+  position: relative;
   width: 100%;
 }
 .figure .subFigures .subFigure .subFigureInner svg {
