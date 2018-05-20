@@ -3,6 +3,17 @@ import GaussianProcess, { getSquaredExponentialCovarianceFunction } from '../../
 import GPPlot from '../../../../components/Figure/GPPlot.js'
 
 export default class CurrentPlot extends GPPlot {
+	// TODO NEXT: A PLAN FOR STORING DATA OF A PLOT IN REDUX WHILE GOING TO ANOTHER PAGE.
+	// - Have a GP export essential data (measurements used, samples generated) in some useful format.
+	// - Upon an event, fire an action for the GP plot (its ID) and with the respective data.
+	// - The action changes the data for that GP and remembers the last action for the GP object itself to process. It's key that the format of the data is clear, as it needs to be used by both the redux file changing the storage as the GP class reading it.
+	// - When doing something GP-specific, like generating a sample, then ask the GP for the data to be generated, store it, and let the GP itself then process it. It's a bit of a roundabout way of doing this, but it's the only way to properly process and store the data.
+	// - When a plot reloads, check if data on it is already available. If so, load in all the data.
+	// - When a plot loads for the first time, use a given set-up (or default). Ignore the given set-up if data is already available.
+	// - Make the option to reset (override the set-up to the given one).
+	// - A plot may also have other data. So store GP data into an object named "gp". Use other objects for other data. In redux, use a key-value storage for this.
+	// - A figure may even have multiple GPs, so use the name of a GP for that storage?
+
 	// TODO NEXT:
 	// - Turn Figure into a proper class. And Subfigure as well.
 	// - In the Figure class, use methods renderSubFigures (not optional) and renderControlBar (optional) that will be incorporated by the figure's render function.

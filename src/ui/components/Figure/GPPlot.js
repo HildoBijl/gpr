@@ -114,6 +114,25 @@ export default class GPPlot extends Plot {
 		this.drawMeasurements()
 	}
 
+	// drawMean draws the line that represents the mean of the GP.
+	drawMean() {
+		// As is usual with D3, define an array with all the elements that need to be drawn. Okay, we're only drawing a single line, so the array has one element.
+		const prediction = this.getCurrentPrediction()
+		const lineData = [prediction]
+
+		// Set up a path for the mean line using D3.
+		const lines = this.meanContainer
+			.selectAll('path')
+			.data(lineData)
+		lines.enter()
+			.append('path')
+			.attr('class', 'mean')
+			.merge(lines)
+			.attr('d', prediction => this.meanFunction(prediction) + 'l10000,0l10000,10000l10000,-10000') // We add the line segments at the end to work around a bug in chrome where a clipping mask combined with a completely straight SVG path results in an invisible line. So we just prevent the line from being straight by adding a large invisible section.
+		lines.exit()
+			.remove()
+	}
+
 	// drawStd draws the gradient background on the canvas that represents the standard deviation of the GP.
 	drawStd() {
 		// Check that we have a canvas and that it's empty.
@@ -156,25 +175,6 @@ export default class GPPlot extends Plot {
 			}
 			this.ctx.putImageData(imgData, left.x, 0)
 		}
-	}
-
-	// drawMean draws the line that represents the mean of the GP.
-	drawMean() {
-		// As is usual with D3, define an array with all the elements that need to be drawn. Okay, we're only drawing a single line, so the array has one element.
-		const prediction = this.getCurrentPrediction()
-		const lineData = [prediction]
-
-		// Set up a path for the mean line using D3.
-		const lines = this.meanContainer
-			.selectAll('path')
-			.data(lineData)
-		lines.enter()
-			.append('path')
-			.attr('class', 'mean')
-			.merge(lines)
-			.attr('d', prediction => this.meanFunction(prediction) + 'l10000,0l10000,10000l10000,-10000') // We add the line segments at the end to work around a bug in chrome where a clipping mask combined with a completely straight SVG path results in an invisible line. So we just prevent the line from being straight by adding a large invisible section.
-		lines.exit()
-			.remove()
 	}
 
 	// drawMeasurements draws circles for each of the measurements that is present in the GP. When an extraMeasurement parameter has been defined for the object (with input and output parameters) then this is also drawn. This can be useful when an extra circle is drawn on a mouseover event.
