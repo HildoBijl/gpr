@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import classnames from 'classnames'
 
-import { SubFigure } from '../../components/Figure/Figure.js'
+import SubFigure from '../../components/Figure/SubFigure.js'
 
 const functionsToBind = [
 	'cycleUpdates',
@@ -29,7 +29,7 @@ export default class Plot extends Component {
 		this.height = 750
 		this.useSVG = true
 		this.useCanvas = false
-		this.classes = {
+		this.className = {
 			plot: true,
 		}
 
@@ -53,7 +53,7 @@ export default class Plot extends Component {
 		if (this.canvas)
 			this.ctx = this.canvas.getContext('2d') // Note that we cannot use `this.context` as the context parameter is also used behind the scenes by React. It will be cleared.
 		
-		// Extract the (subfigure) container of the plot.
+		// Extract the (SubFigure) container of the plot.
 		this.container = (this.svg || this.canvas).parentElement.parentElement
 
 		// Initialize the plot if we haven't already done so.
@@ -123,7 +123,7 @@ export default class Plot extends Component {
 		if (!this.useSVG && !this.useCanvas)
 			throw new Error('Plot render error: cannot generate a plot without either an SVG or a canvas.')
 		return (
-			<SubFigure width={this.width} height={this.height} title={this.props.title} className={classnames(this.classes)}>
+			<SubFigure width={this.width} height={this.height} title={this.props.title} className={classnames(this.className)}>
 				{this.useSVG ? (
 					<svg id={this.getID()} ref={obj => { this.svg = obj }} viewBox={`0 0 ${this.width} ${this.height}`}>
 						<defs>

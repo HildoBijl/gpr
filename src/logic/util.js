@@ -2,9 +2,47 @@
 
 const axes = ['x', 'y']
 
+// isObject checks if a parameter is an object.
+export function isObject(item) {
+	return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
 // deepClone gives a clone of an object, where every sub-object is also cloned.
 export function deepClone(obj) {
 	return JSON.parse(JSON.stringify(obj))
+}
+
+// deepMerge merges objects, where sub-objects are also merged. The result will be a clone (but not necessarily a deep clone). Original objects are not modified. When objects share a parameter, later objects passed along as parameter will always win.
+export function deepMerge(...objects) {
+	// Check parameters.
+	objects.forEach(obj => {
+		if (!isObject(obj))
+			throw new Error('Invalid objects: tried to deepMerge objects, but at least one of them was not an actual object.')
+	})
+
+	// If there is only one object, there is nothing to be done.
+	if (objects.length === 1)
+		return { ...objects[0] }
+	
+	// If there are multiple objects, merge pairs together one by one.
+	if (objects.length > 2) {
+		let merger = {}
+		objects.forEach(obj => {
+			merger = deepMerge(merger, obj)
+		})
+		return merger
+	}
+
+	// If there are two objects, merge them together in the usual way.
+	const a = objects[0], b = objects[1]
+	const merger = { ...a }
+	Object.keys(b).forEach(key => {
+		if (isObject(b[key]) && (key in a) && isObject(a[key]))
+			merger[key] = deepMerge(a[key], b[key]) // Recursively merge sub-objects.
+		else
+			merger[key] = b[key] // Maybe a doesn't have this key. Maybe a does, but in this case b simply wins and overwrites the result. Or maybe one of the values isn't an object, in which case b still wins.
+	})
+	return merger
 }
 
 // getPosition returns the position at which an event occurred, as x-y-coordinates.
@@ -27,17 +65,17 @@ export function getWindowSize() {
 
 // applyFunction will apply the given function to each of the elements of the given array.
 export function applyFunction(fun, arr) {
-	if (typeof(fun) !== 'function')
+	if (typeof fun !== 'function')
 		throw new Error('The given function was not a function.')
-		if (!Array.isArray(arr))
-			throw new Error('The given array was not an array.')
+	if (!Array.isArray(arr))
+		throw new Error('The given array was not an array.')
 	return arr.map(v => fun(v))
 }
 
 // applyFunctionToPairs will apply the given function to each pair of the elements from the given array(s). The result will be a two-dimensional array (matrix). If only one array is given, the second array is assumed to be equal to the first, and the resulting matrix will be symmetrical.
 export function applyFunctionToPairs(fun, arr1, arr2) {
 	// Check the input.
-	if (typeof(fun) !== 'function')
+	if (typeof (fun) !== 'function')
 		throw new Error('The given function was not a function.')
 	if (!Array.isArray(arr1))
 		throw new Error('The given array was not an array.')
@@ -45,9 +83,9 @@ export function applyFunctionToPairs(fun, arr1, arr2) {
 		arr2 = arr1
 	if (!Array.isArray(arr2))
 		throw new Error('The second given array was not an array.')
-	
+
 	// Process the result.
-	return arr1.map(v1 => applyFunction((v2) => fun(v1,v2), arr2))
+	return arr1.map(v1 => applyFunction((v2) => fun(v1, v2), arr2))
 }
 
 // bound will give the closest number to x in the interval [min, max].
@@ -59,7 +97,7 @@ export function bound(x, min, max) {
 
 // getRange(min, max, numPoints) return an array with numPoints numbers, equally distributed between min and max. For instance, getRange(3,9,5) will give [3, 4.5, 6, 7.5, 9].
 export function getRange(min, max, numPoints) {
-  return (new Array(numPoints)).fill(0).map((v, i) => min + (max - min) * i / (numPoints - 1))
+	return (new Array(numPoints)).fill(0).map((v, i) => min + (max - min) * i / (numPoints - 1))
 }
 
 // getDistance returns the distance between two points.

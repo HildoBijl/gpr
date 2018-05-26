@@ -21,16 +21,15 @@ export default actions
  */
 
 export function reducer(status = defaultStatus, action) {
-	const originalStatus = status
-	status = deepClone(status)
   switch (action.type) {
 		case 'OfflineUseUpdate': {
+			status = deepClone(status)
 			status.offlineUse = action.result
 			return status
 		}
 
 		default: {
-      return originalStatus
+      return status
     }
   }
 }

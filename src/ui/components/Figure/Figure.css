@@ -20,6 +20,16 @@
   margin: 12px 6px;
   position: relative;
 }
+@media (min-width: 480.01px) {
+  .figure.twoColumn .subFigures .subFigure {
+    width: calc(50% - 6px);
+  }
+}
+@media (max-width: 480px) {
+  .figure.twoColumn .subFigures .subFigure:not(:last-child) {
+    margin-bottom: 12px;
+  }
+}
 .figure .figureCounter {
   font-size: 0.8em;
   position: absolute;
@@ -47,16 +57,6 @@
 }
 .figure .subFigures .subFigure:only-child {
   margin: auto;
-}
-@media (min-width: 480.01px) {
-  .figure .subFigures .subFigure.half {
-    width: calc(50% - 6px);
-  }
-}
-@media (max-width: 480px) {
-  .figure .subFigures .subFigure.half:not(:last-child) {
-    margin-bottom: 12px;
-  }
 }
 .figure .subFigures .subFigure.noAxes svg .axis {
   display: none;

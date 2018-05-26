@@ -1,10 +1,47 @@
-import GaussianProcess, { getSquaredExponentialCovarianceFunction } from '../../../../../logic/gaussianProcess.js'
+import React from 'react'
 
+import { connectToData } from '../../../../../redux/dataStore.js'
+
+import Figure from '../../../../components/Figure/Figure.js'
 import GPPlot from '../../../../components/Figure/GPPlot.js'
 
-export default class CurrentPlot extends GPPlot {
+const id = 'testPlot'
+const gpData = {
+	covarianceData: {
+		type: 'SquaredExponential',
+		Vx: 2 ** 2,
+		Vy: 2 ** 2,
+	},
+	outputNoise: 0.1,
+}
+
+class InteractiveFigure extends Figure {
+	renderSubFigures() {
+		return <InteractivePlot />
+	}
+	renderControlBar() {
+		return <span onClick={this.reset.bind(this)} style={{cursor: 'pointer', background: '#113344', padding: '4px', borderRadius: '4px'}}>Test reset</span>
+		// TODO: ADD PROPER RESET BUTTON?
+	}
+	reset() {
+		// TODO: REMOVE
+		console.log('Resetting...')
+		this.props.data.gp.applyState(gpData)
+	}
+}
+export default connectToData(InteractiveFigure, id, { gp: true })
+
+class InteractivePlot extends GPPlot {
+	// TODO NEXT: 
+	// - Play around with the new functionalities. Use different GP names, multiple GPs, etcetera.
+	// - Add extra functions for within redux? Next to adding measuments? (Maybe we'll need samples after adding a control bar?)
+
+	// TODO: Set up a GaussianProcess folder within the logic folder, with a separate file for the redux stuff. Also consider putting the applyState and processUpdate functions in an inherited class. Except that the applyState function is now used by the main class too.
+	// For processUpdate, also check if the internal state still matches the redux state. If not, throw an error?
+
 	// TODO NEXT: A PLAN FOR STORING DATA OF A PLOT IN REDUX WHILE GOING TO ANOTHER PAGE.
 	// - Have a GP export essential data (measurements used, samples generated) in some useful format.
+	// V Set up a covariance function data object containing essential covariance function data, so that covariance functions can also be exported.
 	// - Upon an event, fire an action for the GP plot (its ID) and with the respective data.
 	// - The action changes the data for that GP and remembers the last action for the GP object itself to process. It's key that the format of the data is clear, as it needs to be used by both the redux file changing the storage as the GP class reading it.
 	// - When doing something GP-specific, like generating a sample, then ask the GP for the data to be generated, store it, and let the GP itself then process it. It's a bit of a roundabout way of doing this, but it's the only way to properly process and store the data.
@@ -15,17 +52,17 @@ export default class CurrentPlot extends GPPlot {
 	// - A figure may even have multiple GPs, so use the name of a GP for that storage?
 
 	// TODO NEXT:
-	// - Turn Figure into a proper class. And Subfigure as well.
-	// - In the Figure class, use methods renderSubFigures (not optional) and renderControlBar (optional) that will be incorporated by the figure's render function.
-	// - Make the InteractivePlot (this file) expand on the Figure.
-	// - Add a non-exported subclass inside this file, expanding upon the GPPlot and use it in the new renderSubFigures function.
-	// - Replace the half-class for plots by a twoColumn class for figures.
-	// - Make a simple reset button and get it working.
+	// V Turn Figure into a proper class. And Subfigure as well.
+	// V In the Figure class, use methods renderSubFigures (not optional) and renderControlBar (optional) that will be incorporated by the figure's render function.
+	// V Make the InteractivePlot (this file) expand on the Figure.
+	// V Add a non-exported subclass inside this file, expanding upon the GPPlot and use it in the new renderSubFigures function.
+	// V Replace the half-class for plots by a twoColumn class for figures.
+	// V Make a simple reset button and get it working.
 	// - Apply styling to the control bar.
 
 	// Also ToDo:
 	// - At the GP class, when adding measurements, allow us to specify noise on the output. This output noise will be taken into account at the covariance matrix.
-	// - Upon creating a GP class, allow to set a default output noise. If so, that will be used for all measurements. Throw an error if no default is set and no output noise is given.
+	// - Upon creating a GP class, allow to set a default output noise. If so, that will be used for all measurements unless specified differently. Throw an error if no default is set and no output noise is given.
 
 	// TODO and then:
 	// - Set up a button to increase/decrease the number of samples.
@@ -42,10 +79,10 @@ export default class CurrentPlot extends GPPlot {
 		super()
 
 		// Define important settings.
-		this.id = 'interactivePlot'
-		// this.classes['noNumbers'] = true
-		this.classes['pointer'] = true
-		
+		this.id = id
+		this.className.noNumbers = true
+		this.className.pointer = true
+
 		// Set up the plot range.
 		this.range = {
 			x: {
@@ -57,16 +94,16 @@ export default class CurrentPlot extends GPPlot {
 				max: 3,
 			},
 		}
-	
-		// Set up the GP.
-		this.gp = new GaussianProcess({ covariance: getSquaredExponentialCovarianceFunction({ Vx: 2 ** 2, Vy: 2 ** 2 }), outputNoise: 0.1 })
+
+		// Set up the GP. This data will be installed as soon as the GP Plot is set up. [ToDo: rename outputNoise to defaultOutputNoise]
+		this.gpData = gpData
 	}
 	handleClick(pos, evt) {
-		this.gp.addMeasurement({
+		const measurement = {
 			input: this.scale.x.invert(pos.x),
 			output: this.scale.y.invert(pos.y),
-		})
-		this.recalculate()
+		}
+		this.props.data.gp.addMeasurement(measurement)
 	}
 	handleMouseMove(pos, evt) {
 		this.extraPoint = {
@@ -78,3 +115,4 @@ export default class CurrentPlot extends GPPlot {
 		delete this.extraPoint
 	}
 }
+InteractivePlot = connectToData(InteractivePlot, id, { gp: true })

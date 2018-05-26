@@ -9,33 +9,39 @@ import { getRange } from '../../../logic/util.js'
 
 import Plot from '../../components/Figure/Plot.js'
 import Transitioner from '../../../logic/transitioner.js'
+import GaussianProcess from '../../../logic/gaussianProcess.js'
 
 export default class GPPlot extends Plot {
 	constructor() {
 		super()
 
 		// Define important settings that are crucial for this GP.
+		this.dataName = 'gp' // This is the name, within the data store, through which the GP data is stored.
 		this.useCanvas = true
-		this.classes['gpPlot'] = true // Tell the plot that it's a GPPlot, so the corresponding CSS styling applied.
+		this.className.gpPlot = true // Tell the plot that it's a GPPlot, so the corresponding CSS styling applied.
 
 		// Define settings that may be overwritten by the child class.
+		this.gpData = {} // This object will contain all data (the full initial state) of the GP that will be used.
 		this.transitionTime = 400
 		this.range = { x: { min: -5, max: 5 }, y: { min: -3, max: 3 } }
 		this.numPlotPoints = 101
 		this.measurementRadius = 6
-
-		// The child class needs to define a Gaussian Process parameter. Here's an example.
-		// this.gp = new GaussianProcess({ covariance: getSquaredExponentialCovarianceFunction({ Vx: 2 ** 2, Vy: 2 ** 2 }), outputNoise: 0.1 })
 	}
 
 	// initialize sets up all parameters (mostly D3 objects, but also transitioners) that are needed to properly plot the Gaussian Process.
 	initialize() {
-		// Check necessary parameters.
-		if (!this.gp)
-			throw new Error('Missing gp parameter: when you set up a child class for a GPPlot, then this child class should define a gp parameter in its constructor that points to a Gaussian Process.')
+		// Ensure plotpoints are present. They can be defined manually, or only defined through their properties.
 		if (!this.plotPoints)
 			this.plotPoints = getRange(this.range.x.min, this.range.x.max, this.numPlotPoints)
 
+		// Set up the GP object. For this, check if data is available.
+		if (this.props.data[this.dataName].isDataAvailable) {
+			this.gp = new GaussianProcess(this.props.data[this.dataName])
+		} else {
+			this.gp = new GaussianProcess(this.gpData) // We start with a GP object which already has the right data. (So we don't have to recalculate stuff.)
+			this.props.data[this.dataName].applyState(this.gpData, false) // We also store the data in redux, specifically noting that no update is required.
+		}
+		
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
 		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
@@ -78,6 +84,19 @@ export default class GPPlot extends Plot {
 		}))
 	}
 
+	// restore turns the GP object for this plot to its initial (default) settings.
+	restore() {
+		// Tell redux to apply the initial data specified in gpData.
+		this.props.data[this.dataName].applyState(this.gpData)
+	}
+
+	// componentDidUpdate is called when the data of a GP is potentially updated. It tells the GP to check if recalculations are necessary.
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		const gpData = this.props.data[this.dataName]
+		if (this.gp.processUpdate(gpData))
+			this.recalculate()
+	}
+
 	// recalculate asks the GP what the current prediction for the plot points is, and plugs it into the transitioners.
 	recalculate() {
 		// Extract the prediction.
@@ -92,7 +111,7 @@ export default class GPPlot extends Plot {
 
 	// reset resets the GP and applies the change to the plot.
 	reset() {
-		this.gp.reset()
+		this.props.data[this.dataName].applyState(this.gpData) // Reapply the default GP data to our GP object.
 		this.recalculate()
 	}
 

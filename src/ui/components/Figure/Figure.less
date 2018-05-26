@@ -5,6 +5,23 @@
 	margin: 12px 6px;
 	position: relative;
 
+	&.twoColumn {
+		.subFigures {
+			.subFigure {
+				// If we are in two-column mode, then plots should have half the regular length.
+				@media @landscape {
+					width: calc(~"50% - 6px");
+				}
+				// In portrait mode on phones, figures don't go next to each other but below each other. They should get extra margins for this, so they are not too close.
+				@media @phonePortrait {
+					&:not(:last-child) {
+						margin-bottom: 12px;
+					}
+				}
+			}
+		}
+	}
+
 	.figureCounter {
 		font-size: 0.8em;
 		position: absolute;
@@ -34,19 +51,7 @@
 			&:only-child {
 				margin: auto;
 			}
-	
-			// If there are two plots, each taking up half the space, then we should put them together in landscape mode. In portrait mode, they instead go below each other.
-			&.half {
-				@media @landscape {
-					width: calc(~"50% - 6px");
-				}
-			}
-			@media @phonePortrait {
-				&.half:not(:last-child) {
-					margin-bottom: 12px;
-				}
-			}
-						
+		
 			// Enable various classes providing extra looks/functionalities.
 			&.noAxes svg .axis {
 				display: none;
