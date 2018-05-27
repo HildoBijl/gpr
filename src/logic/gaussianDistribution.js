@@ -6,7 +6,7 @@ import { choleskyDecomposition, getGaussianRand, getGaussianSampleFromCholesky }
 
 export default class GaussianDistribution {
 	/*
-	 * constructor creates a Gaussian distribution object. It requires a mean and a (co)variance. When given scalars, we get a scalar Gaussian distribution. All resulting values from functions will be scalars. When given a mean vector and matrix covariance, we get a multivariate Gaussian distributions. Output parameters, like samples, will be vectors too.
+	 * constructor creates a Gaussian distribution object. It requires a mean and a (co)variance. When given scalars, we get a scalar Gaussian distribution. All resulting values from functions will be scalars. When given a mean vector and matrix covariance, we get a multivariate Gaussian distributions. Output parameters, like samples, will be vectors too. Which type of distribution we have can be checked through the 'multivariate' [boolean] property.
 	 */
 	constructor(mean, variance) {
 		// Check the type of parameter that we have.

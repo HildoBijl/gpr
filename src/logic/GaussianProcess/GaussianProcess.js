@@ -9,8 +9,13 @@ import GaussianDistribution from '../gaussianDistribution.js'
 
 export default class GaussianProcess {
 	/*
-	 * constructor creates a GP object. It can take any GP state to set itself up. (A GP state contains all data relevant to a GP, without support matrices and such.)
-	 * ToDo: write documentation on the GP state.
+	 * constructor creates a GP object. It can take any GP state to set itself up. This GP state contains all data relevant to a GP, but does not have support matrices and such that this GP object will have. Parameters include:
+	 * - meanData [object]: see the getMeanFunction for further documentation.
+	 * - covarianceData [object]: see the getCovarianceFunction for further documentation.
+	 * - measurements [array]: an array of measurements, where each consists of:
+	 *   - input [number/array/object]: an input that can be fed to the mean and covariance functions.
+	 *   - output [number]: the output for the given input.
+	 *   - outputNoise [number]: the variance for the given measurement.
 	 */
 	constructor(state = {}) {
 		// Apply the state that we have been given.
@@ -21,15 +26,16 @@ export default class GaussianProcess {
 	 * applyState takes the given GP state and completely builds up this GP object from scratch based on that data. It removes any data that was present previously, so it completely overrides the old GP.
 	 */
 	applyState(state = {}) {
+		window.math = math // TODO REMOVE
 		// First of all remove all measurements currently present.
 		this.removeAllMeasurements()
 
 		// Apply mean and covariance functions.
 		this.applyMeanFunction(state.meanData)
 		this.applyCovarianceFunction(state.covarianceData)
-		this.sy = state.outputNoise // ToDo: adjust this. Store the default output noise if present.
 
 		// Add all the measurements given in the state.
+		this.defaultOutputNoiseVariance = state.defaultOutputNoiseVariance // Store the default output noise, if given.
 		if (state.measurements)
 			this.addMeasurement(state.measurements)
 
@@ -175,9 +181,7 @@ export default class GaussianProcess {
 
 		// Calculate the log-likelihood.
 		const ym = this.getMeasurementOutputs()
-		const Sn = math.multiply(math.eye(n), this.sy ** 2)
-		const Kn = math.add(this.Kmm, Sn)
-		return -0.5 * n * Math.log(2 * Math.PI) - 0.5 * logDet(Kn._data) - 0.5 * math.multiply(math.divide(ym, Kn), ym)
+		return -0.5 * n * Math.log(2 * Math.PI) - 0.5 * logDet(this.Kn) - 0.5 * math.multiply(math.divide(ym, this.Kn), ym)
 	}
 
 	/*
@@ -191,6 +195,21 @@ export default class GaussianProcess {
 		// If we are given an array of measurements, process them one by one. 
 		if (Array.isArray(measurement))
 			return measurement.map(m => this.addMeasurement(m))
+
+		// Extract output noise (variance).
+		let outputVariance
+		if (measurement.output instanceof GaussianDistribution) {
+			if (measurement.output.multivariate)
+				throw new Error('Invalid measurement output: the Gaussian Process object was given a measurement with a multivariate Gaussian Distribution output. This is not (yet?) supported. Only univariate distributions are allowed.')
+			outputVariance = measurement.output.variance
+		} else {
+			if (measurement.outputNoiseVariance)
+				outputVariance = measurement.outputNoiseVariance
+			else if (this.defaultOutputNoiseVariance)
+				outputVariance = this.defaultOutputNoiseVariance
+			else
+				throw new Error('Unknown measurement output noise: the Gaussian Process object was given a measurement, but no outputNoiseVariance parameter was defined, nor did the GP object have a defaultOutputNoiseVariance parameter specified.')
+		}
 
 		// Add a column to matrices Kmm and the matrix-to-invert Kn.
 		const newColumn = arrayAsColumn(this.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
@@ -215,15 +234,15 @@ export default class GaussianProcess {
 				newColumn,
 			], [
 				newRow,
-				scalarAsMatrix(selfVariance + this.sy),
+				scalarAsMatrix(selfVariance + outputVariance),
 			],
 		])
 
 		// Update the inverse of Kn.
 		if (this.measurements.length === 0) {
-			this.Kni = scalarAsMatrix(1 / (selfVariance + this.sy))
+			this.Kni = scalarAsMatrix(1 / (selfVariance + outputVariance))
 		} else {
-			const Delta = 1 / ((selfVariance + this.sy) - multiplyMatrices(newRow, this.Kni, newColumn))
+			const Delta = 1 / ((selfVariance + outputVariance) - multiplyMatrices(newRow, this.Kni, newColumn))
 			const rowResult = math.multiply(newRow, this.Kni)
 			const columnResult = math.multiply(this.Kni, newColumn)
 			this.Kni = mergeMatrices([
@@ -245,14 +264,33 @@ export default class GaussianProcess {
 	 * getMeasurementInputs returns an array of the input values of all the given measurements.
 	 */
 	getMeasurementInputs() {
-		return this.measurements.map(measurement => measurement.input)
+		return this.measurements.map(GaussianProcess.getInputFromMeasurement)
 	}
 
 	/*
 	 * getMeasurementOutputs returns an array of the output values of all the given measurements.
 	 */
 	getMeasurementOutputs() {
-		return this.measurements.map(measurement => measurement.output)
+		return this.measurements.map(GaussianProcess.getOutputFromMeasurement)
+	}
+
+	// Below are some static functions that are helpful when working with Gaussian Processes and its measurements.
+
+	/*
+	 * getInputFromMeasurement takes a measurement object and returns the input value from it.
+	 */
+	static getInputFromMeasurement(measurement) {
+		return measurement.input
+	}
+
+	/*
+	 * getOutputFromMeasurement takes a measurement object and returns the output value from it. We need a function, because the output can be either a number or a distribution object.
+	 */
+	static getOutputFromMeasurement(measurement) {
+		if (measurement.output instanceof GaussianDistribution)
+			return measurement.output.mean
+		else
+			return measurement.output
 	}
 
 	// TODO: SORT OUT THE FUNCTIONS BELOW.

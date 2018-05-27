@@ -41,7 +41,7 @@ export default class GPPlot extends Plot {
 			this.gp = new GaussianProcess(this.gpData) // We start with a GP object which already has the right data. (So we don't have to recalculate stuff.)
 			this.props.data[this.dataName].applyState(this.gpData, false) // We also store the data in redux, specifically noting that no update is required.
 		}
-		
+
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
 		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
@@ -198,11 +198,15 @@ export default class GPPlot extends Plot {
 
 	// drawMeasurements draws circles for each of the measurements that is present in the GP. When an extraMeasurement parameter has been defined for the object (with input and output parameters) then this is also drawn. This can be useful when an extra circle is drawn on a mouseover event.
 	drawMeasurements() {
-		// Extract all the measurements. Add the extra point if it is present.
-		const measurements = (this.extraPoint ?
-			[...this.gp.measurements, this.extraPoint] :
-			this.gp.measurements
-		)
+		// Extract all the measurements. Add the extra point if it is present and within range.
+		let addExtraPoint = true
+		if (!this.extraPoint)
+			addExtraPoint = false
+		else if (this.extraPoint.input < this.range.x.min || this.extraPoint.input > this.range.x.max)
+			addExtraPoint = false
+		else if (this.extraPoint.output < this.range.y.min || this.extraPoint.output > this.range.y.max)
+			addExtraPoint = false
+		const measurements = (addExtraPoint ?	[...this.gp.measurements, this.extraPoint] : this.gp.measurements)
 
 		// Set up the measurement points using D3, first adding new ones, then updating existing ones and finally removing old ones.
 		const points = this.measurementContainer
@@ -213,8 +217,8 @@ export default class GPPlot extends Plot {
 			.attr('class', 'measurement')
 			.attr('r', this.measurementRadius)
 			.merge(points) // New and existing points.
-			.attr('cx', point => this.scale.x(point.input))
-			.attr('cy', point => this.scale.y(point.output))
+			.attr('cx', measurement => this.scale.x(GaussianProcess.getInputFromMeasurement(measurement)))
+			.attr('cy', measurement => this.scale.y(GaussianProcess.getOutputFromMeasurement(measurement)))
 		points.exit() // Outdated points.
 			.remove()
 	}
