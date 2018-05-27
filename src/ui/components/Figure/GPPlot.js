@@ -9,7 +9,7 @@ import { getRange } from '../../../logic/util.js'
 
 import Plot from '../../components/Figure/Plot.js'
 import Transitioner from '../../../logic/transitioner.js'
-import GaussianProcess from '../../../logic/gaussianProcess.js'
+import GaussianProcess from '../../../logic/GaussianProcess/reduxGP.js'
 
 export default class GPPlot extends Plot {
 	constructor() {

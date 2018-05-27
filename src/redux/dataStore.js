@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 
 import { deepMerge } from '../logic/util.js'
-import { gpReducer, getGPModifierFunctions } from '../logic/gaussianProcess.js'
+import { gpReducer, getGPModifierFunctions } from '../logic/GaussianProcess/reduxGP.js'
 
 // Define keys that may not be used in the data store.
 const invalidKeys = {

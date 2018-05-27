@@ -26,15 +26,15 @@ class InteractiveFigure extends Figure {
 	reset() {
 		// TODO: REMOVE
 		console.log('Resetting...')
-		this.props.data.gp.applyState(gpData)
+		this.props.data.gp.removeAllMeasurements()
 	}
 }
 export default connectToData(InteractiveFigure, id, { gp: true })
 
 class InteractivePlot extends GPPlot {
 	// TODO NEXT: 
-	// - Play around with the new functionalities. Use different GP names, multiple GPs, etcetera.
-	// - Add extra functions for within redux? Next to adding measuments? (Maybe we'll need samples after adding a control bar?)
+	// V Play around with the new functionalities. Use different GP names, multiple GPs, etcetera.
+	// V Add extra functions for within redux? Next to adding measuments? (Maybe we'll need samples after adding a control bar?)
 
 	// TODO: Set up a GaussianProcess folder within the logic folder, with a separate file for the redux stuff. Also consider putting the applyState and processUpdate functions in an inherited class. Except that the applyState function is now used by the main class too.
 	// For processUpdate, also check if the internal state still matches the redux state. If not, throw an error?

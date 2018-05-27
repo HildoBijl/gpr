@@ -2,9 +2,9 @@
 
 import math from 'mathjs'
 
-import { applyFunctionToPairs } from './util.js'
-import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix } from './math.js'
-import GaussianDistribution from './gaussianDistribution.js';
+import { applyFunctionToPairs } from '../util.js'
+import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix } from '../math.js'
+import GaussianDistribution from '../gaussianDistribution.js'
 // ToDo: implement getSample with math functions like getRand, cholesky and such.
 
 export default class GaussianProcess {
@@ -18,14 +18,32 @@ export default class GaussianProcess {
 	}
 
 	/*
+	 * applyState takes the given GP state and completely builds up this GP object from scratch based on that data. It removes any data that was present previously, so it completely overrides the old GP.
+	 */
+	applyState(state = {}) {
+		// First of all remove all measurements currently present.
+		this.removeAllMeasurements()
+
+		// Apply mean and covariance functions.
+		this.applyMeanFunction(state.meanData)
+		this.applyCovarianceFunction(state.covarianceData)
+		this.sy = state.outputNoise // ToDo: adjust this. Store the default output noise if present.
+
+		// Add all the measurements given in the state.
+		if (state.measurements)
+			this.addMeasurement(state.measurements)
+
+		// TODO: also load all other stuff.
+	}
+
+	/*
 	 * reset erases all measurements that have been added to the Gaussian process, returning it to the state it had just after being initialized.
 	 */
-	reset() {
+	removeAllMeasurements() {
 		this.measurements = []
 		this.Kmm = [] // The covariance matrix for the measurements.
 		this.Kn = [] // The covariance matrix, including noise. This is the matrix that is going to be inverted.
 		this.Kni = [] // The inverted covariance matrix including noise.
-		delete this.lastChangeTimestamp // This stores the timestamp of updates sent from redux. If it is not defined, it's a signal that we're not using redux for updates. If it is defined, then we do use updates from redux.
 	}
 
 	/*
@@ -144,7 +162,7 @@ export default class GaussianProcess {
 			),
 		}
 	}
-	// TODO: IMPLEMENT ABOVE FUNCTION THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT.
+	// TODO IN FUTURE: IMPLEMENT ABOVE FUNCTION THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT.
 
 	/*
 	 * Returns the log-likelihood of the measurements. A base-e logarithm is used.
@@ -235,65 +253,6 @@ export default class GaussianProcess {
 	 */
 	getMeasurementOutputs() {
 		return this.measurements.map(measurement => measurement.output)
-	}
-
-	/*
-	 * applyState takes the given GP state from redux (passed as parameter) and completely builds up this GP object from scratch based on that data. Ideally, this is only called once for a GP object. It always returns true, unless given no parameter, in which case it does nothing and returns false.
-	 */
-	applyState(state = {}) {
-		// Reset the GP and start setting it up from scratch.
-		this.reset()
-
-		// Apply mean and covariance functions.
-		this.applyMeanFunction(state.meanData)
-		this.applyCovarianceFunction(state.covarianceData)
-		this.sy = state.outputNoise // ToDo: adjust this. Store the default output noise if present.
-
-		// Add all the measurements.
-		if (state.measurements)
-			this.addMeasurement(state.measurements)
-
-		// TODO: also load all other stuff.
-
-		// Set the lastChangeTimestamp to a default value, to remember that we're using redux for updates.
-		this.lastChangeTimestamp = -1
-		return true
-	}
-
-	/*
-	 * processUpdate takes the given GP state from redux (passed as parameter), but it only pretty much only looks at the lastChange parameter and implements this last change (if not implemented already). It does do a check: are the state from redux and the internal state still in sync. If not, an error will be thrown. The return value is true or false: true when the update has been processed (and hence a redraw of any potential graph is required) and false when nothing has been done.
-	 */
-	processUpdate(state) {
-		// We do the update based on the last change. First, verify that there is a new change.
-		if (!state.lastChange)
-			return false // There is no data to update with.
-		if (state.lastChange.timestamp === this.lastChangeTimestamp)
-			return false // Already processed this update.
-
-		// Figure out what the last change is.
-		switch (state.lastChange.action) {
-			case 'GPApplyState': {
-				// This is a hard override of the GP state. Apply the state directly and deal with whatever happens.
-				this.applyState(state)
-				break
-			}
-
-			case 'GPAddMeasurement': {
-				// Add the measurement to this GP. That's all.
-				this.addMeasurement(state.lastChange.measurement)
-				break
-			}
-
-			default: {
-				throw new Error(`Unknown GP update action: a Gaussian Process update was requested concerning the action "${state.lastChange.action}" but this action is unknown.`)
-			}
-		}
-
-		// ToDo: check if the states still match.
-
-		// Update the timestamp and end this update.
-		this.lastChangeTimestamp = state.lastChange.timestamp
-		return true
 	}
 
 	// TODO: SORT OUT THE FUNCTIONS BELOW.
@@ -465,97 +424,3 @@ export function getDefaultCovarianceFunction() {
 	})
 }
 
-// These are redux set-up utilities. They are functions to connect a Gaussian Process to the data store. This is so that Gaussian Process data can be stored globally in redux.
-
-// The gpActions object contains redux functions for actions. It specifies the dataStoreSource to let the data store reducer know it should call the gpReducer.
-const gpActions = {
-	applyState: (id, name, state, updateGP) => ({
-		dataStoreSource: 'gp',
-		id,
-		name,
-		type: 'GPApplyState',
-		state,
-		updateGP,
-	}),
-	addMeasurement: (id, name, measurement) => ({
-		dataStoreSource: 'gp',
-		id,
-		name,
-		type: 'GPAddMeasurement',
-		measurement,
-	}),
-}
-
-// The gpReducer is the special reducer for actions related to Gaussian Processes.
-export function gpReducer(state, action) {
-	switch (action.type) {
-
-		case 'GPApplyState': {
-			// This is the hard override of the state. We simply save the state and deal with whatever happens.
-			state = {
-				...action.state,
-				isDataAvailable: true, // We note that data is available inside redux, so that if we return to a page and reload a plot with a GP object, the data from redux is used.
-			}
-			// Unless specifically indicated (by setting updateGP to false) we also note the last change, so the changes are processed by the GP within the GPPlot object.
-			if (action.updateGP !== false) {
-				state.lastChange = {
-					action: action.type,
-					timestamp: performance.now(),
-				}
-			}
-			return state
-		}
-
-		case 'GPAddMeasurement': {
-			state = { ...state }
-
-			// Clone (or create) the measurement array and add the new measurement.
-			if (!state.measurements)
-				state.measurements = []
-			else
-				state.measurements = state.measurements.slice(0)
-			state.measurements.push(action.measurement)
-
-			// Note the last change that has occurred, so dependent data can apply it.
-			state.lastChange = {
-				action: action.type,
-				timestamp: performance.now(),
-				measurement: action.measurement,
-			}
-			return state
-		}
-
-		default: {
-			throw new Error(`Unknown action type: the GP reducer was called with an unknown action type "${action.type}".`)
-		}
-	}
-}
-
-// getGPModifierFunctions is called when a class is connected to the data store. When the class has told the connector (in the options) that it wants to be connected to a GP, this function is called, and it should return functions to modify said data store.
-export function getGPModifierFunctions(options, dispatch, id) {
-	// Verify the input.
-	let names
-	if (options === true) {
-		names = ['gp']
-	} else if (typeof options === 'string') {
-		names = [options]
-	} else if (Array.isArray(options)) {
-		options.forEach(name => {
-			if (typeof name !== 'string')
-				throw new Error('Invalid GP name: when passing options to the data store, an option was passed along to set up a data store for a GP. However, the name provided was not a string. GP data store names have to be strings.')
-		})
-		names = options
-	} else {
-		throw new Error('Invalid GP option: when passing options to the data store, a GP option was passed along with invalid GP names. The "gp" option should either be true, a string, or an array of strings.')
-	}
-
-	// For each GP, set up the appropriate modifier functions.
-	let result = {}
-	names.forEach(name => {
-		result[name] = {
-			applyState: (state, updateGP) => dispatch(gpActions.applyState(id, name, state, updateGP)),
-			addMeasurement: (input, output) => dispatch(gpActions.addMeasurement(id, name, input, output)),
-		}
-	})
-	return result
-}
