@@ -19,16 +19,13 @@ class InteractiveFigure extends Figure {
 	renderSubFigures() {
 		return <InteractivePlot />
 	}
-	renderControlBar() {
-		return <span onClick={() => this.props.data.gp.removeAllMeasurements()} style={{cursor: 'pointer', background: '#113344', padding: '4px', borderRadius: '4px'}}>Test reset</span>
+	onReset() {
+		this.props.data.gp.removeAllMeasurements()
 	}
 }
 export default connectToData(InteractiveFigure, id, { gp: true })
 
 class InteractivePlot extends GPPlot {
-	// TODO:
-	// - Set up a control bar, and style it appropriately. Make it easy to add buttons.
-
 	// TODO:
 	// - Set up a button to increase/decrease the number of samples.
 	// - Generate samples and plot them. The plan for generating samples is this.
@@ -48,7 +45,6 @@ class InteractivePlot extends GPPlot {
 	//   x setDefaultOutputNoise
 	//   For all these actions, add the option to recalculate all matrices afterwards, or to simply continue with the previous matrix that existed.
 
-
 	constructor() {
 		super()
 
@@ -59,11 +55,11 @@ class InteractivePlot extends GPPlot {
 
 		// Set up the plot range.
 		this.range = {
-			x: {
+			input: {
 				min: -4,
 				max: 5,
 			},
-			y: {
+			output: {
 				min: -3,
 				max: 3,
 			},
@@ -74,15 +70,16 @@ class InteractivePlot extends GPPlot {
 	}
 	handleClick(pos, evt) {
 		this.props.data.gp.addMeasurement({
-			input: this.scale.x.invert(pos.x),
-			output: new GaussianDistribution(this.scale.y.invert(pos.y), Math.random()),
+			input: this.scale.input.invert(pos.x),
+			output: new GaussianDistribution(this.scale.output.invert(pos.y), Math.random()),
 		})
 	}
 	handleMouseMove(pos, evt) {
-		this.extraPoint = {
-			input: this.scale.x.invert(pos.x),
-			output: this.scale.y.invert(pos.y),
+		const point = {
+			input: this.scale.input.invert(pos.x),
+			output: this.scale.output.invert(pos.y),
 		}
+		this.extraPoint = this.isWithinRange(point) ? point : null
 	}
 	handleMouseLeave(pos, evt) {
 		delete this.extraPoint

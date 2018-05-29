@@ -23,7 +23,7 @@ export default class GPPlot extends Plot {
 		// Define settings that may be overwritten by the child class.
 		this.gpData = {} // This object will contain all data (the full initial state) of the GP that will be used.
 		this.transitionTime = 400
-		this.range = { x: { min: -5, max: 5 }, y: { min: -3, max: 3 } }
+		this.range = { input: { min: -5, max: 5 }, output: { min: -3, max: 3 } }
 		this.numPlotPoints = 101
 		this.measurementRadius = 6
 	}
@@ -32,7 +32,7 @@ export default class GPPlot extends Plot {
 	initialize() {
 		// Ensure plotpoints are present. They can be defined manually, or only defined through their properties.
 		if (!this.plotPoints)
-			this.plotPoints = getRange(this.range.x.min, this.range.x.max, this.numPlotPoints)
+			this.plotPoints = getRange(this.range.input.min, this.range.input.max, this.numPlotPoints)
 
 		// Set up the GP object. For this, check if data is available.
 		if (this.props.data[this.dataName].isDataAvailable) {
@@ -50,26 +50,26 @@ export default class GPPlot extends Plot {
 
 		// Set up the scales.
 		this.scale = {
-			x: scaleLinear().domain([this.range.x.min, this.range.x.max]).range([0, this.width]),
-			y: scaleLinear().domain([this.range.y.min, this.range.y.max]).range([this.height, 0]),
+			input: scaleLinear().domain([this.range.input.min, this.range.input.max]).range([0, this.width]),
+			output: scaleLinear().domain([this.range.output.min, this.range.output.max]).range([this.height, 0]),
 		}
 
 		// Set up the axes.
-		const xAxis = axisBottom(this.scale.x)
-		const yAxis = axisLeft(this.scale.y)
+		const inputAxis = axisBottom(this.scale.input)
+		const outputAxis = axisLeft(this.scale.output)
 		this.axisContainer
 			.append('g')
-			.attr('transform', `translate(0,${this.scale.y(0)})`)
-			.call(xAxis)
+			.attr('transform', `translate(0,${this.scale.output(0)})`)
+			.call(inputAxis)
 		this.axisContainer
 			.append('g')
-			.attr('transform', `translate(${this.scale.x(0)},0)`)
-			.call(yAxis)
+			.attr('transform', `translate(${this.scale.input(0)},0)`)
+			.call(outputAxis)
 
 		// Set up the line function for the mean.
 		this.meanFunction = line()
-			.x(prediction => this.scale.x(prediction.input))
-			.y(prediction => this.scale.y(prediction.output.mean))
+			.x(prediction => this.scale.input(prediction.input))
+			.y(prediction => this.scale.output(prediction.output.mean))
 			.curve(curveLinear)
 
 		// Set up the prediction array using transitioners and fill it with the initial prediction.
@@ -162,14 +162,14 @@ export default class GPPlot extends Plot {
 		// Extract the current prediction data from the transitioners and walk through all the points, drawing gradient rectangles to the left of each of them (apart from the first).
 		const prediction = this.getCurrentPrediction()
 		let left, right // We will draw vertical rectangles. The left and right parameters will take into account the data on either side of the rectangle.
-		const zeroValue = this.scale.y(0) // This is a constant we need many times when scaling the standard deviation.
+		const zeroValue = this.scale.output(0) // This is a constant we need many times when scaling the standard deviation.
 		for (let i = 0; i < prediction.length; i++) {
 			// Shift the data forward.
 			left = right
 			right = {
-				x: Math.round(this.scale.x(prediction[i].input)),
-				mean: this.scale.y(prediction[i].output.mean),
-				std: this.scale.y(prediction[i].output.std) - zeroValue,
+				x: Math.round(this.scale.input(prediction[i].input)),
+				mean: this.scale.output(prediction[i].output.mean),
+				std: this.scale.output(prediction[i].output.std) - zeroValue,
 			}
 
 			// Don't do anything at the first iteration, since we do not draw the rectangle to the left of the leftmost point.
@@ -198,15 +198,8 @@ export default class GPPlot extends Plot {
 
 	// drawMeasurements draws circles for each of the measurements that is present in the GP. When an extraMeasurement parameter has been defined for the object (with input and output parameters) then this is also drawn. This can be useful when an extra circle is drawn on a mouseover event.
 	drawMeasurements() {
-		// Extract all the measurements. Add the extra point if it is present and within range.
-		let addExtraPoint = true
-		if (!this.extraPoint)
-			addExtraPoint = false
-		else if (this.extraPoint.input < this.range.x.min || this.extraPoint.input > this.range.x.max)
-			addExtraPoint = false
-		else if (this.extraPoint.output < this.range.y.min || this.extraPoint.output > this.range.y.max)
-			addExtraPoint = false
-		const measurements = (addExtraPoint ?	[...this.gp.measurements, this.extraPoint] : this.gp.measurements)
+		// Extract all the measurements. Add the extra point if it is present.
+		const measurements = (this.extraPoint ? [...this.gp.measurements, this.extraPoint] : this.gp.measurements)
 
 		// Set up the measurement points using D3, first adding new ones, then updating existing ones and finally removing old ones.
 		const points = this.measurementContainer
@@ -217,9 +210,22 @@ export default class GPPlot extends Plot {
 			.attr('class', 'measurement')
 			.attr('r', this.measurementRadius)
 			.merge(points) // New and existing points.
-			.attr('cx', measurement => this.scale.x(GaussianProcess.getInputFromMeasurement(measurement)))
-			.attr('cy', measurement => this.scale.y(GaussianProcess.getOutputFromMeasurement(measurement)))
+			.attr('cx', measurement => this.scale.input(GaussianProcess.getInputFromMeasurement(measurement)))
+			.attr('cy', measurement => this.scale.output(GaussianProcess.getOutputFromMeasurement(measurement)))
 		points.exit() // Outdated points.
 			.remove()
+	}
+
+	// isWithinRange checks whether a point (with an input and an output) falls within the range of this plot.
+	isWithinRange(point) {
+		if (point.input < this.range.input.min)
+			return false
+		if (point.input > this.range.input.max)
+			return false
+		if (point.output < this.range.output.min)
+			return false
+		if (point.output > this.range.output.max)
+			return false
+		return true
 	}
 }

@@ -3,6 +3,7 @@
 .figure {
 	border-radius: 8px;
 	margin: 12px 6px;
+	padding: 12px;
 	position: relative;
 
 	&.twoColumn {
@@ -35,7 +36,6 @@
 		display: flex;
 		flex-flow: row wrap;
 		justify-content: space-between;
-		padding: 12px;
 		position: relative;
 		z-index: 2;
 
@@ -104,6 +104,54 @@
 					z-index: 1;
 				}
 			}
+		}
+	}
+
+	.controlBar {
+		display: flex;
+		flex-flow: row wrap;
+		justify-content: flex-end;
+		margin: 8px auto 0;
+		max-width: 800px;
+
+		.btn {
+			background: @lightThemeColor;
+			border-radius: 0.375em;
+			cursor: pointer;
+			display: flex;
+			flex-flow: column nowrap;
+			font-size: 0.9em;
+			font-weight: bold;
+			height: 1.75em;
+			justify-content: center;
+			padding: 0.25em 0.5em;
+			margin-left: 0.5em;
+
+			&.icon {
+				padding: 0.25em;
+			}
+
+			&:first-child {
+				margin-left: 0;
+			}
+
+			&:hover {
+				background: lighten(@lightThemeColor, 10%);
+			}
+
+			.icon {
+				height: 1.4em;
+				width: 1.4em;
+
+				svg {
+					fill: currentColor;
+				}
+			}
+		}
+	}
+	&.twoColumn {
+		.controlBar {
+			max-width: none;
 		}
 	}
 }

@@ -18,6 +18,7 @@
 .figure {
   border-radius: 8px;
   margin: 12px 6px;
+  padding: 12px;
   position: relative;
 }
 @media (min-width: 480.01px) {
@@ -43,7 +44,6 @@
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
-  padding: 12px;
   position: relative;
   z-index: 2;
 }
@@ -105,6 +105,45 @@
   top: 0;
   width: 100%;
   z-index: 1;
+}
+.figure .controlBar {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-end;
+  margin: 8px auto 0;
+  max-width: 800px;
+}
+.figure .controlBar .btn {
+  background: #13a;
+  border-radius: 0.375em;
+  cursor: pointer;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 0.9em;
+  font-weight: bold;
+  height: 1.75em;
+  justify-content: center;
+  padding: 0.25em 0.5em;
+  margin-left: 0.5em;
+}
+.figure .controlBar .btn.icon {
+  padding: 0.25em;
+}
+.figure .controlBar .btn:first-child {
+  margin-left: 0;
+}
+.figure .controlBar .btn:hover {
+  background: #1641d8;
+}
+.figure .controlBar .btn .icon {
+  height: 1.4em;
+  width: 1.4em;
+}
+.figure .controlBar .btn .icon svg {
+  fill: currentColor;
+}
+.figure.twoColumn .controlBar {
+  max-width: none;
 }
 .figureGuide {
   position: relative;
