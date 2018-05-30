@@ -114,10 +114,19 @@
 		margin: 8px auto 0;
 		max-width: 800px;
 
-		.btn {
+		// Arrange spacing between control bar items.
+		& > div {
+			margin-left: 0.75em;
+
+			&:first-child {
+				margin-left: 0;
+			}
+		}
+
+		// Arrange control bar item looks.
+		.item {
 			background: @lightThemeColor;
 			border-radius: 0.375em;
-			cursor: pointer;
 			display: flex;
 			flex-flow: column nowrap;
 			font-size: 0.9em;
@@ -125,18 +134,18 @@
 			height: 1.75em;
 			justify-content: center;
 			padding: 0.25em 0.5em;
-			margin-left: 0.5em;
+		}
 
-			&.icon {
-				padding: 0.25em;
-			}
-
-			&:first-child {
-				margin-left: 0;
-			}
+		// Arrange button responsiveness.
+		.btn {
+			cursor: pointer;
 
 			&:hover {
 				background: lighten(@lightThemeColor, 10%);
+			}
+
+			&.icon {
+				padding: 0.25em;
 			}
 
 			.icon {
@@ -145,6 +154,41 @@
 
 				svg {
 					fill: currentColor;
+				}
+			}
+		}
+
+		.counter {
+			align-items: center;
+			display: flex;
+			flex-flow: row nowrap;
+			justify-content: center;
+
+			.count {
+				cursor: default;
+				margin: 0 0.35em;
+				min-width: 2.2em;
+        user-select: none;
+				text-align: center;
+			}
+			.minus, .plus {
+				background: transparent;
+				border-bottom: 0.6em solid transparent;
+				border-top: 0.6em solid transparent;
+				height: 0px;
+				transform: scaleX(1.25);
+				width: 0px;
+			}
+			.minus {
+				border-right: 0.6em solid @lightThemeColor;
+				&:hover {
+					border-right-color: lighten(@lightThemeColor, 10%);
+				}
+			}
+			.plus {
+				border-left: 0.6em solid @lightThemeColor;
+				&:hover {
+					border-left-color: lighten(@lightThemeColor, 10%);
 				}
 			}
 		}

@@ -16,18 +16,28 @@ const gpData = {
 }
 
 class InteractiveFigure extends Figure {
+	constructor() {
+		super()
+		this.numCounters = 3
+	}
 	renderSubFigures() {
 		return <InteractivePlot />
 	}
 	onReset() {
 		this.props.data.gp.removeAllMeasurements()
 	}
+	setCounter(newValue, counterIndex) {
+		this.props.data.set({ [`counter${counterIndex}`]: Math.max(0, newValue) })
+	}
+	getCounter(counterIndex) {
+		return this.props.data[`counter${counterIndex}`] || 0
+	}
 }
 export default connectToData(InteractiveFigure, id, { gp: true })
 
 class InteractivePlot extends GPPlot {
 	// TODO:
-	// - Set up a button to increase/decrease the number of samples.
+	// V Set up a button to increase/decrease the number of samples.
 	// - Generate samples and plot them. The plan for generating samples is this.
 	//   x Check the test points for which we want a sample. If they are fifteen or less, find the posterior covariance, generate the Cholesky, and come up with a sample.
 	//   x If they are more than fifteen points (say, n points) then generating a Cholesky might be tricky. So then:

@@ -6,7 +6,7 @@ import { gpReducer, getGPModifierFunctions } from '../logic/GaussianProcess/redu
 // Define keys that may not be used in the data store.
 const invalidKeys = {
 	set: true,
-	add: true,
+	reset: true,
 	delete: true,
 }
 
@@ -20,8 +20,8 @@ const actions = {
 		id,
 		data,
 	}),
-	addData: (id, data) => ({
-		type: 'AddData',
+	resetData: (id, data) => ({
+		type: 'ResetData',
 		id,
 		data,
 	}),
@@ -67,8 +67,8 @@ export function reducer(state = {}, action) {
 	// Check if the action was one of our regular actions.
 	switch (action.type) {
 
-		// AddData will add a set of key-value pairs to the data storage. Other key-value pairs will be unmodified.
-		case 'AddData': {
+		// SetData will set certain key-value pairs in the data storage. Other key-value pairs will be unmodified.
+		case 'SetData': {
 			const id = action.id
 			verifyKeys(Object.keys(action.data))
 			return {
@@ -80,8 +80,8 @@ export function reducer(state = {}, action) {
 			}
 		}
 
-		// SetData will override the full data storage with the given data.
-		case 'SetData': {
+		// ResetData will override the full data storage with the given data.
+		case 'ResetData': {
 			const id = action.id
 			verifyKeys(Object.keys(action.data))
 			return {
@@ -165,7 +165,7 @@ export function connectToData(Class, id, options = {}) {
 function getModifierFunctions(dispatch, id) {
 	return {
 		set: (data) => dispatch(actions.setData(id, data)),
-		add: (data) => dispatch(actions.setData(id, data)),
+		reset: (data) => dispatch(actions.resetData(id, data)),
 		delete: (key) => dispatch(actions.deleteKey(id, key)),
 	}
 }

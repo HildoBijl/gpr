@@ -113,10 +113,15 @@
   margin: 8px auto 0;
   max-width: 800px;
 }
-.figure .controlBar .btn {
+.figure .controlBar > div {
+  margin-left: 0.75em;
+}
+.figure .controlBar > div:first-child {
+  margin-left: 0;
+}
+.figure .controlBar .item {
   background: #13a;
   border-radius: 0.375em;
-  cursor: pointer;
   display: flex;
   flex-flow: column nowrap;
   font-size: 0.9em;
@@ -124,16 +129,15 @@
   height: 1.75em;
   justify-content: center;
   padding: 0.25em 0.5em;
-  margin-left: 0.5em;
 }
-.figure .controlBar .btn.icon {
-  padding: 0.25em;
-}
-.figure .controlBar .btn:first-child {
-  margin-left: 0;
+.figure .controlBar .btn {
+  cursor: pointer;
 }
 .figure .controlBar .btn:hover {
   background: #1641d8;
+}
+.figure .controlBar .btn.icon {
+  padding: 0.25em;
 }
 .figure .controlBar .btn .icon {
   height: 1.4em;
@@ -141,6 +145,40 @@
 }
 .figure .controlBar .btn .icon svg {
   fill: currentColor;
+}
+.figure .controlBar .counter {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+.figure .controlBar .counter .count {
+  cursor: default;
+  margin: 0 0.35em;
+  min-width: 2.2em;
+  user-select: none;
+  text-align: center;
+}
+.figure .controlBar .counter .minus,
+.figure .controlBar .counter .plus {
+  background: transparent;
+  border-bottom: 0.6em solid transparent;
+  border-top: 0.6em solid transparent;
+  height: 0px;
+  transform: scaleX(1.25);
+  width: 0px;
+}
+.figure .controlBar .counter .minus {
+  border-right: 0.6em solid #13a;
+}
+.figure .controlBar .counter .minus:hover {
+  border-right-color: #1641d8;
+}
+.figure .controlBar .counter .plus {
+  border-left: 0.6em solid #13a;
+}
+.figure .controlBar .counter .plus:hover {
+  border-left-color: #1641d8;
 }
 .figure.twoColumn .controlBar {
   max-width: none;

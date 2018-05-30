@@ -159,7 +159,7 @@ export default class GaussianProcess extends RegularGP {
 	 */
 	isStateValid(state) {
 		// Compare number of measurements.
-		if (state.measurements.length !== this.measurements.length)
+		if ((state.measurements || []).length !== (this.measurements || []).length)
 			return false
 		
 		// No discrepancies found.
