@@ -147,7 +147,7 @@ export default class GaussianProcess extends RegularGP {
 
 		// Do a basic check to see if the states still match. If not, something is wrong. For now, throw an error. In the future, it may be better to try to deal with (i.e., apply) the new state regardless.
 		if (!this.isStateValid(state))
-			throw new Error('Discrepancy in GP state: the state in the local Guassian Process object was not equal to the state found in the redux data store. Updates may have been missed, or processed incorrectly.')
+			console.log('Warning: discrepancy in GP state. The state in the local Guassian Process object was not equal to the state found in the redux data store. Updates may have been missed, or processed incorrectly.')
 
 		// Update the timestamp and end this update.
 		this.lastChangeTimestamp = state.lastChange.timestamp
@@ -164,5 +164,12 @@ export default class GaussianProcess extends RegularGP {
 		
 		// No discrepancies found.
 		return true
+	}
+
+	// Overwrite the applyState function. When the state is applied, then the last change should also be seen as "processed". This prevents us from processing that last change again.
+	applyState(state = {}) {
+		super.applyState(state)
+		if (state.lastChange)
+			this.lastChangeTimestamp = state.lastChange.timestamp
 	}
 }

@@ -26,7 +26,6 @@ export default class GaussianProcess {
 	 * applyState takes the given GP state and completely builds up this GP object from scratch based on that data. It removes any data that was present previously, so it completely overrides the old GP.
 	 */
 	applyState(state = {}) {
-		window.math = math // TODO REMOVE
 		// First of all remove all measurements currently present.
 		this.removeAllMeasurements()
 
