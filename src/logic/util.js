@@ -23,7 +23,7 @@ export function deepMerge(...objects) {
 	// If there is only one object, there is nothing to be done.
 	if (objects.length === 1)
 		return { ...objects[0] }
-	
+
 	// If there are multiple objects, merge pairs together one by one.
 	if (objects.length > 2) {
 		let merger = {}
@@ -86,6 +86,16 @@ export function applyFunctionToPairs(fun, arr1, arr2) {
 
 	// Process the result.
 	return arr1.map(v1 => applyFunction((v2) => fun(v1, v2), arr2))
+}
+
+// getMinimum will return the lowest element of an array of numbers.
+export function getMinimum(arr) {
+	return arr.reduce((min, v) => Math.min(min, v), arr[0])
+}
+
+// getMaximum will return the highest element of an array of numbers.
+export function getMaximum(arr) {
+	return arr.reduce((max, v) => Math.max(max, v), arr[0])
 }
 
 // bound will give the closest number to x in the interval [min, max].

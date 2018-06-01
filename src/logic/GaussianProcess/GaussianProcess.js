@@ -2,10 +2,12 @@
 
 import math from 'mathjs'
 
-import { applyFunctionToPairs } from '../util.js'
-import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix } from '../math.js'
+import { applyFunctionToPairs, deepClone, getRange, getMinimum, getMaximum } from '../util.js'
+import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix, choleskyDecomposition, getGaussianRand, getGaussianSampleFromCholesky, removeRow, removeColumn } from '../math.js'
 import GaussianDistribution from '../gaussianDistribution.js'
 // ToDo: implement getSample with math functions like getRand, cholesky and such.
+
+const randomVectorLength = 15 // The number of numbers in a random vector, used for generating samples.
 
 export default class GaussianProcess {
 	/*
@@ -19,6 +21,7 @@ export default class GaussianProcess {
 	 */
 	constructor(state = {}) {
 		// Apply the state that we have been given.
+		this.state = {}
 		this.applyState(state)
 	}
 
@@ -34,18 +37,35 @@ export default class GaussianProcess {
 		this.applyCovarianceFunction(state.covarianceData)
 
 		// Add all the measurements given in the state.
-		this.defaultOutputNoiseVariance = state.defaultOutputNoiseVariance // Store the default output noise, if given.
+		this.state.defaultOutputNoiseVariance = state.defaultOutputNoiseVariance // Store the default output noise, if given.
 		if (state.measurements)
 			this.addMeasurement(state.measurements)
 
-		// TODO: also load all other stuff.
+		// Set number of samples to zero.
+		this.setNumSamples(0)
+
+		// TODO: also load all other stuff. When doing this, also add it to the clone function below to be cloned.
+	}
+
+	/*
+	 * getState returns the state of this GP. It's all the data needed to rebuild the GP from scratch.
+	 */
+	getState() {
+		return this.state
+	}
+
+	/*
+	 * getClone makes a clone of this GP object. When doing this, it doesn't only copy the state, but also internal matrices and such.
+	 */
+	getClone() {
+		return new this.constructor(deepClone(this.getState()))
 	}
 
 	/*
 	 * reset erases all measurements that have been added to the Gaussian process, returning it to the state it had just after being initialized.
 	 */
 	removeAllMeasurements() {
-		this.measurements = []
+		this.state.measurements = []
 		this.Kmm = [] // The covariance matrix for the measurements.
 		this.Kn = [] // The covariance matrix, including noise. This is the matrix that is going to be inverted.
 		this.Kni = [] // The inverted covariance matrix including noise.
@@ -55,7 +75,7 @@ export default class GaussianProcess {
 	 * applyMeanFunction sets up a new mean function for the GP.
 	 */
 	applyMeanFunction(meanData) {
-		this.meanData = meanData
+		this.state.meanData = meanData
 		this.meanFunction = meanData ? getMeanFunction(meanData) : getDefaultMeanFunction()
 		// ToDo: reevaluate all matrices.
 	}
@@ -64,11 +84,11 @@ export default class GaussianProcess {
 	 * applyCovarianceFunction sets up a new covariance function for the GP.
 	 */
 	applyCovarianceFunction(covarianceData) {
-		this.covarianceData = covarianceData
+		this.state.covarianceData = covarianceData
 		this.covarianceFunction = covarianceData ? getCovarianceFunction(covarianceData) : getDefaultCovarianceFunction()
 		// ToDo: reevaluate all matrices.
 	}
-	
+
 	/* 
 	 * getPrediction returns the predicted distribution of the GP for the given test points. Parameters include:
 	 * - input [array] is the input-values for which we want to get the prior. (It can also be a number, in which case all the results are numbers too.)
@@ -87,7 +107,7 @@ export default class GaussianProcess {
 			throw new Error('Missing parameter: no parameter "input" was passed to the getPrior function.')
 
 		// Check if we actually have measurements.
-		const n = this.measurements.length // Number of measurements.
+		const n = this.state.measurements.length // Number of measurements.
 		if (n === 0)
 			return this.getPrior(param)
 
@@ -174,7 +194,7 @@ export default class GaussianProcess {
 	 */
 	getLogLikelihood() {
 		// If there are no measurements, we have a likelihood of 1 (100%).
-		const n = this.measurements.length
+		const n = this.state.measurements.length
 		if (n === 0)
 			return 1
 
@@ -195,24 +215,30 @@ export default class GaussianProcess {
 		if (Array.isArray(measurement))
 			return measurement.map(m => this.addMeasurement(m))
 
-		// Extract output noise (variance).
-		let outputVariance
+		// So we have an individual measurement. Verify it.
+		if (!measurement.input)
+			throw new Error('Missing output: the function addMeasurement was called with a measurement with no output.')
+		if (!measurement.output)
+			throw new Error('Missing output: the function addMeasurement was called with a measurement with no output.')
+
+		// Process the measurement. This is to ensure that all the measurements are in the same format.
+		const processedMeasurement = { input: measurement.input }
 		if (measurement.output instanceof GaussianDistribution) {
 			if (measurement.output.multivariate)
 				throw new Error('Invalid measurement output: the Gaussian Process object was given a measurement with a multivariate Gaussian Distribution output. This is not (yet?) supported. Only univariate distributions are allowed.')
-			outputVariance = measurement.output.variance
+			processedMeasurement.output = measurement.output.mean
+			processedMeasurement.outputNoiseVariance = measurement.output.variance
 		} else {
+			processedMeasurement.output = measurement.output
 			if (measurement.outputNoiseVariance)
-				outputVariance = measurement.outputNoiseVariance
-			else if (this.defaultOutputNoiseVariance)
-				outputVariance = this.defaultOutputNoiseVariance
-			else
+				processedMeasurement.outputNoiseVariance = measurement.outputNoiseVariance
+			else if (this.defaultOutputNoiseVariance === undefined)
 				throw new Error('Unknown measurement output noise: the Gaussian Process object was given a measurement, but no outputNoiseVariance parameter was defined, nor did the GP object have a defaultOutputNoiseVariance parameter specified.')
 		}
 
 		// Add a column to matrices Kmm and the matrix-to-invert Kn.
-		const newColumn = arrayAsColumn(this.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
-		const newRow = arrayAsRow(this.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
+		const newColumn = arrayAsColumn(this.state.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
+		const newRow = arrayAsRow(this.state.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
 		const selfVariance = this.covarianceFunction(measurement.input, measurement.input)
 
 		// Update Kmm.
@@ -227,6 +253,7 @@ export default class GaussianProcess {
 		])
 
 		// Update Kn.
+		const outputVariance = processedMeasurement.outputNoiseVariance || this.state.defaultOutputNoiseVariance
 		this.Kn = mergeMatrices([
 			[
 				this.Kn,
@@ -238,7 +265,7 @@ export default class GaussianProcess {
 		])
 
 		// Update the inverse of Kn.
-		if (this.measurements.length === 0) {
+		if (this.state.measurements.length === 0) {
 			this.Kni = scalarAsMatrix(1 / (selfVariance + outputVariance))
 		} else {
 			const Delta = 1 / ((selfVariance + outputVariance) - multiplyMatrices(newRow, this.Kni, newColumn))
@@ -256,21 +283,168 @@ export default class GaussianProcess {
 		}
 
 		// Store the measurement.
-		return this.measurements.push(measurement) - 1
+		return this.state.measurements.push(processedMeasurement) - 1
+	}
+
+	/*
+	 * removeMeasurement removes the measurement with the given index. It returns the removed measurement. It cannot be passed multiple indices, because then things get confusing due to changing indices.
+	 */
+	removeMeasurement(index) {
+		// Check the arguments.
+		if (!this.state.measurements)
+			throw new Error(`Invalid function call: the order was given to remove measurement "${index}", but there are no measurements yet.`)
+		if (index < 0 || index >= this.state.measurements.length)
+			throw new Error(`Invalid measurement index: the order was given to remove measurement "${index}", but there are only "${this.state.measurements.length}" measurements.`)
+
+		// Verify if this is the last measurement.
+		if (this.state.measurements.length === 1) {
+			const measurement = this.state.measurements[0]
+			this.removeAllMeasurements()
+			return measurement
+		}
+
+		window.math = math // TODO REMOVE
+		window.removeRow = removeRow
+		window.removeColumn = removeColumn
+		window.mergeMatrices = mergeMatrices
+		window.arrayAsColumn = arrayAsColumn
+		window.arrayAsRow = arrayAsRow
+		window.scalarAsMatrix = scalarAsMatrix
+
+		// We first apply a reverse matrix update to Kni. This uses the theory from https://math.stackexchange.com/questions/1248220/find-the-inverse-of-a-submatrix-of-a-given-matrix.
+		let vi = removeRow(this.Kni, index) // Get the row from the inverted matrix.
+		const ai = scalarAsMatrix(vi.splice(index, 1)[0]) // Ensure we have the row without the specific element in it.
+		vi = arrayAsRow(vi) // Put the array in row matrix form.
+		const ui = arrayAsColumn(removeColumn(this.Kni, index)) // Get the column from the inverted matrix.
+		let v = removeRow(this.Kn, index) // Do the same for the regular matrix.
+		v = arrayAsRow(v)
+		const u = arrayAsColumn(removeColumn(this.Kn, index))
+		const z = new Array(this.state.measurements.length - 1).fill(0) // An array filled with zeros.
+		// We apply KniNew = Kni + [ui, Kni] * [1,0;0,u] * (I - [0,v;1,0]*[ai,ui;vi,Kni]*[1,0;0,u])^{-1} * [0,v;1,0] * [vi; Kni].
+		const U = mergeMatrices([[scalarAsMatrix(1), scalarAsMatrix(0)], [arrayAsColumn(z), u]])
+		const V = mergeMatrices([[scalarAsMatrix(0), v], [scalarAsMatrix(1), arrayAsRow(z)]])
+		this.Kni = math.add(
+			this.Kni,
+			math.multiply(
+				math.multiply(
+					math.multiply(
+						math.multiply(
+							mergeMatrices([[ui, this.Kni]]),
+							U
+						),
+						math.inv(
+							math.subtract(
+								[[1, 0], [0, 1]],
+								math.multiply(
+									math.multiply(
+										V,
+										mergeMatrices([[ai, vi], [ui, this.Kni]])
+									),
+									U
+								)
+							)
+						)
+					),
+					V
+				),
+				mergeMatrices([[vi], [this.Kni]])
+			)
+		)
+
+		// Remove the measurement from the remaining parameters.
+		removeRow(this.Kmm)
+		removeColumn(this.Kmm)
+
+		// Return the measurement.
+		return this.state.measurements.splice(index, 1)[0]
+	}
+
+
+	/*
+	 * setNumSamples sets how many samples should be present in this GP. These are then stored so that, if measurements are added/removed, the samples are still similar.
+	 */
+	setNumSamples(numSamples) {
+		// Ensure that there is a samples array.
+		if (!this.state.samples)
+			this.state.samples = []
+
+		// Add samples as long as necessary.
+		while (this.state.samples.length < numSamples) {
+			this.state.samples.push(getGaussianRand(randomVectorLength))
+		}
+
+		// Remove samples as long as necessary.
+		while (this.state.samples.length > numSamples) {
+			this.state.samples.pop()
+		}
+	}
+
+	/*
+	 * refreshSamples changes (remakes) the samples that are present in this GP.
+	 */
+	refreshSamples() {
+		this.state.samples = this.state.samples.map(() => getGaussianRand(randomVectorLength))
+	}
+
+	/*
+	 * getSamples returns all current samples for the GP. It uses the random vectors stored in the GP (in this.state.samples) to generate them. It does kind of cheat with the math. After all, the math is complex (Cholesky decompositions and such) and only work for a small number of points (up to roughly 20, depending on the circumstances) because otherwise numerical problems occur. To work around this, we only take a sample of a small number of points for our first sample part. Then we take this sample part, add them as measurements to our GP, and find its mean, which is to be considered the actual sample. It's not fully legit, but it comes as close as we can get, and at least it gives a smooth line without numerical problems.
+	 */
+	getSamples(param) {
+		// Check the input.
+		if (!param)
+			throw new Error('Invalid argument: the getSamples function was called with an invalid or missing argument.')
+		if (!Array.isArray(param.input))
+			throw new Error('Missing input parameter: the getSamples function was given a parameter that did not have an "input" parameter with all the sample input points.')
+
+		// Generate a Cholesky decomposition for the given input.
+		const numPoints = 15 // If this number gets higher, then the Cholesky decomposition is likely to fail.
+		const sampleInput = getRange(getMinimum(param.input), getMaximum(param.input), numPoints)
+		const predictionPart = this.getPrediction({
+			input: sampleInput,
+			joint: true,
+		})
+		const chol = choleskyDecomposition(predictionPart.output.variance)
+
+		// ToDo: just add the measurements once, and only change the output vector with the new samples.
+
+		// For each sample random vector, generate the sample part from the random vector and use it to come up with a full sample.
+		const Kni = deepClone(this.Kni) // Store a copy of Kni to prevent drifts due to numerical innacuracies.
+		const samples = (this.state.samples || []).map(randomVector => {
+			const samplePart = getGaussianSampleFromCholesky(predictionPart.output.mean, chol, randomVector)
+			const extraMeasurements = sampleInput.map((input, i) => ({
+				input,
+				output: samplePart[i],
+				outputNoiseVariance: (this.defaultOutputNoiseVariance || 0.1) / 10000,
+			}))
+			const indices = this.addMeasurement(extraMeasurements)
+			const prediction = this.getPrediction({ input: param.input }).map(measurement => measurement.output.mean)
+			while (indices.length > 0) // Remove measurements again to ensure we don't mess up the GP.
+				this.removeMeasurement(indices.pop())
+			return prediction
+		})
+		this.Kni = Kni // Restore the copied Kni matrix.
+		return samples
+	}
+
+	/*
+	 * getMeasurements returns an array of measurement objects. These measurements should be considered as read-only and not be adjusted, or funny stuff might happen.
+	 */
+	getMeasurements() {
+		return this.state.measurements
 	}
 
 	/*
 	 * getMeasurementInputs returns an array of the input values of all the given measurements.
 	 */
 	getMeasurementInputs() {
-		return this.measurements.map(GaussianProcess.getInputFromMeasurement)
+		return this.state.measurements.map(GaussianProcess.getInputFromMeasurement)
 	}
 
 	/*
 	 * getMeasurementOutputs returns an array of the output values of all the given measurements.
 	 */
 	getMeasurementOutputs() {
-		return this.measurements.map(GaussianProcess.getOutputFromMeasurement)
+		return this.state.measurements.map(GaussianProcess.getOutputFromMeasurement)
 	}
 
 	// Below are some static functions that are helpful when working with Gaussian Processes and its measurements.
@@ -283,13 +457,10 @@ export default class GaussianProcess {
 	}
 
 	/*
-	 * getOutputFromMeasurement takes a measurement object and returns the output value from it. We need a function, because the output can be either a number or a distribution object.
+	 * getOutputFromMeasurement takes a measurement object and returns the output value from it.
 	 */
 	static getOutputFromMeasurement(measurement) {
-		if (measurement.output instanceof GaussianDistribution)
-			return measurement.output.mean
-		else
-			return measurement.output
+		return measurement.output
 	}
 
 	// TODO: SORT OUT THE FUNCTIONS BELOW.
@@ -403,7 +574,7 @@ export function getMeanFunction(meanData) {
  * getDefaultMeanFunction returns the default mean function: the zero mean function.
  */
 export function getDefaultMeanFunction() {
-	return getMeanFunction({ type: 'Zero'	})
+	return getMeanFunction({ type: 'Zero' })
 }
 
 /*

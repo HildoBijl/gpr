@@ -151,6 +151,16 @@ export function scalarAsMatrix(scalar) {
   return [[scalar]]
 }
 
+// removeRow removes a row from a matrix. The given matrix (through pass by reference) is adjusted, and the removed row is returned as array.
+export function removeRow(matrix, row) {
+  return matrix.splice(row, 1)[0]
+}
+
+// removeColumn removes a column from a matrix. The given matrix (through pass by reference) is adjusted, and the removed column is returned as array.
+export function removeColumn(matrix, col) {
+  return matrix.map(row => row.splice(col, 1)[0])
+}
+
 /*
  * Probability theory stuff.
  */
@@ -164,15 +174,17 @@ export function getGaussianRand(n) {
   return (new Array(n)).fill(0).map(() => getGaussianRand())
 }
 
-// getGaussianSample(mu, Sigma) returns a sample of a Gaussian distribution with mean mu and covariance Sigma. Note: it may fail for large (say, 20 elements) distributions.
-export function getGaussianSample(mu, Sigma) {
+// getGaussianSample(mu, Sigma, randomVector) returns a sample of a Gaussian distribution with mean mu and covariance Sigma. It either generates its own random vector (if randomVector is not given) or a randomVector (generated through getGaussianRand) may be given to ensure the same result. Note: it may fail for large (say, 20 elements) distributions.
+export function getGaussianSample(mu, Sigma, randomVector) {
   const chol = choleskyDecomposition(Sigma)
-  return getGaussianSampleFromCholesky(mu, chol)
+  return getGaussianSampleFromCholesky(mu, chol, randomVector)
 }
 
-// getGaussianSampleFromCholesky(mu, chol) returns a sample of a Gaussian distribution with mean mu and covariance matrix Sigma = chol*chol^T, where chol is the Cholesky decomposition of sigma. This is useful if you need multiple samples from the same distribution. Use it instead of getGaussianSample, to prevent that function from having to calculate the Cholesky decomposition every single time.
-export function getGaussianSampleFromCholesky(mu, chol) {
-  return math.add(mu, math.multiply(chol, getGaussianRand(mu.length))) // mu + chol*rand(n,1).
+// getGaussianSampleFromCholesky(mu, chol, randomVector) returns a sample of a Gaussian distribution with mean mu and covariance matrix Sigma = chol*chol^T, where chol is the Cholesky decomposition of sigma. This is useful if you need multiple samples from the same distribution. Use it instead of getGaussianSample, to prevent that function from having to calculate the Cholesky decomposition every single time. It either generates its own random vector (if randomVector is not given) or a randomVector (generated through getGaussianRand) may be given to ensure the same result.
+export function getGaussianSampleFromCholesky(mu, chol, randomVector) {
+  if (randomVector && randomVector.length !== mu.length)
+    throw new Error(`Invalid input: the getGaussianSampleFromCholesky got a random vector with length ${randomVector.length} but the mean vector mu has length ${mu.length}. These numbers should match.`)
+  return math.add(mu, math.multiply(chol, randomVector || getGaussianRand(mu.length))) // mu + chol*rand(n,1).
 }
 
 /*

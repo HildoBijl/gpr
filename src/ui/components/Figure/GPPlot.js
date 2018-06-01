@@ -45,6 +45,7 @@ export default class GPPlot extends Plot {
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
 		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
+		this.sampleContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'mean') // TODO: MAKE OWN CLASS. ADD COLORS.
 		this.meanContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'mean')
 		this.measurementContainer = this.svgContainer.append('g').attr('class', 'measurements')
 
@@ -70,6 +71,12 @@ export default class GPPlot extends Plot {
 		this.meanFunction = line()
 			.x(prediction => this.scale.input(prediction.input))
 			.y(prediction => this.scale.output(prediction.output.mean))
+			.curve(curveLinear)
+
+		// Set up the line function for the sample.
+		this.sampleFunction = line()
+			.x(point => this.scale.input(point.input))
+			.y(point => this.scale.output(point.output))
 			.curve(curveLinear)
 
 		// Set up the prediction array using transitioners and fill it with the initial prediction.
@@ -107,6 +114,10 @@ export default class GPPlot extends Plot {
 			this.prediction[i].output.mean.setValue(point.output.mean)
 			this.prediction[i].output.std.setValue(Math.sqrt(point.output.variance))
 		})
+
+		// Extract the samples.
+		// ToDo: throw the results in transitioners. Make new ones when necessary, and throw old ones out when necessary.
+		this.gp.getSamples({ input: this.plotPoints })
 	}
 
 	// reset resets the GP and applies the change to the plot.
@@ -126,8 +137,9 @@ export default class GPPlot extends Plot {
 		}))
 	}
 
-	// update will usually be overwritten by the child class, but the default action is that it draws the mean, the standard deviation and the measurements.
+	// update will often be overwritten by the child class, but the default action is that it draws the mean, the standard deviation and the measurements.
 	update() {
+		this.drawSamples()
 		this.drawMean()
 		this.drawStd()
 		this.drawMeasurements()
@@ -199,7 +211,7 @@ export default class GPPlot extends Plot {
 	// drawMeasurements draws circles for each of the measurements that is present in the GP. When an extraMeasurement parameter has been defined for the object (with input and output parameters) then this is also drawn. This can be useful when an extra circle is drawn on a mouseover event.
 	drawMeasurements() {
 		// Extract all the measurements. Add the extra point if it is present.
-		const measurements = (this.extraPoint ? [...this.gp.measurements, this.extraPoint] : this.gp.measurements)
+		const measurements = (this.extraPoint ? [...this.gp.getMeasurements(), this.extraPoint] : this.gp.getMeasurements())
 
 		// Set up the measurement points using D3, first adding new ones, then updating existing ones and finally removing old ones.
 		const points = this.measurementContainer
@@ -214,6 +226,31 @@ export default class GPPlot extends Plot {
 			.attr('cy', measurement => this.scale.output(GaussianProcess.getOutputFromMeasurement(measurement)))
 		points.exit() // Outdated points.
 			.remove()
+	}
+
+	// drawSamples draws sample lines for the samples given by the GP object. To make samples, simply tell the GP object to have the correct number of samples.
+	drawSamples() {
+		// ToDo: pass data through transitioners.
+		// Extract the samples from the GP object. And as is usual with D3, define an array with all the elements that need to be drawn.
+		const samples = this.gp.getSamples({ input: this.plotPoints })
+		const lineData = samples.map(sample => sample.map((sampleValue, i) => ({
+			input: this.plotPoints[i],
+			output: sampleValue,
+		})))
+
+		// Set up a path for the mean line using D3.
+		const lines = this.sampleContainer
+			.selectAll('path')
+			.data(lineData)
+		lines.enter()
+			.append('path')
+			.attr('class', 'mean')
+			.merge(lines)
+			.attr('d', this.sampleFunction)
+		lines.exit()
+			.remove()
+
+		// TODO: DO STUFF WITH SAMPLES.
 	}
 
 	// isWithinRange checks whether a point (with an input and an output) falls within the range of this plot.
