@@ -23,7 +23,11 @@ const gpActions = {
 	}),
 	removeAllMeasurements: () => ({
 		type: 'GPRemoveAllMeasurements',
-	})
+	}),
+	setNumSamples: (numSamples) => ({
+		type: 'GPSetNumSamples',
+		numSamples,
+	}),
 }
 
 // The gpReducer is the special reducer for actions related to Gaussian Processes. First of all, it keeps track of the last action that has been applied to it, which is added to the state by the 'gpReducer' wrapper function. This function uses the 'defaultReducer' below, which does all the hard work of processing actions into the state.
@@ -65,6 +69,23 @@ function defaultReducer(state, action) {
 			}
 		}
 
+		case 'GPSetNumSamples': {
+			// Fix the samples array of the state.
+			const samples = (state.samples || []).slice(0) // Clone the array.
+			while (samples.length < action.numSamples) { // Add samples as long as necessary.
+				samples.push(RegularGP.generateSample())
+			}
+			while (samples.length > action.numSamples) { // Remove samples as long as necessary.
+				samples.pop()
+			}
+
+			// Set up the new state.
+			return {
+				...state,
+				samples,
+			}
+		}
+
 		default: {
 			throw new Error(`Unknown action type: the GP reducer was called with an unknown action type "${action.type}".`)
 		}
@@ -97,6 +118,7 @@ export function getGPModifierFunctions(options, dispatch, id) {
 			applyState: (state, updateGP) => dispatch(extendAction(gpActions.applyState(state, updateGP), extension)),
 			addMeasurement: (input, output) => dispatch(extendAction(gpActions.addMeasurement(input, output), extension)),
 			removeAllMeasurements: () => dispatch(extendAction(gpActions.removeAllMeasurements(), extension)),
+			setNumSamples: (numSamples) => dispatch(extendAction(gpActions.setNumSamples(numSamples), extension)),
 		}
 	})
 	return result
@@ -140,6 +162,12 @@ export default class GaussianProcess extends RegularGP {
 				break
 			}
 
+			case 'GPSetNumSamples': {
+				// Overwrite the samples array. We have to clone the array: if the GP later decides to add a sample on its own, this state will be affected.
+				this.state.samples = state.samples.slice(0)
+				break
+			}
+
 			default: {
 				throw new Error(`Unknown GP update action: a Gaussian Process update was requested concerning the action "${state.lastChange.type}" but this action is unknown.`)
 			}
@@ -160,6 +188,10 @@ export default class GaussianProcess extends RegularGP {
 	isStateValid(state) {
 		// Compare number of measurements.
 		if ((state.measurements || []).length !== (this.state.measurements || []).length)
+			return false
+
+		// Compare number of samples.
+		if ((state.samples || []).length !== (this.state.samples || []).length)
 			return false
 		
 		// No discrepancies found.

@@ -45,7 +45,7 @@ export default class GPPlot extends Plot {
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
 		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
-		this.sampleContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'mean') // TODO: MAKE OWN CLASS. ADD COLORS.
+		this.sampleContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'samples')
 		this.meanContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'mean')
 		this.measurementContainer = this.svgContainer.append('g').attr('class', 'measurements')
 
@@ -89,6 +89,9 @@ export default class GPPlot extends Plot {
 				std: new Transitioner({ transitionTime: this.transitionTime }).setValue(Math.sqrt(point.output.variance)),
 			},
 		}))
+
+		// Set up an array for samplers too, but it starts empty.
+		this.samples = []
 	}
 
 	// restore turns the GP object for this plot to its initial (default) settings.
@@ -116,8 +119,23 @@ export default class GPPlot extends Plot {
 		})
 
 		// Extract the samples.
-		// ToDo: throw the results in transitioners. Make new ones when necessary, and throw old ones out when necessary.
-		this.gp.getSamples({ input: this.plotPoints })
+		const newSamples = this.gp.getSamples({ input: this.plotPoints })
+		newSamples.forEach((sample, i) => {
+			// If there are no transitioners yet for this sample, create them first.
+			if (!this.samples[i]) {
+				this.samples[i] = []
+				sample.forEach((value, j) => {
+					this.samples[i][j] = new Transitioner({ transitionTime: this.transitionTime })
+				})
+			}
+			// Adjust the transitioners.
+			sample.forEach((value, j) => {
+				this.samples[i][j].setValue(value)
+			})
+		})
+		// Remove extra unnecessary samples.
+		while (this.samples.length > newSamples.length)
+			this.samples.pop()
 	}
 
 	// reset resets the GP and applies the change to the plot.
@@ -135,6 +153,11 @@ export default class GPPlot extends Plot {
 				std: point.output.std.getValue(),
 			}
 		}))
+	}
+
+	// getCurrentSamples checks the transitioners and asks them what the current samples are, based on the transitioning.
+	getCurrentSamples() {
+		return this.samples.map(sample => sample.map(point => point.getValue()))
 	}
 
 	// update will often be overwritten by the child class, but the default action is that it draws the mean, the standard deviation and the measurements.
@@ -230,9 +253,8 @@ export default class GPPlot extends Plot {
 
 	// drawSamples draws sample lines for the samples given by the GP object. To make samples, simply tell the GP object to have the correct number of samples.
 	drawSamples() {
-		// ToDo: pass data through transitioners.
-		// Extract the samples from the GP object. And as is usual with D3, define an array with all the elements that need to be drawn.
-		const samples = this.gp.getSamples({ input: this.plotPoints })
+		// Extract the samples from the transitioners. And as is usual with D3, define an array with all the elements that need to be drawn.
+		const samples = this.getCurrentSamples()
 		const lineData = samples.map(sample => sample.map((sampleValue, i) => ({
 			input: this.plotPoints[i],
 			output: sampleValue,
@@ -244,13 +266,11 @@ export default class GPPlot extends Plot {
 			.data(lineData)
 		lines.enter()
 			.append('path')
-			.attr('class', 'mean')
+			.attr('class', 'sample')
 			.merge(lines)
 			.attr('d', this.sampleFunction)
 		lines.exit()
 			.remove()
-
-		// TODO: DO STUFF WITH SAMPLES.
 	}
 
 	// isWithinRange checks whether a point (with an input and an output) falls within the range of this plot.

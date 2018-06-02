@@ -29,8 +29,9 @@ export default class GaussianProcess {
 	 * applyState takes the given GP state and completely builds up this GP object from scratch based on that data. It removes any data that was present previously, so it completely overrides the old GP.
 	 */
 	applyState(state = {}) {
-		// First of all remove all measurements currently present.
+		// First of all remove all measurements and samples currently present.
 		this.removeAllMeasurements()
+		this.removeAllSamples()
 
 		// Apply mean and covariance functions.
 		this.applyMeanFunction(state.meanData)
@@ -41,34 +42,33 @@ export default class GaussianProcess {
 		if (state.measurements)
 			this.addMeasurement(state.measurements)
 
-		// Set number of samples to zero.
-		this.setNumSamples(0)
-
-		// TODO: also load all other stuff. When doing this, also add it to the clone function below to be cloned.
+		// Set the appropriate samples.
+		if (state.samples)
+			this.addSample(state.samples)
 	}
 
 	/*
-	 * getState returns the state of this GP. It's all the data needed to rebuild the GP from scratch.
-	 */
-	getState() {
-		return this.state
-	}
-
-	/*
-	 * getClone makes a clone of this GP object. When doing this, it doesn't only copy the state, but also internal matrices and such.
+	 * getClone makes a clone of this GP object. It does this by cloning the state and subsequently rebuilding the GP from scratch. It's not the most efficient way of doing this, with all support matrices being recalculated, but it prevents complicated cloning code from being made. (It's hardly used anyway.)
 	 */
 	getClone() {
-		return new this.constructor(deepClone(this.getState()))
+		return new this.constructor(deepClone(this.state))
 	}
 
 	/*
-	 * reset erases all measurements that have been added to the Gaussian process, returning it to the state it had just after being initialized.
+	 * removeAllMeasurements erases all measurements that have been added to the Gaussian process.
 	 */
 	removeAllMeasurements() {
 		this.state.measurements = []
 		this.Kmm = [] // The covariance matrix for the measurements.
 		this.Kn = [] // The covariance matrix, including noise. This is the matrix that is going to be inverted.
 		this.Kni = [] // The inverted covariance matrix including noise.
+	}
+
+	/*
+	 * removeAllSamples erases all samples that have been added to the Gaussian process.
+	 */
+	removeAllSamples() {
+		delete this.samples
 	}
 
 	/*
@@ -126,15 +126,9 @@ export default class GaussianProcess {
 			}
 		}
 
-		// Set up necessary matrices.
-		const xm = this.getMeasurementInputs()
-		const Kms = applyFunctionToPairs(this.covarianceFunction, xm, input)
-		const Kss = applyFunctionToPairs(this.covarianceFunction, input)
-		const Ksm = math.transpose(Kms)
-
-		// Calculate inferences.
+		// Set up necessary matrices and apply the inference.
+		const { Kms, Kss, beta } = this.getGPRMatrices(input)
 		const ym = this.getMeasurementOutputs()
-		const beta = math.multiply(Ksm, this.Kni) // Ksm/(Kmm + Sn).
 		const mean = math.multiply(beta, ym)
 		const covariance = math.subtract(Kss, math.multiply(beta, Kms))
 
@@ -146,6 +140,18 @@ export default class GaussianProcess {
 				new GaussianDistribution(mean[0], covariance[0][0]) // We didn't want a joint distribution, and we also didn't get an array of input points. Just return a single distribution as output.
 			),
 		}
+	}
+
+	/*
+	 * getGPRMatrices takes a set of input points and calculate the Gaussian Process regression matrices {Kms, Kss, Ksm and beta} for it.
+	 */
+	getGPRMatrices(input) {
+		const xm = this.getMeasurementInputs()
+		const Kms = applyFunctionToPairs(this.covarianceFunction, xm, input)
+		const Kss = applyFunctionToPairs(this.covarianceFunction, input)
+		const Ksm = math.transpose(Kms)
+		const beta = math.multiply(Ksm, this.Kni) // Ksm/(Kmm + Sn).
+		return {Kms, Kss, Ksm, beta}
 	}
 	// TODO: IMPLEMENT ABOVE FUNCTION THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT.
 
@@ -216,9 +222,9 @@ export default class GaussianProcess {
 			return measurement.map(m => this.addMeasurement(m))
 
 		// So we have an individual measurement. Verify it.
-		if (!measurement.input)
-			throw new Error('Missing output: the function addMeasurement was called with a measurement with no output.')
-		if (!measurement.output)
+		if (measurement.input === undefined)
+			throw new Error('Missing input: the function addMeasurement was called with a measurement with no input.')
+		if (measurement.output === undefined)
 			throw new Error('Missing output: the function addMeasurement was called with a measurement with no output.')
 
 		// Process the measurement. This is to ensure that all the measurements are in the same format.
@@ -303,20 +309,13 @@ export default class GaussianProcess {
 			return measurement
 		}
 
-		window.math = math // TODO REMOVE
-		window.removeRow = removeRow
-		window.removeColumn = removeColumn
-		window.mergeMatrices = mergeMatrices
-		window.arrayAsColumn = arrayAsColumn
-		window.arrayAsRow = arrayAsRow
-		window.scalarAsMatrix = scalarAsMatrix
-
 		// We first apply a reverse matrix update to Kni. This uses the theory from https://math.stackexchange.com/questions/1248220/find-the-inverse-of-a-submatrix-of-a-given-matrix.
 		let vi = removeRow(this.Kni, index) // Get the row from the inverted matrix.
-		const ai = scalarAsMatrix(vi.splice(index, 1)[0]) // Ensure we have the row without the specific element in it.
+		const ai = scalarAsMatrix(vi.splice(index, 1)[0]) // Ensure we have the row without the specific element in it. Also remember that element.
 		vi = arrayAsRow(vi) // Put the array in row matrix form.
 		const ui = arrayAsColumn(removeColumn(this.Kni, index)) // Get the column from the inverted matrix.
 		let v = removeRow(this.Kn, index) // Do the same for the regular matrix.
+		v.splice(index, 1)
 		v = arrayAsRow(v)
 		const u = arrayAsColumn(removeColumn(this.Kn, index))
 		const z = new Array(this.state.measurements.length - 1).fill(0) // An array filled with zeros.
@@ -364,19 +363,41 @@ export default class GaussianProcess {
 	 * setNumSamples sets how many samples should be present in this GP. These are then stored so that, if measurements are added/removed, the samples are still similar.
 	 */
 	setNumSamples(numSamples) {
+		// Verify the argument.
+		if (isNaN(numSamples))
+			throw new Error(`Invalid argument: the setNumSamples function was called with an argument of type "${typeof numSamples}". It expected a number.`)
+		if (numSamples < 0)
+			throw new Error(`Invalid argument: the setNumSamples function was called with an argument "${numSamples}" but only positive numbers are allowed.`)
+
 		// Ensure that there is a samples array.
 		if (!this.state.samples)
 			this.state.samples = []
 
 		// Add samples as long as necessary.
 		while (this.state.samples.length < numSamples) {
-			this.state.samples.push(getGaussianRand(randomVectorLength))
+			this.state.samples.push(GaussianProcess.generateSample())
 		}
 
 		// Remove samples as long as necessary.
 		while (this.state.samples.length > numSamples) {
 			this.state.samples.pop()
 		}
+	}
+
+	/*
+	 * addSample adds the given sample(s) (random vectors) to the sample array. It can be a single sample, or multiple ones simultaneously. It returns the index of the sample that was added in the samples array. (When multiple samples were added, multiple indices are returned.)
+	 */
+	addSample(sample) {
+		// Check the arguments.
+		if (!Array.isArray(sample))
+			throw new Error('Invalid argument: the addSample function expects an array as argument; either an array of random vectors, or a random vector (which is also an array). It did not get this array.')
+		if (Array.isArray(sample[0]))
+			return sample.map((currSample) => this.addSample(currSample))
+		if (sample.length !== randomVectorLength)
+			throw new Error(`Invalid argument: the sample given to the addSample function should be an array of length ${randomVectorLength} but it had length ${sample.length}.`)
+		
+		// Add the sample.
+		this.samples.push(sample)
 	}
 
 	/*
@@ -396,6 +417,10 @@ export default class GaussianProcess {
 		if (!Array.isArray(param.input))
 			throw new Error('Missing input parameter: the getSamples function was given a parameter that did not have an "input" parameter with all the sample input points.')
 
+		// If there are now samples, don't do anything.
+		if ((this.state.samples || []).length === 0)
+			return []
+
 		// Generate a Cholesky decomposition for the given input.
 		const numPoints = 15 // If this number gets higher, then the Cholesky decomposition is likely to fail.
 		const sampleInput = getRange(getMinimum(param.input), getMaximum(param.input), numPoints)
@@ -405,24 +430,31 @@ export default class GaussianProcess {
 		})
 		const chol = choleskyDecomposition(predictionPart.output.variance)
 
-		// ToDo: just add the measurements once, and only change the output vector with the new samples.
-
-		// For each sample random vector, generate the sample part from the random vector and use it to come up with a full sample.
+		// Add the measurements to the GP and extract regression matrices.
 		const Kni = deepClone(this.Kni) // Store a copy of Kni to prevent drifts due to numerical innacuracies.
+		const extraMeasurements = sampleInput.map((input, i) => ({
+			input,
+			output: 0, // This will be adjusted later.
+			outputNoiseVariance: (this.defaultOutputNoiseVariance || 0.1) / 10000,
+		}))
+		const indices = this.addMeasurement(extraMeasurements)
+		const { beta } = this.getGPRMatrices(param.input)
+		const ym = this.getMeasurementOutputs()
+
+		// For each sample random vector, generate the output given at the sampling points, add them to the GP output vector, and apply regression to find the mean, which is our full sample.
 		const samples = (this.state.samples || []).map(randomVector => {
 			const samplePart = getGaussianSampleFromCholesky(predictionPart.output.mean, chol, randomVector)
-			const extraMeasurements = sampleInput.map((input, i) => ({
-				input,
-				output: samplePart[i],
-				outputNoiseVariance: (this.defaultOutputNoiseVariance || 0.1) / 10000,
-			}))
-			const indices = this.addMeasurement(extraMeasurements)
-			const prediction = this.getPrediction({ input: param.input }).map(measurement => measurement.output.mean)
-			while (indices.length > 0) // Remove measurements again to ensure we don't mess up the GP.
-				this.removeMeasurement(indices.pop())
-			return prediction
+			samplePart.forEach((value, i) => {
+				ym[indices[i]] = value
+			})
+			return math.multiply(beta, ym) // Note: if multiple types of regression (like FITC regression and such) are added later, then this might have to be changed as well.
 		})
+
+		// Remove measurements again to ensure we don't mess up the GP. (Note: a possible performance gain might be obtained if we don't adjust the GP but do all the regression here. The downside is that, if the way in which all measurements are added/removed is changed, we'd have to change it here too, which is more work.)
+		while (indices.length > 0) 
+			this.removeMeasurement(indices.pop())
 		this.Kni = Kni // Restore the copied Kni matrix.
+
 		return samples
 	}
 
@@ -463,6 +495,13 @@ export default class GaussianProcess {
 		return measurement.output
 	}
 
+	/*
+	 * generateSample generates a random vector representing a sample. It's an array of numbers.
+	 */
+	static generateSample() {
+		return getGaussianRand(randomVectorLength)
+	}
+
 	// TODO: SORT OUT THE FUNCTIONS BELOW.
 	/*
 		predictFromPreviousPrediction(xs, prediction) {
@@ -491,43 +530,6 @@ export default class GaussianProcess {
 				Sigma,
 				std,
 			}
-		}
-	
-		getSample(x, canvas) {
-			// Okay, we kind of cheat. Because the math is complex (Cholesky decompositions and such) and only work for a small number of points (up to roughly 21, depending on the circumstances) we only take a sample of a small number of points for our first sample. Then we take this sample, construct a new GP out of it, and find its mean, which is to be considered the actual sample. It's not fully legit, but it comes as close as we can get, and at least it gives a smooth line.
-	
-			// So, first take a small sample.
-			const nSample = 21
-			const sampleX = getRange(x[0], x[x.length - 1], nSample)
-			const samplePrediction = this.predict(sampleX)
-			const sampleY = math.add(samplePrediction.mu, math.multiply(chol(samplePrediction.Sigma), getRand(nSample)))
-	
-			// Then make a new GP with this sample as "measurements" with very little measurement noise.
-			const sampleGP = new GP({
-				lx: this.lx,
-				ly: this.ly,
-				sy: this.ly / 100,
-				xm: sampleX,
-				ym: sampleY,
-			})
-			const prediction = sampleGP.predict(x)
-			return {
-				x,
-				y: prediction.mu
-			}
-		}
-	
-		plotSample(sample, canvas, color = '#11dd55') {
-			// We draw the given sample line.
-			const ctx = canvas.getContext('2d')
-			ctx.beginPath()
-			sample.x.forEach((v, i) => (i === 0 ?
-				ctx.moveTo(sample.x[i], canvas.height / 2 - sample.y[i]) :
-				ctx.lineTo(sample.x[i], canvas.height / 2 - sample.y[i])
-			))
-			ctx.strokeStyle = color
-			ctx.lineWidth = 3
-			ctx.stroke()
 		}*/
 }
 
