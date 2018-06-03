@@ -56,8 +56,8 @@ export default class GPPlot extends Plot {
 		}
 
 		// Set up the axes.
-		const inputAxis = axisBottom(this.scale.input)
-		const outputAxis = axisLeft(this.scale.output)
+		const inputAxis = this.getInputAxisStyle()
+		const outputAxis = this.getOutputAxisStyle()
 		this.axisContainer
 			.append('g')
 			.attr('transform', `translate(0,${this.scale.output(0)})`)
@@ -92,6 +92,16 @@ export default class GPPlot extends Plot {
 
 		// Set up an array for samplers too, but it starts empty.
 		this.samples = []
+	}
+
+	// getInputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
+	getInputAxisStyle() {
+		return axisBottom(this.scale.input)
+	}
+
+	// getOutputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
+	getOutputAxisStyle() {
+		return axisLeft(this.scale.output)
 	}
 
 	// restore turns the GP object for this plot to its initial (default) settings.

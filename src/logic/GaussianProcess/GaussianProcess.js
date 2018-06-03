@@ -153,7 +153,7 @@ export default class GaussianProcess {
 		const beta = math.multiply(Ksm, this.Kni) // Ksm/(Kmm + Sn).
 		return {Kms, Kss, Ksm, beta}
 	}
-	// TODO: IMPLEMENT ABOVE FUNCTION THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT.
+	// TODO: IMPLEMENT ABOVE FUNCTIONS THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT. CHECK OUT https://davidea.st/articles/comlink-simple-web-worker FOR DETAILS?
 
 	/* 
 	 * getPrior returns the prior distribution of the GP for the given test points. So that's the distribution when no measurements at all have been added. The set-up is identical as that of getPrediction.

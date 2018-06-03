@@ -166,6 +166,7 @@ class Tree extends Component {
 										'chapter',
 										{ 'active': active },
 										{ 'previousActive': previousActive },
+										{ 'unwritten': chapter.unwritten },
 									)}
 									ref={obj => this.chapterBlocks[chapter.name] = obj}
 									style={{

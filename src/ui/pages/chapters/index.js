@@ -40,6 +40,7 @@ chapters.whatisgpr = {
 		x: 0,
 		y: 0,
 	},
+	unwritten: true,
 }
 
 chapters.fundamentalassumptions = {
@@ -75,6 +76,7 @@ chapters.samplingfunctions = {
 		x: chapters.fundamentalassumptions.position.x - (size.x + margin.x),
 		y: chapters.fundamentalassumptions.position.y + size.y + 2*margin.y,
 	},
+	unwritten: true,
 }
 
 chapters.addingdata = {
@@ -96,6 +98,7 @@ chapters.addingdata = {
 		x: chapters.samplingfunctions.position.x + (size.x + margin.x),
 		y: chapters.samplingfunctions.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.lineartransformations = {
@@ -111,6 +114,7 @@ chapters.lineartransformations = {
 		x: chapters.addingdata.position.x + (size.x + margin.x),
 		y: chapters.addingdata.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.hyperparameters = {
@@ -126,6 +130,7 @@ chapters.hyperparameters = {
 		x: chapters.addingdata.position.x - 3*(size.x + margin.x),
 		y: chapters.addingdata.position.y + size.y + 2*margin.y,
 	},
+	unwritten: true,
 }
 
 chapters.covariancefunctions = {
@@ -141,6 +146,7 @@ chapters.covariancefunctions = {
 		x: chapters.hyperparameters.position.x,
 		y: chapters.hyperparameters.position.y + (size.y + margin.y),
 	},
+	unwritten: true,
 }
 
 chapters.multidimensionalinput = {
@@ -156,6 +162,7 @@ chapters.multidimensionalinput = {
 		x: chapters.hyperparameters.position.x + (size.x + margin.x),
 		y: chapters.hyperparameters.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.multidimensionaloutput = {
@@ -171,6 +178,7 @@ chapters.multidimensionaloutput = {
 		x: chapters.multidimensionalinput.position.x,
 		y: chapters.multidimensionalinput.position.y + (size.y + margin.y),
 	},
+	unwritten: true,
 }
 
 chapters.sparsemethods = {
@@ -186,6 +194,7 @@ chapters.sparsemethods = {
 		x: chapters.multidimensionalinput.position.x + (size.x + margin.x),
 		y: chapters.multidimensionalinput.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.onlinemethods = {
@@ -201,6 +210,7 @@ chapters.onlinemethods = {
 		x: chapters.sparsemethods.position.x,
 		y: chapters.sparsemethods.position.y + (size.y + margin.y),
 	},
+	unwritten: true,
 }
 
 chapters.stochastictestinputs = {
@@ -216,6 +226,7 @@ chapters.stochastictestinputs = {
 		x: chapters.sparsemethods.position.x + (size.x + margin.x),
 		y: chapters.sparsemethods.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.stochasticmeasurementinputs = {
@@ -231,6 +242,7 @@ chapters.stochasticmeasurementinputs = {
 		x: chapters.stochastictestinputs.position.x,
 		y: chapters.stochastictestinputs.position.y + (size.y + margin.y),
 	},
+	unwritten: true,
 }
 
 chapters.gpoptimization = {
@@ -246,6 +258,7 @@ chapters.gpoptimization = {
 		x: chapters.stochastictestinputs.position.x + (size.x + margin.x),
 		y: chapters.stochastictestinputs.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.functionoptimization = {
@@ -261,6 +274,7 @@ chapters.functionoptimization = {
 		x: chapters.gpoptimization.position.x,
 		y: chapters.gpoptimization.position.y + (size.y + margin.y),
 	},
+	unwritten: true,
 }
 
 chapters.measuringlinearrelationships = {
@@ -276,6 +290,7 @@ chapters.measuringlinearrelationships = {
 		x: chapters.gpoptimization.position.x + (size.x + margin.x),
 		y: chapters.gpoptimization.position.y,
 	},
+	unwritten: true,
 }
 
 chapters.sonig = {
@@ -291,6 +306,7 @@ chapters.sonig = {
 		x: chapters.onlinemethods.position.x,
 		y: chapters.onlinemethods.position.y + size.y + 2*margin.y,
 	},
+	unwritten: true,
 }
 
 chapters.sisonig = {
@@ -306,6 +322,7 @@ chapters.sisonig = {
 		x: chapters.sonig.position.x,
 		y: chapters.sonig.position.y + (size.y + margin.y),
 	},
+	unwritten: true,
 }
 
 // Walk through the chapters, adding some extra data.

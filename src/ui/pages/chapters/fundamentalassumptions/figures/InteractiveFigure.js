@@ -55,17 +55,23 @@ class InteractivePlot extends GPPlot {
 		// Set up the plot range.
 		this.range = {
 			input: {
-				min: -4,
-				max: 5,
+				min: -2,
+				max: 6,
 			},
 			output: {
-				min: -3,
-				max: 3,
+				min: -5,
+				max: 5,
 			},
 		}
 
 		// Set up the GP. This data will be installed as soon as the GP Plot is set up. [ToDo: rename outputNoise to defaultOutputNoise]
 		this.gpData = gpData
+	}
+	getInputAxisStyle() {
+		return super.getInputAxisStyle().tickFormat(v => `${(v + 24) % 24}:00`)
+	}
+	getOutputAxisStyle() {
+		return super.getOutputAxisStyle().tickFormat(v => `${v.toFixed(1)} °C`)
 	}
 	handleClick(pos, evt) {
 		this.props.data.gp.addMeasurement({

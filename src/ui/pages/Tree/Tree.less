@@ -30,6 +30,22 @@
 				width: 320px;
 				z-index: 0;
 
+				&.previousActive {
+					z-index: 1;
+				}
+
+				&.active {
+					z-index: 2;
+
+					.title {
+						box-shadow: 0 2px 4px rgba(0,0,0,.26); // Only add a shadow when the description is active, so the shadow falls on the description.
+
+						svg {
+							transform: translateX(-50%) scaleY(-1);
+						}
+					}
+				}
+
 				.title {
 					background: inherit;
 					border-radius: 16px 16px 0 0;
@@ -132,22 +148,6 @@
 						}
 					}
 				}
-
-				&.previousActive {
-					z-index: 1;
-				}
-
-				&.active {
-					z-index: 2;
-
-					.title {
-						box-shadow: 0 2px 4px rgba(0,0,0,.26); // Only add a shadow when the description is active, so the shadow falls on the description.
-
-						svg {
-							transform: translateX(-50%) scaleY(-1);
-						}
-					}
-				}
 			}
 		}
 	}
@@ -205,6 +205,15 @@
 		.chapter {
 			background: #013;
 
+			&.unwritten {
+				// background: #458;
+				color: #777;
+
+				.description {
+					// background: #56a;
+				}
+			}
+
 			.title {
 				svg {
 					path {
@@ -239,6 +248,10 @@
 
 		.chapter {
 			background: #adf;
+
+			&.unwritten {
+				color: #999;
+			}
 
 			.title {
 				svg {
