@@ -2,7 +2,7 @@
 
 .figure {
 	border-radius: 8px;
-	margin: 12px 6px;
+	margin: 16px 0px;
 	padding: 12px;
 	position: relative;
 
@@ -138,6 +138,7 @@
 
 		// Arrange button responsiveness.
 		.btn {
+			.notSelectable;
 			cursor: pointer;
 
 			&:hover {
@@ -206,10 +207,14 @@
 	&::before {
 		content: '';
 		height: 100%;
-		left: -7px;
 		position: absolute;
 		top: 0;
 		width: 3px;
+
+		left: -7px;
+		@media @desktop {
+			left: -12px;
+		}
 	}
 
 	p:last-child {

@@ -79,6 +79,14 @@
 
 		.section {
 			.pagePadding;
+			text-align: justify;
+
+			h4 {
+				font-size: 1.2em;
+				font-weight: bold;
+				margin: 16px 0 10px;
+				padding: 2px 0;
+			}
 		}
 
 		.loading {
@@ -141,6 +149,15 @@
 				background-image: linear-gradient(to right, #eee, #888, #eee)
 			}
 		}
+
+		.chapterContainer {
+			.section {
+				h4 {
+					border-bottom: 1px dashed @lightThemeColor;
+					color: @lightThemeColor;
+				}
+			}
+		}
 	}
 }
 .darkTheme {
@@ -157,6 +174,15 @@
 		footer {
 			hr {
 				background-image: linear-gradient(to right, #222, #999, #222)
+			}
+		}
+
+		.chapterContainer {
+			.section {
+				h4 {
+					border-bottom: 1px dashed @darkThemeColor;
+					color: @darkThemeColor;
+				}
 			}
 		}
 	}

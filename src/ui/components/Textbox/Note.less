@@ -1,0 +1,60 @@
+@import '../../shared/params.less';
+
+
+.noteContainer {
+
+	.noteDial {
+		.notSelectable;
+		border-radius: 50%;
+		cursor: pointer;
+		display: inline-block;
+		height: 1rem;
+		position: relative;
+		transform: translateY(15%);
+		width: 1rem;
+	
+		&::before {
+			color: #fff;
+			content: '*';
+			font-size: 1.5rem;
+			line-height: 0;
+			left: 50%;
+			position: absolute;
+			top: 85%; // This was manually tuned. If this doesn't work in other browsers, we could always replace the star by an SVG star.
+			transform: translate(-50%, -50%);
+		}
+	}
+
+	.note {
+		border-radius: .3rem;
+		padding: .07rem .2rem;
+	}
+}
+
+.lightTheme {
+	.noteContainer {
+		.noteDial {
+			background: @lightThemeColor;
+			&:hover {
+				background: lighten(@lightThemeColor, 15%);
+			}
+		}
+		.note {
+			background: lighten(@darkThemeColor, 10%);
+		}
+	}
+}
+
+.darkTheme {
+	.noteContainer {
+		.noteDial {
+			background: @lightThemeColor;
+			&:hover {
+				background: lighten(@lightThemeColor, 15%);
+			}
+		}
+		.note {
+			background: darken(@lightThemeColor, 15%);
+		}
+	}
+}

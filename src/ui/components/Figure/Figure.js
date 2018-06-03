@@ -44,11 +44,10 @@ export default class Figure extends Component {
 
 	// render sets up the figure, with a figure number and potentially a control bar.
 	render() {
-		// Verify that a section is given and process related data.
-		if (!this.props.section)
-			throw new Error('Missing section: a figure must be told which section it belongs to. Provide a section object along with the figure.')
+		// Verify that a section is given.
 		const section = this.props.section
-		section.counters.figure++
+		if (!section)
+			throw new Error('Missing section: a figure must be told which section it belongs to. Provide a section object along with the figure.')
 
 		// Verify necessary functions.
 		if (!this.renderSubFigures)
@@ -59,7 +58,7 @@ export default class Figure extends Component {
 			<div className={classnames('figure', this.props.className)}>
 				<div className="subFigures">{this.renderSubFigures()}</div>
 				{this.renderControlBar()}
-				<span className="figureCounter">Figure {section.number}.{section.counters.figure}</span>
+				<span className="figureCounter">Figure {section.number}.{this.props.number}</span>
 			</div>
 		)
 	}

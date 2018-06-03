@@ -17,6 +17,7 @@ const gpData = {
 
 class InteractiveFigure extends Figure {
 	renderSubFigures() {
+		this.num = 'A'
 		return <InteractivePlot />
 	}
 	onReset() {
