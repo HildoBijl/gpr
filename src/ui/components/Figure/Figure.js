@@ -3,6 +3,7 @@ import './Figure.css'
 import React, { Component } from 'react'
 import classnames from 'classnames'
 
+import Counter from '../Counter/Counter.js'
 import Refresh from '../../icons/Refresh.js'
 
 export default class Figure extends Component {
@@ -21,14 +22,7 @@ export default class Figure extends Component {
 		if (this.setCounter && this.getCounter) {
 			const numCounters = this.numCounters || 1 // It is possible to use multiple counters. In this case, the parameters `numCounters` should be set in the constructor.
 			new Array(numCounters).fill(0).forEach((_, index) => {
-				const value = this.getCounter(index)
-				items.push(
-					<div key={`counter${index}`} className="counter">
-						<div className="btn minus" onClick={(event) => this.setCounter(value - (event.shiftKey ? 10 : 1), index)} />
-						<div className="item count">{value}</div>
-						<div className="btn plus" onClick={(event) => this.setCounter(value + (event.shiftKey ? 10 : 1), index)} />
-					</div>
-				)
+				items.push(<Counter key={`counter${index}`} value={this.getCounter(index)} setValue={(value) => this.setCounter(value, index)} />)
 			})
 		}
 
