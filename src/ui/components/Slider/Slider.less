@@ -1,8 +1,58 @@
+@import '../../shared/params.less';
+
+@buttonWidth: 2rem;
+@height: 1.75rem;
+@radius: 0.6rem;
+@slideRadius: 0.125rem;
+@width: 12rem;
+
 .slider {
+	.notSelectable;
+	position: relative;
+	height: @height;
+	width: @width;
+
 	.track {
-		background: red;
-		border-radius: 0.125rem;
-		height: 0.25rem;
-		width: 12rem;
+		background: darken(@lightThemeColor, 15%);
+		border-radius: @slideRadius;
+		height: 2*@slideRadius;
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: @width - 2*@radius;
+		z-index: 1;
+	}
+	.clickArea {
+		border-radius: @radius;
+		cursor: pointer;
+		height: 2*@radius;
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: @width;
+		z-index: 2;
+	}
+	.slideButton {
+		background: @lightThemeColor;
+		border-radius: @radius;
+		cursor: pointer;
+		height: 2*@radius;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: @buttonWidth;
+		z-index: 3;
+
+	}
+
+	&:hover, &.dragging {
+		.track {
+			background: darken(@lightThemeColor, 13%);
+		}
+		.slideButton {
+			background: lighten(@lightThemeColor, 10%);
+		}
 	}
 }

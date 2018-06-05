@@ -21,7 +21,6 @@ class InteractiveFigure extends Figure {
 		this.numSliders = 2
 	}
 	renderSubFigures() {
-		this.num = 'A'
 		return <InteractivePlot />
 	}
 	onReset() {
@@ -39,7 +38,6 @@ class InteractiveFigure extends Figure {
 	}
 	getSlider(index) {
 		// ToDo: pull directly from the GP.
-		console.log(this.props.data)
 		return this.props.data[`slider${index}`]
 	}
 }
@@ -55,7 +53,7 @@ class InteractivePlot extends GPPlot {
 	//   For all these actions, add the option to recalculate all matrices afterwards, or to simply continue with the previous matrix that existed.
 
 	// TODO
-	// - Set up a slider that can be adjusted/slid.
+	// V Set up a slider that can be adjusted/slid.
 	// - Couple the slider to a hyperparameter.
 
 	// TODO:
@@ -92,6 +90,7 @@ class InteractivePlot extends GPPlot {
 		return super.getOutputAxisStyle().tickFormat(v => `${v.toFixed(1)} °C`)
 	}
 	handleClick(pos, evt) {
+		console.log(this.props.data)
 		this.props.data.gp.addMeasurement({
 			input: this.scale.input.invert(pos.x),
 			output: new GaussianDistribution(this.scale.output.invert(pos.y), Math.random()),
