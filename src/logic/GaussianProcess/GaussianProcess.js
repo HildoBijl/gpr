@@ -375,7 +375,7 @@ export default class GaussianProcess {
 
 		// Add samples as long as necessary.
 		while (this.state.samples.length < numSamples) {
-			this.state.samples.push(GaussianProcess.generateSample())
+			this.addSample(GaussianProcess.generateSample())
 		}
 
 		// Remove samples as long as necessary.
@@ -396,8 +396,12 @@ export default class GaussianProcess {
 		if (sample.length !== randomVectorLength)
 			throw new Error(`Invalid argument: the sample given to the addSample function should be an array of length ${randomVectorLength} but it had length ${sample.length}.`)
 		
+		// Ensure that there is a samples array.
+		if (!this.state.samples)
+			this.state.samples = []
+			
 		// Add the sample.
-		this.samples.push(sample)
+		this.state.samples.push(sample)
 	}
 
 	/*

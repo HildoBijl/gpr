@@ -16,6 +16,10 @@ const gpData = {
 }
 
 class InteractiveFigure extends Figure {
+	constructor() {
+		super()
+		this.numSliders = 2
+	}
 	renderSubFigures() {
 		this.num = 'A'
 		return <InteractivePlot />
@@ -29,14 +33,19 @@ class InteractiveFigure extends Figure {
 	getCounter(counterIndex) {
 		return (this.props.data.gp.samples || []).length
 	}
+	setSlider(newValue, definite, index) {
+		// ToDo: set directly into the GP.
+		this.props.data.set({ [`slider${index}`]: newValue })
+	}
+	getSlider(index) {
+		// ToDo: pull directly from the GP.
+		console.log(this.props.data)
+		return this.props.data[`slider${index}`]
+	}
 }
 export default connectToData(InteractiveFigure, id, { gp: true })
 
 class InteractivePlot extends GPPlot {
-	// TODO:
-	// - Set up a separate function in the GPPlot class to draw a sliver of the background for a GP.
-	// - Use this to start making content.
-
 	// TODO:
 	// - Set up a function in the GP class to recalculate all matrices.
 	// - Add actions to the reduxGP file (and to the GP):
@@ -44,6 +53,14 @@ class InteractivePlot extends GPPlot {
 	//   x setCovarianceFunction
 	//   x setDefaultOutputNoise
 	//   For all these actions, add the option to recalculate all matrices afterwards, or to simply continue with the previous matrix that existed.
+
+	// TODO
+	// - Set up a slider that can be adjusted/slid.
+	// - Couple the slider to a hyperparameter.
+
+	// TODO:
+	// - Set up a separate function in the GPPlot class to draw a sliver of the background for a GP.
+	// - Use this for certain plots in the chapter.
 
 	constructor() {
 		super()

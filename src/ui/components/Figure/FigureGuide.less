@@ -1,0 +1,38 @@
+@import '../../shared/params.less';
+
+.figureGuide {
+	position: relative;
+
+	&::before {
+		content: '';
+		height: 100%;
+		position: absolute;
+		top: 0;
+		width: 3px;
+
+		left: -7px;
+		@media @desktop {
+			left: -12px;
+		}
+	}
+
+	p:last-child {
+		margin-bottom: 0;
+	}
+}
+
+// Coloring
+.lightTheme {
+	.figureGuide {
+		&::before {
+			background: @lightFigureGuideColor;
+		}
+	}
+}
+.darkTheme {
+	.figureGuide {
+		&::before {
+			background: @darkFigureGuideColor;
+		}
+	}
+}

@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 import classnames from 'classnames'
 
 import Counter from '../Counter/Counter.js'
+import Slider from '../Slider/Slider.js'
 import Refresh from '../../icons/Refresh.js'
 
 export default class Figure extends Component {
@@ -18,9 +19,17 @@ export default class Figure extends Component {
 		// Create an array that will contain all items needed for the control bar.
 		const items = []
 
-		// If a setCounter and a getCounter function has been defined, we add counters.
+		// If a setSlider and a getSlider function has been defined, we add sliders. These will have a value between 0 (left) and 1 (right). The setSlider function can have three parameters: value (obviously), definite (a boolean that says whether the value is still definite - we are done dragging/sliding) and index (the index of the slider, in case we have multiple).
+		if (this.setSlider && this.getSlider) {
+			const numSliders = this.numSliders || 1 // It is possible to use multiple sliders. In this case, the parameter `numSliders` should be set in the constructor.
+			new Array(numSliders).fill(0).forEach((_, index) => {
+				items.push(<Slider key={`slider${index}`} value={this.getSlider(index)} setValue={(value, definite) => this.setSlider(value, definite, index)} />)
+			})
+		}
+
+		// If a setCounter and a getCounter function has been defined, we add counters. These can be negative too, but you could also have a setCounter function which adjusts negative values to zero.
 		if (this.setCounter && this.getCounter) {
-			const numCounters = this.numCounters || 1 // It is possible to use multiple counters. In this case, the parameters `numCounters` should be set in the constructor.
+			const numCounters = this.numCounters || 1 // It is possible to use multiple counters. In this case, the parameter `numCounters` should be set in the constructor.
 			new Array(numCounters).fill(0).forEach((_, index) => {
 				items.push(<Counter key={`counter${index}`} value={this.getCounter(index)} setValue={(value) => this.setCounter(value, index)} />)
 			})

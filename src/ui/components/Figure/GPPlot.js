@@ -90,8 +90,9 @@ export default class GPPlot extends Plot {
 			},
 		}))
 
-		// Set up an array for samplers too, but it starts empty.
+		// Set up sample arrays too, with transitioners inside them.
 		this.samples = []
+		this.recalculateSamples()
 	}
 
 	// getInputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
@@ -129,6 +130,12 @@ export default class GPPlot extends Plot {
 		})
 
 		// Extract the samples.
+		this.recalculateSamples() 
+	}
+
+	// recalculateSamples extracts sample values from the GP and plugs them into the transitioners.
+	recalculateSamples() {
+		// Extract the samples from the GP and plug them into the transitioners.
 		const newSamples = this.gp.getSamples({ input: this.plotPoints })
 		newSamples.forEach((sample, i) => {
 			// If there are no transitioners yet for this sample, create them first.
@@ -143,6 +150,7 @@ export default class GPPlot extends Plot {
 				this.samples[i][j].setValue(value)
 			})
 		})
+
 		// Remove extra unnecessary samples.
 		while (this.samples.length > newSamples.length)
 			this.samples.pop()
