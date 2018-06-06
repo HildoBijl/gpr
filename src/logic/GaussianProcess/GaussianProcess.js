@@ -5,9 +5,8 @@ import math from 'mathjs'
 import { applyFunctionToPairs, deepClone, getRange, getMinimum, getMaximum } from '../util.js'
 import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix, choleskyDecomposition, getGaussianRand, getGaussianSampleFromCholesky, removeRow, removeColumn } from '../math.js'
 import GaussianDistribution from '../gaussianDistribution.js'
-// ToDo: implement getSample with math functions like getRand, cholesky and such.
 
-const randomVectorLength = 15 // The number of numbers in a random vector, used for generating samples.
+const randomVectorLength = 15 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20) then the Cholesky decomposition needed to generate a sample is likely to fail.
 
 export default class GaussianProcess {
 	/*
@@ -34,11 +33,11 @@ export default class GaussianProcess {
 		this.removeAllSamples()
 
 		// Apply mean and covariance functions.
-		this.applyMeanFunction(state.meanData)
-		this.applyCovarianceFunction(state.covarianceData)
+		this.setMeanFunction(state.meanData)
+		this.setCovarianceFunction(state.covarianceData)
 
 		// Add all the measurements given in the state.
-		this.state.defaultOutputNoiseVariance = state.defaultOutputNoiseVariance // Store the default output noise, if given.
+		this.setDefaultOutputNoiseVariance(state.defaultOutputNoiseVariance)
 		if (state.measurements)
 			this.addMeasurement(state.measurements)
 
@@ -72,21 +71,31 @@ export default class GaussianProcess {
 	}
 
 	/*
-	 * applyMeanFunction sets up a new mean function for the GP.
+	 * setMeanFunction sets up a new mean function for the GP.
 	 */
-	applyMeanFunction(meanData) {
+	setMeanFunction(meanData) {
 		this.state.meanData = meanData
 		this.meanFunction = meanData ? getMeanFunction(meanData) : getDefaultMeanFunction()
-		// ToDo: reevaluate all matrices.
+		this.recalculateMatrices()
 	}
 
 	/*
-	 * applyCovarianceFunction sets up a new covariance function for the GP.
+	 * setCovarianceFunction sets up a new covariance function for the GP.
 	 */
-	applyCovarianceFunction(covarianceData) {
+	setCovarianceFunction(covarianceData) {
 		this.state.covarianceData = covarianceData
 		this.covarianceFunction = covarianceData ? getCovarianceFunction(covarianceData) : getDefaultCovarianceFunction()
-		// ToDo: reevaluate all matrices.
+		this.recalculateMatrices()
+	}
+
+	/*
+	 * setDefaultOutputNoiseVariance stores the given default output noise variance and applies it to all earlier measurements that did not have any output noise specified.
+	 */
+	setDefaultOutputNoiseVariance(defaultOutputNoiseVariance) {
+		if (defaultOutputNoiseVariance === this.defaultOutputNoiseVariance)
+			return
+		this.state.defaultOutputNoiseVariance = defaultOutputNoiseVariance
+		this.recalculateMatrices()
 	}
 
 	/* 
@@ -243,9 +252,9 @@ export default class GaussianProcess {
 		}
 
 		// Add a column to matrices Kmm and the matrix-to-invert Kn.
-		const newColumn = arrayAsColumn(this.state.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
-		const newRow = arrayAsRow(this.state.measurements.map(oldMeasurement => this.covarianceFunction(oldMeasurement.input, measurement.input)))
-		const selfVariance = this.covarianceFunction(measurement.input, measurement.input)
+		const newColumn = applyFunctionToPairs(this.covarianceFunctionForMeasurements.bind(this), this.state.measurements, [measurement])
+		const newRow = (newColumn.length === 0 ? [[]] : math.transpose(newColumn)) // We need a fix to make sure an empty column [] is properly transformed into an empty row [[]].
+		const selfVariance = this.covarianceFunctionForMeasurements(measurement, measurement)
 
 		// Update Kmm.
 		this.Kmm = mergeMatrices([
@@ -259,22 +268,22 @@ export default class GaussianProcess {
 		])
 
 		// Update Kn.
-		const outputVariance = processedMeasurement.outputNoiseVariance || this.state.defaultOutputNoiseVariance
+		const outputNoiseVariance = processedMeasurement.outputNoiseVariance || this.state.defaultOutputNoiseVariance
 		this.Kn = mergeMatrices([
 			[
 				this.Kn,
 				newColumn,
 			], [
 				newRow,
-				scalarAsMatrix(selfVariance + outputVariance),
+				scalarAsMatrix(selfVariance + outputNoiseVariance),
 			],
 		])
 
 		// Update the inverse of Kn.
 		if (this.state.measurements.length === 0) {
-			this.Kni = scalarAsMatrix(1 / (selfVariance + outputVariance))
+			this.Kni = scalarAsMatrix(1 / (selfVariance + outputNoiseVariance))
 		} else {
-			const Delta = 1 / ((selfVariance + outputVariance) - multiplyMatrices(newRow, this.Kni, newColumn))
+			const Delta = 1 / ((selfVariance + outputNoiseVariance) - multiplyMatrices(newRow, this.Kni, newColumn))
 			const rowResult = math.multiply(newRow, this.Kni)
 			const columnResult = math.multiply(this.Kni, newColumn)
 			this.Kni = mergeMatrices([
@@ -358,6 +367,26 @@ export default class GaussianProcess {
 		return this.state.measurements.splice(index, 1)[0]
 	}
 
+	/*
+	 * recalculateMatrices throws out all support matrices for this GP and recalculates them from scratch. It at least does this in one go, and not incrementally, which is what does happen when measurements are added one by one.
+	 */
+	recalculateMatrices() {
+		// Check that we have measurements.
+		if (this.state.measurements.length === 0)
+			return this.removeAllMeasurements() // This will reset all the matrices to the right size.
+		
+		// Recalculate respective matrices.
+		this.Kmm = applyFunctionToPairs(this.covarianceFunctionForMeasurements.bind(this), this.state.measurements)
+		this.Kn = this.Kmm.map((row, rowIndex) => row.map((covariance, colIndex) => { // Clone the matrix and adjust the diagonal elements.
+			if (rowIndex !== colIndex)
+				return covariance
+			const outputNoiseVariance = this.state.measurements[rowIndex].outputNoiseVariance || this.state.defaultOutputNoiseVariance
+			if (outputNoiseVariance === undefined)
+				throw new Error(`Missing output noise variance: in the Gaussian Process, measurement ${rowIndex} does not have an output noise variance defined, nor is there a default output noise variance.`)
+			return covariance + outputNoiseVariance
+		}))
+		this.Kni = math.inv(this.Kn)
+	}
 
 	/*
 	 * setNumSamples sets how many samples should be present in this GP. These are then stored so that, if measurements are added/removed, the samples are still similar.
@@ -426,13 +455,20 @@ export default class GaussianProcess {
 			return []
 
 		// Generate a Cholesky decomposition for the given input.
-		const numPoints = 15 // If this number gets higher, then the Cholesky decomposition is likely to fail.
-		const sampleInput = getRange(getMinimum(param.input), getMaximum(param.input), numPoints)
+		const sampleInput = getRange(getMinimum(param.input), getMaximum(param.input), randomVectorLength)
 		const predictionPart = this.getPrediction({
 			input: sampleInput,
 			joint: true,
 		})
-		const chol = choleskyDecomposition(predictionPart.output.variance)
+		let chol = choleskyDecomposition(predictionPart.output.variance)
+
+		// If the Cholesky decomposition did fail, increase the diagonal and try again. Every iteration, increase the addition to the diagonal addition until it works.
+		for (let i = 0; isNaN(chol[chol.length-1][chol.length-1]); i++) {
+			const variance = predictionPart.output.variance.map((row, rowIndex) => row.map((value, colIndex) => {
+				return (rowIndex === colIndex ? value + (this.defaultOutputNoiseVariance || 0.00001)*Math.pow(Math.E, i) : value)
+			}))
+			chol = choleskyDecomposition(variance)
+		}
 
 		// Add the measurements to the GP and extract regression matrices.
 		const Kni = deepClone(this.Kni) // Store a copy of Kni to prevent drifts due to numerical innacuracies.
@@ -460,6 +496,20 @@ export default class GaussianProcess {
 		this.Kni = Kni // Restore the copied Kni matrix.
 
 		return samples
+	}
+
+	/*
+	 * meanFunctionForMeasurements is the mean function which supports entire measurements to be plugged in. It extracts the inputs by itself.
+	 */
+	meanFunctionForMeasurements(m1, m2) {
+		return this.meanFunction(m1.input, m2.input)
+	}
+
+	/*
+	 * covarianceFunctionForMeasurements is the covariance function which supports entire measurements to be plugged in. It extracts the inputs by itself.
+	 */
+	covarianceFunctionForMeasurements(m1, m2) {
+		return this.covarianceFunction(m1.input, m2.input)
 	}
 
 	/*

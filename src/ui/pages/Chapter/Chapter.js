@@ -68,6 +68,10 @@ class Chapter extends Component {
 					if (this.props.chapter !== chapter.name)
 						return
 
+					// Log the error.
+					console.error(`An error occurred while loading the page "${chapter.title}" (section ${section}). Please try refreshing the page. If that does not work, contact us.`)
+					console.log(err.message)
+
 					// Note the failure in the Chapter state.
 					const newStatus = deepClone(this.state.status)
 					newStatus[ind] = 'failed'

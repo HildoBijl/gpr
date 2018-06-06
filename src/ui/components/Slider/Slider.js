@@ -62,13 +62,13 @@ export default class Slider extends Component {
 		window.removeEventListener('mouseup', this.endDrag)
 		window.removeEventListener('mousemove', this.updateDrag)
 
+		// Notify the application of the new value.
+		this.props.setValue(this.getValueFromEvent(event), true) // Set the "definite" parameter to true: this is the definite slider value. The dragging has ended.
+
 		// Update state that we are no longer dragging.
 		this.setState({
 			dragging: false,
 		})
-
-		// Notify the application of the new value.
-		this.props.setValue(this.getValueFromEvent(event), true) // Set the "definite" parameter to true: this is the definite slider value. The dragging has ended.
 	}
 
 	render() {
@@ -76,8 +76,12 @@ export default class Slider extends Component {
 		if (!this.areaRect || !this.buttonRect)
 			this.measureRectangles()
 
+		// If the rectangles are still not known yet, then this is the first render. We cannot know the rectangles just yet. In that case, add to the javascript queue to update the slider again after rendering.
+		if (!this.areaRect || !this.buttonRect)
+			setTimeout(this.forceUpdate.bind(this), 0) // Yeah, it's a bit of a dirty trick.
+
 		// Find the position the slider should be in.
-		const value = bound(this.state.dragging ? this.state.value : this.props.value, 0, 1) // If we are dragging, we keep track of our own value, mainly because the application itself does not always set the value immediately. It can also do so upon releasing the slider.
+		const value = bound(this.state.dragging ? this.state.value : this.props.getValue(), 0, 1) // If we are dragging, we keep track of our own value, mainly because the application itself does not always set the value immediately. It can also do so upon releasing the slider.
 		const w = (this.areaRect && this.buttonRect) ? this.areaRect.width - this.buttonRect.width : 0
 		const pos = w*value
 

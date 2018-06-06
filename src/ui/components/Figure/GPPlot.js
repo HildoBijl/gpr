@@ -34,13 +34,8 @@ export default class GPPlot extends Plot {
 		if (!this.plotPoints)
 			this.plotPoints = getRange(this.range.input.min, this.range.input.max, this.numPlotPoints)
 
-		// Set up the GP object. For this, check if data is available.
-		if (this.props.data[this.dataName].isDataAvailable) {
-			this.gp = new GaussianProcess(this.props.data[this.dataName])
-		} else {
-			this.gp = new GaussianProcess(this.gpData) // We start with a GP object which already has the right data. (So we don't have to recalculate stuff.)
-			this.props.data[this.dataName].applyState(this.gpData, false) // We also store the data in redux, specifically noting that no update is required.
-		}
+		// Set up the GP object, using data from redux.
+		this.gp = new GaussianProcess(this.props.data[this.dataName])
 
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)

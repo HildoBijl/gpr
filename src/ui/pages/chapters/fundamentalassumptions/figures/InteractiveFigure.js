@@ -33,20 +33,23 @@ class InteractiveFigure extends Figure {
 		return (this.props.data.gp.samples || []).length
 	}
 	setSlider(newValue, definite, index) {
-		// ToDo: set directly into the GP.
-		this.props.data.set({ [`slider${index}`]: newValue })
+		this.props.data.gp.setCovarianceFunction({
+			...this.props.data.gp.covarianceData,
+			[index === 0 ? 'Vx' : 'Vy']: (0.2 + (newValue*5)) ** 2,
+		})
 	}
 	getSlider(index) {
-		// ToDo: pull directly from the GP.
-		return this.props.data[`slider${index}`]
+		const key = index === 0 ? 'Vx' : 'Vy'
+		const V = this.props.data.gp.covarianceData[key]
+		return (Math.sqrt(V) - 0.2)/5
 	}
 }
-export default connectToData(InteractiveFigure, id, { gp: true })
+export default connectToData(InteractiveFigure, id, { gp: true, initial: { gp: gpData } })
 
 class InteractivePlot extends GPPlot {
 	// TODO:
-	// - Set up a function in the GP class to recalculate all matrices.
-	// - Add actions to the reduxGP file (and to the GP):
+	// V Set up a function in the GP class to recalculate all matrices.
+	// V Add actions to the reduxGP file (and to the GP):
 	//   x setMeanFunction
 	//   x setCovarianceFunction
 	//   x setDefaultOutputNoise
@@ -54,7 +57,7 @@ class InteractivePlot extends GPPlot {
 
 	// TODO
 	// V Set up a slider that can be adjusted/slid.
-	// - Couple the slider to a hyperparameter.
+	// V Couple the slider to a hyperparameter.
 
 	// TODO:
 	// - Set up a separate function in the GPPlot class to draw a sliver of the background for a GP.
@@ -65,8 +68,10 @@ class InteractivePlot extends GPPlot {
 
 		// Define important settings.
 		this.id = id
-		// this.className.noNumbers = true
-		this.className.pointer = true
+		// this.className.noNumbers = true // Do we show numbers on the axes?
+		this.className.pointer = true // Should we show a pointer when the mouse is over the plot? Useful when the user can click on the plot to do something, like adding measurements.
+		this.numPlotPoints = 201 // Useful when the length scale is cut down and samples vary quickly.
+		this.transitionTime = 0 // Can be set to zero for instant reactions.
 
 		// Set up the plot range.
 		this.range = {
@@ -80,7 +85,7 @@ class InteractivePlot extends GPPlot {
 			},
 		}
 
-		// Set up the GP. This data will be installed as soon as the GP Plot is set up. [ToDo: rename outputNoise to defaultOutputNoise]
+		// Set up the GP. This data will be installed as soon as the GP Plot is set up.
 		this.gpData = gpData
 	}
 	getInputAxisStyle() {
@@ -90,7 +95,8 @@ class InteractivePlot extends GPPlot {
 		return super.getOutputAxisStyle().tickFormat(v => `${v.toFixed(1)} °C`)
 	}
 	handleClick(pos, evt) {
-		console.log(this.props.data)
+		console.log(this.props.data) // TODO REMOVE
+		window.g = this.gp // TODO REMOVE
 		this.props.data.gp.addMeasurement({
 			input: this.scale.input.invert(pos.x),
 			output: new GaussianDistribution(this.scale.output.invert(pos.y), Math.random()),

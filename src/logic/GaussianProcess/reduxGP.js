@@ -5,7 +5,7 @@
  * - gpActions that specifies what actions there exist in the first place to modify GP state data in the data store.
  * - gpReducer specifying how to modify the state for each of these actions.
  * - getGPModifierFunctions that specifies what methods an outside class can get (by connecting to the data store) to modify the data.
- * - GaussianProcess is an extension of the GaussianProcess class and has support for processing updates sent by redux into the Gaussian Process object.
+ * - GaussianProcess is an extension of the GaussianProcess class and has support for processing updates sent by redux into the Gaussian Process object. It looks at the last change made and implements it into the GP's own internal data.
  */
 
 import RegularGP from './GaussianProcess.js'
@@ -27,6 +27,18 @@ const gpActions = {
 	setNumSamples: (numSamples) => ({
 		type: 'GPSetNumSamples',
 		numSamples,
+	}),
+	setMeanFunction: (meanData) => ({
+		type: 'GPSetMeanFunction',
+		meanData,
+	}),
+	setCovarianceFunction: (covarianceData) => ({
+		type: 'GPSetCovarianceFunction',
+		covarianceData,
+	}),
+	setDefaultOutputNoiseVariance: (defaultOutputNoiseVariance) => ({
+		type: 'GPSetDefaultOutputNoiseVariance',
+		defaultOutputNoiseVariance,
 	}),
 }
 
@@ -86,6 +98,27 @@ function defaultReducer(state, action) {
 			}
 		}
 
+		case 'GPSetMeanFunction': {
+			return {
+				...state,
+				meanData: action.meanData,
+			}
+		}
+
+		case 'GPSetCovarianceFunction': {
+			return {
+				...state,
+				covarianceData: action.covarianceData,
+			}
+		}
+
+		case 'GPSetDefaultOutputNoiseVariance': {
+			return {
+				...state,
+				defaultOutputNoiseVariance: action.defaultOutputNoiseVariance,
+			}
+		}
+
 		default: {
 			throw new Error(`Unknown action type: the GP reducer was called with an unknown action type "${action.type}".`)
 		}
@@ -110,16 +143,14 @@ export function getGPModifierFunctions(options, dispatch, id) {
 		throw new Error('Invalid GP option: when passing options to the data store, a GP option was passed along with invalid GP names. The "gp" option should either be true, a string, or an array of strings.')
 	}
 
-	// For each GP, set up the appropriate modifier functions. We also extend the actions to include important to for the data store.
+	// For each GP, add all the actions, so that we can modify the data. We do extend each action by adding important data about which data store we're in.
 	let result = {}
 	names.forEach(name => {
 		const extension = { id, name, dataStoreSource: 'gp' }
-		result[name] = {
-			applyState: (state, updateGP) => dispatch(extendAction(gpActions.applyState(state, updateGP), extension)),
-			addMeasurement: (input, output) => dispatch(extendAction(gpActions.addMeasurement(input, output), extension)),
-			removeAllMeasurements: () => dispatch(extendAction(gpActions.removeAllMeasurements(), extension)),
-			setNumSamples: (numSamples) => dispatch(extendAction(gpActions.setNumSamples(numSamples), extension)),
-		}
+		result[name] = {}
+		Object.keys(gpActions).forEach(key => {
+			result[name][key] = (...args) => dispatch(extendAction(gpActions[key](...args), extension))
+		})
 	})
 	return result
 }
@@ -141,7 +172,7 @@ export default class GaussianProcess extends RegularGP {
 		if (state.lastChange.timestamp === this.lastChangeTimestamp)
 			return false // Already processed this update.
 
-		// Figure out what the last change is.
+		// Figure out what the last change is. This is where the GP implements the change from redux into its own data structure.
 		switch (state.lastChange.type) {
 			case 'GPApplyState': {
 				// This is a hard override of the GP state. Apply the state directly and deal with whatever happens. There is one exception: if the 'updateGP' has been set to false, we don't apply this state. This may happen when the GP object already knows its state, but has merely sent it to redux to be stored. It should then not override the state that it already sent itself.
@@ -165,6 +196,21 @@ export default class GaussianProcess extends RegularGP {
 			case 'GPSetNumSamples': {
 				// Overwrite the samples array. We have to clone the array: if the GP later decides to add a sample on its own, this state will be affected.
 				this.state.samples = state.samples.slice(0)
+				break
+			}
+
+			case 'GPSetMeanFunction': {
+				this.setMeanFunction(state.lastChange.meanData)
+				break
+			}
+
+			case 'GPSetCovarianceFunction': {
+				this.setCovarianceFunction(state.lastChange.covarianceData)
+				break
+			}
+
+			case 'GPSetDefaultOutputNoiseVariance': {
+				this.setDefaultOutputNoiseVariance(state.lastChange.defaultOutputNoiseVariance)
 				break
 			}
 

@@ -37,7 +37,9 @@ export default actions
  * Second, set up the reducer applying the actions to the state.
  */
 
-export function reducer(state = {}, action) {
+const initialState = {} // This may be expanded by functions connecting to the datastore.
+
+export function reducer(state = initialState, action) {
 	// Check if there was an external source for this action.
 	if (action.dataStoreSource) {
 		// So we have an external reducer. Clone (or create if not available) the appropriate objects, as is usual for redux.
@@ -112,9 +114,11 @@ export function reducer(state = {}, action) {
 
 /* connectToData is used to connect a class to a part of the data store. Parameters given should be:
  * - The class to be connected. This should be a Javascript class.
- * - The id of the data store. This can also be an array of ids.
- * - Various options.
- *   x You can add GP support by putting { gp: true } or { gp: 'SomeName' } or { gp: ['Name1','Name2'] } as parameters.
+ * - The ID of the data store. This can also be an array of IDs, in case you want to connect to multiple datastores.
+ * - Various options. 
+ *   x You can add an initial state by putting { initial: { key1: "value1", key2: "value2" }}.
+ *   x You can add GP support in three ways: use { gp: true } to name the gp "gp" (default), use { gp: 'SomeName' } to name the gp "SomeName", or use { gp: ['Name1','Name2'] } to have multiple GPs with different names. It is also possible (and recommended) to add an initial GP state. This is done through the above "initial" option. So you can use { initial: { SomeName: { covarianceData: ..., ... }}}.
+ * If you use multiple IDs (for example 'plotOne', 'graphTwo', etc.) then your options object should not be like the above. Instead, it should have the same keys as the IDs given, { plotOne: { gp: true, ... }, graphTwo: { initial: { ... }, ... }}, where each sub-object would constitute a regular options object.
  * After connection, the class can access the data from the data store through either (when a single id is given) this.props.data[key] or (when an array of ids is given) this.props.data[id][key].
  */
 export function connectToData(Class, id, options = {}) {
@@ -124,6 +128,7 @@ export function connectToData(Class, id, options = {}) {
 	// How we do this depends on whether id is a string or an array. If it's a string, we couple the array to a single data store. Otherwise, we couple it to multiple data stores.
 	if (typeof id === 'string') {
 		// Set up the connection for a single data store. To access them, you need to use this.props.data[key].
+		adjustInitialStateFromOptions(id, options)
 		const stateMap = (state) => ({
 			data: state.dataStore[id],
 		})
@@ -137,6 +142,9 @@ export function connectToData(Class, id, options = {}) {
 		return connect(stateMap, actionMap, mergeProps)(Class)
 	} else if (Array.isArray(id)) {
 		// Set up the connection for multiple data stores. To access them, you need to use this.props.data[id][key].
+		id.forEach(currId => {
+			adjustInitialStateFromOptions(currId, options[currId])
+		})
 		const stateMap = (state) => {
 			let data = {}
 			id.forEach(currId => {
@@ -149,7 +157,7 @@ export function connectToData(Class, id, options = {}) {
 			id.forEach(currId => {
 				data[currId] = {
 					...getModifierFunctions(dispatch, currId),
-					...getModifierFunctionsFromOptions(options, dispatch, currId),
+					...getModifierFunctionsFromOptions(options[currId] || {}, dispatch, currId),
 				}
 			})
 			return data
@@ -159,6 +167,20 @@ export function connectToData(Class, id, options = {}) {
 	} else {
 		throw new Error('Invalid ID: the ID given to the connectToData function was neither a string nor an array.')
 	}
+}
+
+// adjustInitialStateFromOptions will look at the options and check if the initial state needs to be adjusted, based on it.
+function adjustInitialStateFromOptions(id, options) {
+	// Check that an initial parameter is given in the options.
+	if (!options.initial)
+		return
+
+	// Check that an initial state has not already been defined for this ID. That's not allowed. (Otherwise it would secretly overwrite earlier data, which is undesirable.)
+	if (initialState[id])
+		throw new Error(`Double assignment of initial datastore state: the datastore "${id}" was assigned an initial state, but it already had been assigned one previously. Double assigning of an initial state is not allowed.`)
+	
+	// Store the initial state.
+	initialState[id] = options.initial
 }
 
 // getModifierFunctions returns all the functions which a class, connected to a data store, gets to adjust the data in the data store.
@@ -175,6 +197,11 @@ function getModifierFunctionsFromOptions(options, dispatch, id) {
 	let functions = {}
 	Object.keys(options).forEach(key => {
 		switch (key) {
+			case 'initial': {
+				// The "initial" option (adding an initial state) does not add any modifier functions.
+				return
+			}
+
 			case 'gp': {
 				functions = {
 					...functions,

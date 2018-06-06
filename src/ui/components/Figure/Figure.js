@@ -23,7 +23,7 @@ export default class Figure extends Component {
 		if (this.setSlider && this.getSlider) {
 			const numSliders = this.numSliders || 1 // It is possible to use multiple sliders. In this case, the parameter `numSliders` should be set in the constructor.
 			new Array(numSliders).fill(0).forEach((_, index) => {
-				items.push(<Slider key={`slider${index}`} value={this.getSlider(index)} setValue={(value, definite) => this.setSlider(value, definite, index)} />)
+				items.push(<Slider key={`slider${index}`} getValue={() => this.getSlider(index)} setValue={(value, definite) => this.setSlider(value, definite, index)} />)
 			})
 		}
 
