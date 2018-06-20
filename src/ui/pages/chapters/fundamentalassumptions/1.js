@@ -1,8 +1,12 @@
 import React from 'react'
 
+import GP from '../../../../logic/GaussianProcess/GaussianProcess.js'
+import { connectToData } from '../../../../redux/dataStore.js'
+
 import Section from '../../../components/Section/Section.js'
+import Figure from '../../../components/Figure/Figure.js'
 import FigureGuide from '../../../components/Figure/FigureGuide.js'
-import InteractiveFigure from './figures/InteractiveFigure.js'
+import GPPlot from '../../../components/Figure/GPPlot.js'
 
 export default class CurrentSection extends Section {
 	render() {
@@ -19,8 +23,7 @@ export default class CurrentSection extends Section {
 				
 				<h4>What is "gradually"?</h4>
 				<p>Explaining the concept "gradually" to a computer is not as easy as it sounds. Mathematically, the word "gradually" doesn't mean much. After all, there are infinitely many gradually varying functions, as the following figure shows. Can you obtain a temperature variation, for my particular scientific morning, that seems sensible to you?</p>
-				<InteractiveFigure section={this} number={++this.counters.figure} />
-				{/* TODO: Make this figure. Also figure out whether figures should be in the bottom of this file, or in their own file. For this figure, we probably need to be able to set a new covariance function and recalculate matrices first. */}
+				<FGradual section={this} number={++this.counters.figure} />
 				<FigureGuide>
 					<p>The above figure shows an example of how the temperature (the vertical axis) may have varied over time (the horizontal axis) during this particular morning. Note that the temperature variation (the line) satisfies our measurements (the dots), but other than that is not very sensible yet. You can adjust the slider to make the function vary more quickly or more slowly. Click the reset button to get a different example of a temperature variation. Try to get the temperature variation that corresponds best with what you expect it to be.</p>
 				</FigureGuide>
@@ -29,3 +32,91 @@ export default class CurrentSection extends Section {
 		)
 	}
 }
+
+// Define data for the GP.
+const id = 'gradual'
+const gpData = {
+	covarianceData: {
+		type: 'SquaredExponential',
+		Vx: 0.5 ** 2,
+		Vy: 0.5 ** 2,
+	},
+	measurements: [
+		{
+			input: 2,
+			output: 2,
+		},
+		{
+			input: 4,
+			output: 4,
+		},
+	],
+	defaultOutputNoiseVariance: 0.0001,
+	samples: [GP.generateSample()],
+}
+
+// Define figure variation data.
+const minL = 1/8
+const maxL = 8
+const multip = Math.log(maxL/minL)
+
+// Set up the figure.
+class FGradual extends Figure {
+	constructor() {
+		super()
+		this.numSliders = 2
+	}
+	renderSubFigures() {
+		return <PGradual />
+	}
+	onReset() {
+		this.props.data.gp.refreshSamples()
+	}
+	setSlider(newValue, definite, index) {
+		this.props.data.gp.setCovarianceFunction({
+			...this.props.data.gp.covarianceData,
+			[index === 0 ? 'Vy' : 'Vx']: (minL*Math.pow(Math.E, multip*newValue)) ** 2,
+		})
+	}
+	getSlider(index) {
+		const key = index === 0 ? 'Vy' : 'Vx'
+		const V = this.props.data.gp.covarianceData[key]
+		return Math.log(Math.sqrt(V)/minL)/multip
+	}
+}
+FGradual = connectToData(FGradual, id, { gp: true, initial: { gp: gpData } })
+
+// Set up the plot.
+class PGradual extends GPPlot {
+	constructor() {
+		super()
+
+		// Define important settings.
+		this.numPlotPoints = 201 // Useful when the length scale is cut down and samples vary quickly.
+		this.transitionTime = 0 // Set to zero for instant reactions when adjusting sliders.
+
+		// Set up the plot range.
+		this.range = {
+			input: {
+				min: -1,
+				max: 7,
+			},
+			output: {
+				min: -2,
+				max: 6,
+			},
+		}
+	}
+	getInputAxisStyle() {
+		return super.getInputAxisStyle().tickFormat(v => `${(v + 6 + 24) % 24}:00`)
+	}
+	getOutputAxisStyle() {
+		return super.getOutputAxisStyle().tickFormat(v => `${v.toFixed(1)} °C`)
+	}
+	update() {
+		// These are the things that we want to draw.
+		this.drawSamples()
+		this.drawMeasurements()
+	}
+}
+PGradual = connectToData(PGradual, id, { gp: true })

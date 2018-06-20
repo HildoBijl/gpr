@@ -37,12 +37,17 @@ export default class Figure extends Component {
 
 		// If a reset functionality has been defined in this figure, add a reset function to the control bar.
 		if (this.onReset)
-			items.push(<div key="reset" className="item btn icon" onClick={() => this.props.data.gp.removeAllMeasurements()}><Refresh /></div>)
+			items.push(<div key="reset" className="item btn icon" onClick={this.onReset.bind(this)}><Refresh /></div>)
 
 		// If there are no items on the control bar, show nothing.
 		if (items.length === 0)
 			return ''
 		return <div className="controlBar">{items}</div>
+	}
+
+	// renderSubFigures is a function that should return an array of subfigures to be displayed in the figure.
+	renderSubFigures() {
+		return this.props.children
 	}
 
 	// render sets up the figure, with a figure number and potentially a control bar.

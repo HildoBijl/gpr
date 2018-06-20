@@ -28,6 +28,9 @@ const gpActions = {
 		type: 'GPSetNumSamples',
 		numSamples,
 	}),
+	refreshSamples: () => ({
+		type: 'GPRefreshSamples',
+	}),
 	setMeanFunction: (meanData) => ({
 		type: 'GPSetMeanFunction',
 		meanData,
@@ -95,6 +98,13 @@ function defaultReducer(state, action) {
 			return {
 				...state,
 				samples,
+			}
+		}
+
+		case 'GPRefreshSamples': {
+			return {
+				...state,
+				samples: state.samples.map(() => GaussianProcess.generateSample()),
 			}
 		}
 
@@ -194,7 +204,13 @@ export default class GaussianProcess extends RegularGP {
 			}
 
 			case 'GPSetNumSamples': {
-				// Overwrite the samples array. We have to clone the array: if the GP later decides to add a sample on its own, this state will be affected.
+				// Overwrite the samples array and store it in the GP. We have to clone the array: if the GP later decides to add a sample on its own, this state will be affected.
+				this.state.samples = state.samples.slice(0)
+				break
+			}
+
+			case 'GPRefreshSamples': {
+				// Overwrite the samples array and store it in the GP. We have to clone the array: if the GP later decides to add a sample on its own, this state will be affected.
 				this.state.samples = state.samples.slice(0)
 				break
 			}

@@ -21,7 +21,6 @@ export default class GPPlot extends Plot {
 		this.className.gpPlot = true // Tell the plot that it's a GPPlot, so the corresponding CSS styling applied.
 
 		// Define settings that may be overwritten by the child class.
-		this.gpData = {} // This object will contain all data (the full initial state) of the GP that will be used.
 		this.transitionTime = 400
 		this.range = { input: { min: -5, max: 5 }, output: { min: -3, max: 3 } }
 		this.numPlotPoints = 101
@@ -100,12 +99,6 @@ export default class GPPlot extends Plot {
 		return axisLeft(this.scale.output)
 	}
 
-	// restore turns the GP object for this plot to its initial (default) settings.
-	restore() {
-		// Tell redux to apply the initial data specified in gpData.
-		this.props.data[this.dataName].applyState(this.gpData)
-	}
-
 	// componentDidUpdate is called when the data of a GP is potentially updated. It tells the GP to check if recalculations are necessary.
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		const gpData = this.props.data[this.dataName]
@@ -149,12 +142,6 @@ export default class GPPlot extends Plot {
 		// Remove extra unnecessary samples.
 		while (this.samples.length > newSamples.length)
 			this.samples.pop()
-	}
-
-	// reset resets the GP and applies the change to the plot.
-	reset() {
-		this.props.data[this.dataName].applyState(this.gpData) // Reapply the default GP data to our GP object.
-		this.recalculate()
 	}
 
 	// getCurrentPrediction checks the transitioners and asks them what the current prediction is, based on the transitioning.

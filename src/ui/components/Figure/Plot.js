@@ -40,13 +40,6 @@ export default class Plot extends Component {
 		})
 	}
 
-	// The getID is used to extract the ID of this plot. It can be overwritten by child classes, for example when iterating multiple plots in a loop.
-	getID() {
-		if (this.id)
-			return this.id
-		throw new Error(`Missing ID error: tried to render a Plot with an unknown ID. When extending Plot, make sure you specify a unique ID for the new class.`)
-	}
-
 	// Upon mounting, initialize the object, if we haven't already done so. Also set up necessary event listeners and animation frame requests.
 	componentDidMount() {
 		// Extract the canvas context, if a canvas is available. (This needs to be done upon every mounting, since a new mounting generally means a new canvas too.)
@@ -125,7 +118,7 @@ export default class Plot extends Component {
 		return (
 			<SubFigure width={this.width} height={this.height} title={this.props.title} className={classnames(this.className)}>
 				{this.useSVG ? (
-					<svg id={this.getID()} ref={obj => { this.svg = obj }} viewBox={`0 0 ${this.width} ${this.height}`}>
+					<svg ref={obj => { this.svg = obj }} viewBox={`0 0 ${this.width} ${this.height}`}>
 						<defs>
 							<mask id="noOverflow">
 								<rect x="0" y="0" width={this.width} height={this.height} fill="#fff" />

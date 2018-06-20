@@ -47,27 +47,12 @@ class InteractiveFigure extends Figure {
 export default connectToData(InteractiveFigure, id, { gp: true, initial: { gp: gpData } })
 
 class InteractivePlot extends GPPlot {
-	// TODO:
-	// V Set up a function in the GP class to recalculate all matrices.
-	// V Add actions to the reduxGP file (and to the GP):
-	//   x setMeanFunction
-	//   x setCovarianceFunction
-	//   x setDefaultOutputNoise
-	//   For all these actions, add the option to recalculate all matrices afterwards, or to simply continue with the previous matrix that existed.
-
-	// TODO
-	// V Set up a slider that can be adjusted/slid.
-	// V Couple the slider to a hyperparameter.
-
-	// TODO:
-	// V Set up a separate function in the GPPlot class to draw a sliver of the background for a GP.
-	// - Use this for certain plots in the chapter.
+	// TODO: Eventually remove this file.
 
 	constructor() {
 		super()
 
 		// Define important settings.
-		this.id = id
 		// this.className.noNumbers = true // Do we show numbers on the axes?
 		this.className.pointer = true // Should we show a pointer when the mouse is over the plot? Useful when the user can click on the plot to do something, like adding measurements.
 		this.numPlotPoints = 201 // Useful when the length scale is cut down and samples vary quickly.

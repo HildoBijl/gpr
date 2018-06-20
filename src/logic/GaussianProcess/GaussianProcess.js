@@ -6,7 +6,7 @@ import { applyFunctionToPairs, deepClone, getRange, getMinimum, getMaximum } fro
 import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix, choleskyDecomposition, getGaussianRand, getGaussianSampleFromCholesky, removeRow, removeColumn } from '../math.js'
 import GaussianDistribution from '../gaussianDistribution.js'
 
-const randomVectorLength = 15 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20) then the Cholesky decomposition needed to generate a sample is likely to fail.
+const randomVectorLength = 15 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20) then the Cholesky decomposition needed to generate a sample is likely to fail and alternative methods are applied to still get decent results.
 
 export default class GaussianProcess {
 	/*
@@ -92,7 +92,7 @@ export default class GaussianProcess {
 	 * setDefaultOutputNoiseVariance stores the given default output noise variance and applies it to all earlier measurements that did not have any output noise specified.
 	 */
 	setDefaultOutputNoiseVariance(defaultOutputNoiseVariance) {
-		if (defaultOutputNoiseVariance === this.defaultOutputNoiseVariance)
+		if (defaultOutputNoiseVariance === this.state.defaultOutputNoiseVariance)
 			return
 		this.state.defaultOutputNoiseVariance = defaultOutputNoiseVariance
 		this.recalculateMatrices()
@@ -247,7 +247,7 @@ export default class GaussianProcess {
 			processedMeasurement.output = measurement.output
 			if (measurement.outputNoiseVariance)
 				processedMeasurement.outputNoiseVariance = measurement.outputNoiseVariance
-			else if (this.defaultOutputNoiseVariance === undefined)
+			else if (this.state.defaultOutputNoiseVariance === undefined)
 				throw new Error('Unknown measurement output noise: the Gaussian Process object was given a measurement, but no outputNoiseVariance parameter was defined, nor did the GP object have a defaultOutputNoiseVariance parameter specified.')
 		}
 
@@ -437,7 +437,7 @@ export default class GaussianProcess {
 	 * refreshSamples changes (remakes) the samples that are present in this GP.
 	 */
 	refreshSamples() {
-		this.state.samples = this.state.samples.map(() => getGaussianRand(randomVectorLength))
+		this.state.samples = this.state.samples.map(() => GaussianProcess.generateSample())
 	}
 
 	/*
@@ -463,9 +463,9 @@ export default class GaussianProcess {
 		let chol = choleskyDecomposition(predictionPart.output.variance)
 
 		// If the Cholesky decomposition did fail, increase the diagonal and try again. Every iteration, increase the addition to the diagonal addition until it works.
-		for (let i = 0; isNaN(chol[chol.length-1][chol.length-1]); i++) {
+		for (let i = -20; isNaN(chol[chol.length-1][chol.length-1]); i++) {
 			const variance = predictionPart.output.variance.map((row, rowIndex) => row.map((value, colIndex) => {
-				return (rowIndex === colIndex ? value + (this.defaultOutputNoiseVariance || 0.00001)*Math.pow(Math.E, i) : value)
+				return (rowIndex === colIndex ? value + (this.state.defaultOutputNoiseVariance || 0.0001)*Math.pow(Math.E, i) : value)
 			}))
 			chol = choleskyDecomposition(variance)
 		}
@@ -475,7 +475,7 @@ export default class GaussianProcess {
 		const extraMeasurements = sampleInput.map((input, i) => ({
 			input,
 			output: 0, // This will be adjusted later.
-			outputNoiseVariance: (this.defaultOutputNoiseVariance || 0.1) / 10000,
+			outputNoiseVariance: (this.state.defaultOutputNoiseVariance || 0.1) / 10000,
 		}))
 		const indices = this.addMeasurement(extraMeasurements)
 		const { beta } = this.getGPRMatrices(param.input)
