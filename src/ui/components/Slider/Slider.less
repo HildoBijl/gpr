@@ -4,13 +4,14 @@
 @height: 1.75rem;
 @radius: 0.6rem;
 @slideRadius: 0.125rem;
-@width: 12rem;
+@minWidth: 6rem;
 
 .slider {
 	.notSelectable;
-	position: relative;
+	flex-grow: 1;
 	height: @height;
-	width: @width;
+	min-width: @minWidth;
+	position: relative;
 
 	.track {
 		background: darken(@lightThemeColor, 15%);
@@ -20,7 +21,7 @@
 		position: absolute;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		width: @width - 2*@radius;
+		width: calc(~"100%" - 2*@radius);
 		z-index: 1;
 	}
 	.clickArea {
@@ -31,7 +32,7 @@
 		position: absolute;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		width: @width;
+		width: 100%;
 		z-index: 2;
 	}
 	.slideButton {

@@ -21,6 +21,8 @@ export default class Slider extends Component {
 		this.startTouch = this.startTouch.bind(this)
 		this.updateTouch = this.updateTouch.bind(this)
 		this.endTouch = this.endTouch.bind(this)
+
+		this.update = this.update.bind(this)
 	}
 
 	componentDidMount() {
@@ -28,6 +30,7 @@ export default class Slider extends Component {
 		this.button.addEventListener('mousedown', this.startDrag)
 		this.area.addEventListener('touchstart', this.startTouch, { passive: false })
 		this.button.addEventListener('touchstart', this.startTouch, { passive: false })
+		window.addEventListener('resize', this.update)
 	}
 
 	componentWillUnmount() {
@@ -35,6 +38,12 @@ export default class Slider extends Component {
 		this.button.removeEventListener('mousedown', this.startDrag)
 		this.area.removeEventListener('touchstart', this.startTouch)
 		this.button.removeEventListener('touchstart', this.startTouch)
+		window.removeEventListener('resize', this.update)
+	}
+
+	update() {
+		this.measureRectangles()
+		this.forceUpdate()
 	}
 
 	measureRectangles() {
