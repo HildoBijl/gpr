@@ -210,37 +210,54 @@ export default class GPPlot extends Plot {
 		// Extract the current prediction data from the transitioners and walk through all the points, drawing gradient rectangles to the left of each of them (apart from the first).
 		const prediction = this.getCurrentPrediction()
 		let left, right // We will draw vertical rectangles. The left and right parameters will take into account the data on either side of the rectangle.
-		const zeroValue = this.scale.output(0) // This is a constant we need many times when scaling the standard deviation.
 		for (let i = 0; i < prediction.length; i++) {
 			// Shift the data forward.
 			left = right
 			right = {
-				x: Math.round(this.scale.input(prediction[i].input)),
-				mean: this.scale.output(prediction[i].output.mean),
-				std: this.scale.output(prediction[i].output.std) - zeroValue,
+				x: prediction[i].input,
+				mean: prediction[i].output.mean,
+				std: prediction[i].output.std,
 			}
 
 			// Don't do anything at the first iteration, since we do not draw the rectangle to the left of the leftmost point.
 			if (i === 0)
 				continue
 
-			// Set up an image data object and walk through it, setting every pixel.
-			const dx = right.x - left.x
-			const dMean = right.mean - left.mean
-			const dStd = right.std - left.std
-			const imgData = this.ctx.createImageData(dx, this.height)
-			for (let x = left.x; x < right.x; x++) { // Walk horizontally through the pixels of the rectangle.
-				const mean = left.mean + (x - left.x) / dx * dMean // The current mean of the GP, linearly extrapolated.
-				const std = left.std + (x - left.x) / dx * dStd // The current std of the GP, linearly extrapolated.
-				for (let y = 0; y < this.height; y++) { // Walk vertically through the pixels.
-					const ind = ((x - left.x) + y * dx) * 4 // The index within the image data that we're currently at. (The image data array uses four elements per pixel (rgba).)
-					imgData.data[ind + 0] = 0 // Red.
-					imgData.data[ind + 1] = 34 // Blue.
-					imgData.data[ind + 2] = 204 // Green.
-					imgData.data[ind + 3] = 255 * Math.exp(-0.5 * (((mean - y) / std) ** 2)) // Alpha.
-				}
+			this.drawStdSliver(left, right)
+		}
+	}
+
+	// drawStdSliver draws on the canvas a gradient (only a small vertical sliver) showing the distribution of a Gaussian value. It should be given as parameters a left and a right object. These objects should each have an x-value (in plot coordinates), a mean value and an std.
+	drawStdSliver(left, right) {
+		// Transform coordinates to canvas coordinates and calculate important parameters.
+		left = this.scaleSliverPoint(left)
+		right = this.scaleSliverPoint(right)
+		const dx = right.x - left.x
+		const dMean = right.mean - left.mean
+		const dStd = right.std - left.std
+
+		// Set up an image data object and walk through it, setting every pixel.
+		const imgData = this.ctx.createImageData(dx, this.height)
+		for (let x = left.x; x < right.x; x++) { // Walk horizontally through the pixels of the rectangle.
+			const mean = left.mean + (x - left.x) / dx * dMean // The current mean of the GP, linearly extrapolated.
+			const std = left.std + (x - left.x) / dx * dStd // The current std of the GP, linearly extrapolated.
+			for (let y = 0; y < this.height; y++) { // Walk vertically through the pixels.
+				const index = ((x - left.x) + y * dx) * 4 // The index within the image data array that we're currently at. (The image data array uses four elements per pixel: rgba.)
+				imgData.data[index + 0] = 0 // Red.
+				imgData.data[index + 1] = 34 // Blue.
+				imgData.data[index + 2] = 204 // Green.
+				imgData.data[index + 3] = 255 * Math.exp(-0.5 * (((mean - y) / std) ** 2)) // Alpha.
 			}
-			this.ctx.putImageData(imgData, left.x, 0)
+		}
+		this.ctx.putImageData(imgData, left.x, 0)
+	}
+
+	// scaleSliverPoint(point) takes a point given to drawStdSliver (the left or right part of a sliver, containing an x-value, a mean and an std) and transforms it to canvas coordinates.
+	scaleSliverPoint(point) {
+		return {
+			x: Math.round(this.scale.input(point.x)), // We can only have integer x-coordinates in the canvas.
+			mean: this.scale.output(point.mean),
+			std: this.scale.output(point.std) - this.scale.output(0), // Because std is a distance and not a coordinate, we should not just apply regular scaling, but only get the distance with respect to zero.
 		}
 	}
 

@@ -60,7 +60,7 @@ class InteractivePlot extends GPPlot {
 	// V Couple the slider to a hyperparameter.
 
 	// TODO:
-	// - Set up a separate function in the GPPlot class to draw a sliver of the background for a GP.
+	// V Set up a separate function in the GPPlot class to draw a sliver of the background for a GP.
 	// - Use this for certain plots in the chapter.
 
 	constructor() {
