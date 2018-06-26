@@ -1,6 +1,12 @@
 import React, { Component } from 'react'
 import classnames from 'classnames'
 
+import { select } from 'd3-selection'
+import { scaleLinear } from 'd3-scale'
+import { axisLeft, axisBottom } from 'd3-axis'
+
+import { getRange } from '../../../logic/util.js'
+
 import SubFigure from '../../components/Figure/SubFigure.js'
 
 const functionsToBind = [
@@ -38,6 +44,11 @@ export default class Plot extends Component {
 			if (typeof(this[name]) === 'function')
 				this[name] = this[name].bind(this)
 		})
+		
+		// Define settings that may be overwritten by the child class.
+		this.transitionTime = 400
+		this.range = { input: { min: -5, max: 5 }, output: { min: -3, max: 3 } }
+		this.numPlotPoints = 101
 	}
 
 	// Upon mounting, initialize the object, if we haven't already done so. Also set up necessary event listeners and animation frame requests.
@@ -49,12 +60,9 @@ export default class Plot extends Component {
 		// Extract the (SubFigure) container of the plot.
 		this.container = (this.svg || this.canvas).parentElement.parentElement
 
-		// Initialize the plot if we haven't already done so.
-		if (!this.initialized) {
-			if (this.initialize)
-				this.initialize()
-			this.initialized = true
-		}
+		// Ensure plotpoints are present. They can be defined manually, or only defined through their properties.
+		if (!this.plotPoints)
+			this.plotPoints = getRange(this.range.input.min, this.range.input.max, this.numPlotPoints)
 
 		// Set up event listeners. Also ensure that they get the position of the event as first parameter, using an expanded handler.
 		eventHandlers.forEach(data => {
@@ -69,9 +77,36 @@ export default class Plot extends Component {
 			// Start listening to the event.
 			this.container.addEventListener(data.event, this.handler[data.handler])
 		})
+		
+		// Set up containers. The order matters: later containers are on top of earlier containers.
+		this.svgContainer = select(this.svg)
+		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
+
+		// Set up the scales.
+		this.scale = {
+			input: scaleLinear().domain([this.range.input.min, this.range.input.max]).range([0, this.width]),
+			output: scaleLinear().domain([this.range.output.min, this.range.output.max]).range([this.height, 0]),
+		}
+
+		// Set up the axes.
+		const inputAxis = this.getInputAxisStyle()
+		const outputAxis = this.getOutputAxisStyle()
+		this.axisContainer
+			.append('g')
+			.attr('transform', `translate(0,${this.scale.output(0)})`)
+			.call(inputAxis)
+		this.axisContainer
+			.append('g')
+			.attr('transform', `translate(${this.scale.input(0)},0)`)
+			.call(outputAxis)
 
 		// Ensure that the plot is updated regularly.
-		this.cycleUpdates()
+		this.cycleUpdates(true)
+	}
+
+	// We implement a componentDidUpdate function to ensure that, if a child class overloads this method and calls the super.componentDidUpdate, things won't crash.
+	componentDidUpdate() {
+		// Do nothing.
 	}
 
 	// Upon unmounting, deactivate event listeners and animation frame requests.
@@ -86,12 +121,23 @@ export default class Plot extends Component {
 		})
 	}
 
-	// cycleUpdates is called on every animation frame request. It calls the update function of the plot, if it exists. To start animating, this function also needs to be called.
-	cycleUpdates() {
+	// cycleUpdates is called on every animation frame request. It calls the update function of the plot, if it exists. To start animating, this function also needs to be called. Optionally, it can be given `true' to skip the first update. This is useful if the calling script is still initializing things.
+	cycleUpdates(skipFirstUpdate) {
 		if (this.update) {
-			this.update()
+			if (skipFirstUpdate !== true)
+				this.update()
 			this.animationFrameRequest = window.requestAnimationFrame(this.cycleUpdates)
 		}
+	}
+
+	// getInputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
+	getInputAxisStyle() {
+		return axisBottom(this.scale.input)
+	}
+
+	// getOutputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
+	getOutputAxisStyle() {
+		return axisLeft(this.scale.output)
 	}
 
 	// getPositionFromEvent takes an event object and (based on the clientX and clientY parameters) turns it into the internal coordinates which the event took place at.
@@ -104,11 +150,22 @@ export default class Plot extends Component {
 
 	// clearCanvas is used to empty the canvas so a new drawing can be drawn.
 	clearCanvas() {
-		if (!this.initialized)
-			throw new Error('Not initialized: cannot clear the canvas before the Plot object has been initialized. This happens upon mounting.')
 		if (!this.canvas)
 			throw new Error('No canvas: the clear canvas function cannot be called when no canvas has been ordered to be present.')
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+	}
+
+	// isWithinRange checks whether a point (with an input and an output) falls within the range of this plot.
+	isWithinRange(point) {
+		if (point.input < this.range.input.min)
+			return false
+		if (point.input > this.range.input.max)
+			return false
+		if (point.output < this.range.output.min)
+			return false
+		if (point.output > this.range.output.max)
+			return false
+		return true
 	}
 
 	// render sets up the HTML of the plot. Based on what has been requested (through useSVG and useCanvas) it adds an SVG or Canvas object.

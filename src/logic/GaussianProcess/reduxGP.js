@@ -85,6 +85,10 @@ function defaultReducer(state, action) {
 		}
 
 		case 'GPSetNumSamples': {
+			// Check the input.
+			if (!(action.numSamples >= 0))
+				throw new Error(`Invalid number of samples: the setNumSamples function of a Gaussian process was called with the number ${action.numSamples}. This must be a non-negative number.`)
+
 			// Fix the samples array of the state.
 			const samples = (state.samples || []).slice(0) // Clone the array.
 			while (samples.length < action.numSamples) { // Add samples as long as necessary.

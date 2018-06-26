@@ -1,51 +1,57 @@
 .gpPlot {
-	path.mean {
-		fill: none;
-		stroke: #13f;
-		stroke-width: 2;
-	}
-	path.sample {
-		fill: none;
-		stroke-width: 1;
-
-		&:nth-child(12n+1) {
-			stroke: #d22;
-		}
-		&:nth-child(12n+2) {
-			stroke: #dd2;
-		}
-		&:nth-child(12n+3) {
-			stroke: #2dd;
-		}
-		&:nth-child(12n+4) {
-			stroke: #d2d;
-		}
-		&:nth-child(12n+5) {
-			stroke: #2d2;
-		}
-		&:nth-child(12n+6) {
-			stroke: #ddd;
-		}
-		&:nth-child(12n+7) {
-			stroke: #d82;
-		}
-		&:nth-child(12n+8) {
-			stroke: #2d8;
-		}
-		&:nth-child(12n+9) {
-			stroke: #82d;
-		}
-		&:nth-child(12n+10) {
-			stroke: #8d2;
-		}
-		&:nth-child(12n+11) {
-			stroke: #28d;
-		}
-		&:nth-child(12n+0) {
-			stroke: #d28;
+	.means {
+		path.mean {
+			fill: none;
+			stroke: #13f;
+			stroke-width: 2;
 		}
 	}
-	circle.measurement {
-		fill: #e53;
+	.samples {
+		path.sample {
+			fill: none;
+			stroke-width: 1;
+	
+			&:nth-child(12n+1) {
+				stroke: #d22;
+			}
+			&:nth-child(12n+2) {
+				stroke: #dd2;
+			}
+			&:nth-child(12n+3) {
+				stroke: #2dd;
+			}
+			&:nth-child(12n+4) {
+				stroke: #d2d;
+			}
+			&:nth-child(12n+5) {
+				stroke: #2d2;
+			}
+			&:nth-child(12n+6) {
+				stroke: #ddd;
+			}
+			&:nth-child(12n+7) {
+				stroke: #d82;
+			}
+			&:nth-child(12n+8) {
+				stroke: #2d8;
+			}
+			&:nth-child(12n+9) {
+				stroke: #82d;
+			}
+			&:nth-child(12n+10) {
+				stroke: #8d2;
+			}
+			&:nth-child(12n+11) {
+				stroke: #28d;
+			}
+			&:nth-child(12n+0) {
+				stroke: #d28;
+			}
+		}
+	}
+	.measurements {
+		circle.measurement {
+			fill: #e53;
+		}
 	}
 }

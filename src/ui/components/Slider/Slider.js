@@ -151,7 +151,7 @@ export default class Slider extends Component {
 			setTimeout(this.forceUpdate.bind(this), 0) // Yeah, it's a bit of a dirty trick.
 
 		// Find the position the slider should be in.
-		const value = bound(this.state.dragging ? this.state.value : this.props.getValue(), 0, 1) // If we are dragging, we keep track of our own value, mainly because the application itself does not always set the value immediately. It can also do so upon releasing the slider.
+		const value = bound(this.state.dragging ? this.state.value : this.props.value, 0, 1) // If we are dragging, we keep track of our own value, mainly because the application itself does not always set the value immediately. It can also do so upon releasing the slider.
 		const w = (this.areaRect && this.buttonRect) ? this.areaRect.width - this.buttonRect.width : 0
 		const pos = w * value
 

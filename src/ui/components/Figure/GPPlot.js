@@ -1,11 +1,6 @@
 import './GPPlot.css'
 
-import { select } from 'd3-selection'
-import { scaleLinear } from 'd3-scale'
-import { axisLeft, axisBottom } from 'd3-axis'
 import { line, curveLinear } from 'd3-shape'
-
-import { getRange } from '../../../logic/util.js'
 
 import Plot from '../../components/Figure/Plot.js'
 import Transitioner from '../../../logic/transitioner.js'
@@ -21,45 +16,21 @@ export default class GPPlot extends Plot {
 		this.className.gpPlot = true // Tell the plot that it's a GPPlot, so the corresponding CSS styling applied.
 
 		// Define settings that may be overwritten by the child class.
-		this.transitionTime = 400
-		this.range = { input: { min: -5, max: 5 }, output: { min: -3, max: 3 } }
-		this.numPlotPoints = 101
 		this.measurementRadius = 6
 	}
 
-	// initialize sets up all parameters (mostly D3 objects, but also transitioners) that are needed to properly plot the Gaussian Process.
-	initialize() {
-		// Ensure plotpoints are present. They can be defined manually, or only defined through their properties.
-		if (!this.plotPoints)
-			this.plotPoints = getRange(this.range.input.min, this.range.input.max, this.numPlotPoints)
+	// componentDidMount sets up all parameters (mostly D3 objects, but also transitioners) that are needed to properly plot the Gaussian Process.
+	componentDidMount() {
+		// Do the regular plot initialization.
+		super.componentDidMount()
 
 		// Set up the GP object, using data from redux.
 		this.gp = new GaussianProcess(this.props.data[this.dataName])
 
-		// Set up all containers. The order matters: later containers are on top of earlier containers.
-		this.svgContainer = select(this.svg)
-		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
+		// Set up containers. The order matters: later containers are on top of earlier containers.
 		this.sampleContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'samples')
-		this.meanContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'mean')
+		this.meanContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'means')
 		this.measurementContainer = this.svgContainer.append('g').attr('class', 'measurements')
-
-		// Set up the scales.
-		this.scale = {
-			input: scaleLinear().domain([this.range.input.min, this.range.input.max]).range([0, this.width]),
-			output: scaleLinear().domain([this.range.output.min, this.range.output.max]).range([this.height, 0]),
-		}
-
-		// Set up the axes.
-		const inputAxis = this.getInputAxisStyle()
-		const outputAxis = this.getOutputAxisStyle()
-		this.axisContainer
-			.append('g')
-			.attr('transform', `translate(0,${this.scale.output(0)})`)
-			.call(inputAxis)
-		this.axisContainer
-			.append('g')
-			.attr('transform', `translate(${this.scale.input(0)},0)`)
-			.call(outputAxis)
 
 		// Set up the line function for the mean.
 		this.meanFunction = line()
@@ -87,16 +58,6 @@ export default class GPPlot extends Plot {
 		// Set up sample arrays too, with transitioners inside them.
 		this.samples = []
 		this.recalculateSamples()
-	}
-
-	// getInputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
-	getInputAxisStyle() {
-		return axisBottom(this.scale.input)
-	}
-
-	// getOutputAxisStyle returns a d3 axis function for the x-axis. It can be overwritten by child classes to get specific types of ticks or axis formatting.
-	getOutputAxisStyle() {
-		return axisLeft(this.scale.output)
 	}
 
 	// componentDidUpdate is called when the data of a GP is potentially updated. It tells the GP to check if recalculations are necessary.
@@ -160,7 +121,7 @@ export default class GPPlot extends Plot {
 		return this.samples.map(sample => sample.map(point => point.getValue()))
 	}
 
-	// update will often be overwritten by the child class, but the default action is that it draws the mean, the standard deviation and the measurements.
+	// update will often be overwritten by the child class, but the default action is that it draws the mean, the standard deviation and the measurements, as well as any potential samples that may have been added.
 	update() {
 		this.drawSamples()
 		this.drawMean()
@@ -288,18 +249,5 @@ export default class GPPlot extends Plot {
 			.attr('d', this.sampleFunction)
 		lines.exit()
 			.remove()
-	}
-
-	// isWithinRange checks whether a point (with an input and an output) falls within the range of this plot.
-	isWithinRange(point) {
-		if (point.input < this.range.input.min)
-			return false
-		if (point.input > this.range.input.max)
-			return false
-		if (point.output < this.range.output.min)
-			return false
-		if (point.output > this.range.output.max)
-			return false
-		return true
 	}
 }

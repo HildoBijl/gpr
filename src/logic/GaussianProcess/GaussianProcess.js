@@ -6,7 +6,7 @@ import { applyFunctionToPairs, deepClone, getRange, getMinimum, getMaximum } fro
 import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix, choleskyDecomposition, getGaussianRand, getGaussianSampleFromCholesky, removeRow, removeColumn } from '../math.js'
 import GaussianDistribution from '../gaussianDistribution.js'
 
-const randomVectorLength = 15 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20) then the Cholesky decomposition needed to generate a sample is likely to fail and alternative methods are applied to still get decent results.
+const randomVectorLength = 25 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20) then the Cholesky decomposition needed to generate a sample is likely to fail and alternative methods are applied to still get decent results.
 
 export default class GaussianProcess {
 	/*

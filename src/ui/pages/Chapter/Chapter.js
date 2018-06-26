@@ -70,7 +70,7 @@ class Chapter extends Component {
 
 					// Log the error.
 					console.error(`An error occurred while loading the page "${chapter.title}" (section ${section}). Please try refreshing the page. If that does not work, contact us.`)
-					console.log(err.message)
+					console.error(`Error details: ${err.message}`)
 
 					// Note the failure in the Chapter state.
 					const newStatus = deepClone(this.state.status)

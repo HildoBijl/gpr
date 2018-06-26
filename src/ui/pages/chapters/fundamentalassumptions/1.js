@@ -22,10 +22,10 @@ export default class CurrentSection extends Section {
 				<p>Can we also let a computer make such predictions though? Of course the answer is "yes", but if we want to do so, we must also give the computer this prior knowledge. In short, we have to tell the computer that the temperature only gradually varies over time.</p>
 				
 				<h4>What is "gradually"?</h4>
-				<p>Explaining the concept "gradually" to a computer is not as easy as it sounds. Mathematically, the word "gradually" doesn't mean much. After all, there are infinitely many gradually varying functions, as the following figure shows. Can you obtain a temperature variation, for my particular scientific morning, that seems sensible to you?</p>
+				<p>Explaining the concept "gradually" to a computer is not as easy as it sounds. Mathematically, the word "gradually" doesn't mean much. After all, there are infinitely many gradually varying functions, as the following figure shows. Using the sliders, can you obtain a temperature variation, for my particular scientific morning, that seems sensible to you?</p>
 				<FGradual section={this} number={++this.counters.figure} />
 				<FigureGuide>
-					<p>The above figure shows an example of how the temperature (the vertical axis) may have varied over time (the horizontal axis) during this particular morning. Note that the temperature variation (the line) satisfies our measurements (the dots), but other than that is not very sensible yet. You can adjust the slider to make the function vary more quickly or more slowly. Click the reset button to get a different example of a temperature variation. Try to get the temperature variation that corresponds best with what you expect it to be.</p>
+					<p>The above figure shows an example of how the temperature (the vertical axis) may have varied over time (the horizontal axis) during this particular morning. Note that the temperature variation (the line) satisfies our measurements (the dots), but other than that is not very realistic yet. You can adjust the slider to make the line vary more quickly or more slowly. Click the reset button to get a different example of a temperature variation. Try to get the temperature variation that corresponds best with what you expect it to be.</p>
 				</FigureGuide>
 				<p>The lesson is that we have to be very specific. We have to tell the computer, with mathematical precision, what we know about temperature variations. So let's get at it.</p>
 			</div>
@@ -92,6 +92,7 @@ class PGradual extends GPPlot {
 		super()
 
 		// Define important settings.
+		this.measurementRadius = 10
 		this.numPlotPoints = 201 // Useful when the length scale is cut down and samples vary quickly.
 		this.transitionTime = 0 // Set to zero for instant reactions when adjusting sliders.
 
@@ -111,7 +112,7 @@ class PGradual extends GPPlot {
 		return super.getInputAxisStyle().tickFormat(v => `${(v + 6 + 24) % 24}:00`)
 	}
 	getOutputAxisStyle() {
-		return super.getOutputAxisStyle().tickFormat(v => `${v.toFixed(1)} °C`)
+		return super.getOutputAxisStyle().tickFormat(v => `${v} °C`)
 	}
 	update() {
 		// These are the things that we want to draw.
