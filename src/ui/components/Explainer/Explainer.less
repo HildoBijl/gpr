@@ -1,0 +1,28 @@
+.explainer {
+	align-items: stretch;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-end;
+	position: absolute;
+	transform: translate(-50%, -100%);
+	z-index: 120; // Something high.
+
+	.contents {
+		background: #ff0000;
+		border-radius: 0.75rem;
+		padding: 0.5rem;
+	}
+	.cornerContainer {
+		background: rgba(0, 0, 255, 0.2);
+		height: 1rem;
+		margin: 0 0.75rem;
+		position: relative;
+
+		.corner {
+			background: #00ff00;
+			height: 1rem;
+			position: absolute;
+			width: 1rem;
+		}
+	}
+}

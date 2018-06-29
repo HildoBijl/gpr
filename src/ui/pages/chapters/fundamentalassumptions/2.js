@@ -1,7 +1,6 @@
 import React from 'react'
 import Link from 'redux-first-router-link'
 
-import { select } from 'd3-selection'
 import { line, curveLinear } from 'd3-shape'
 
 import { connectToData } from '../../../../redux/dataStore.js'
@@ -144,23 +143,25 @@ class PGaussianDistribution extends LinePlot {
 
 		// Set up the blocks with the right coordinates.
 		let start = this.range.input.min, end = this.range.input.min + this.stepSize // We're starting from the minimum input.
+		const filter = input => (input > start + this.hPadding / 2 && input < end - this.hPadding / 2)
+		const mapper = input => ({ input })
 		while (start < this.range.input.max) { // Walk with blocks through the whole plot.
 			// Add all the points. For the bottom points, we can already determine the output value. For the bottom points that will not work.
 			const block = [].concat(
 				{ // Bottom right point.
-					input: end - this.hPadding/2,
+					input: end - this.hPadding / 2,
 					output: 0,
 				},
 				{ // Bottom left point.
-					input: start + this.hPadding/2,
+					input: start + this.hPadding / 2,
 					output: 0,
 				},
 				{ // Top left point. The output will be set later for all the top points, as it depends on the plot settings.
-					input: start + this.hPadding/2,
+					input: start + this.hPadding / 2,
 				},
-				this.plotPoints.filter(input => (input > start + this.hPadding/2 && input < end - this.hPadding/2)).map(input => ({ input })), // All the points at the top, from the plotPoints.
+				this.plotPoints.filter(filter).map(mapper), // All the points at the top, from the plotPoints.
 				{ // Top right point.
-					input: end - this.hPadding/2,
+					input: end - this.hPadding / 2,
 				},
 			)
 
@@ -189,9 +190,21 @@ class PGaussianDistribution extends LinePlot {
 			.append('path')
 			.attr('class', 'block')
 			.merge(blocks)
-			.attr('d', line => this.lineFunction(line) + 'Z')
+			.attr('d', block => this.lineFunction(block) + 'Z')
+			.on('mouseover', this.handleBlockMouseOver.bind(this))
+			.on('mousemove', this.handleBlockMouseMove.bind(this))
+			.on('mouseout', this.handleBlockMouseOut.bind(this))
 		blocks.exit()
 			.remove()
+	}
+	handleBlockMouseOver(block, index) {
+		console.log('Over')
+	}
+	handleBlockMouseMove(block, index) {
+		console.log('Move')
+	}
+	handleBlockMouseOut(block, index) {
+		console.log('Out')
 	}
 }
 PGaussianDistribution = connectToData(PGaussianDistribution, plotId)
