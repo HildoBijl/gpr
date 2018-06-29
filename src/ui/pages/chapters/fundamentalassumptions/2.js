@@ -1,6 +1,9 @@
 import React from 'react'
 import Link from 'redux-first-router-link'
 
+import { select } from 'd3-selection'
+import { line, curveLinear } from 'd3-shape'
+
 import { connectToData } from '../../../../redux/dataStore.js'
 
 import Section from '../../../components/Section/Section.js'
@@ -52,7 +55,7 @@ export default connectToData(CurrentSection, plotId)
 // Set up the Gaussian distribution figure.
 const minL = 0.4
 const maxL = 6
-const initialL = (maxL + minL)/2
+const initialL = (maxL + minL) / 2
 class FGaussianDistribution extends Figure {
 	constructor() {
 		super()
@@ -62,13 +65,13 @@ class FGaussianDistribution extends Figure {
 		return <PGaussianDistribution />
 	}
 	setSlider(newValue) {
-		this.props.data.set({ l: minL + newValue*(maxL - minL)})
+		this.props.data.set({ l: minL + newValue * (maxL - minL) })
 	}
 	getSlider(index) {
-		return (this.props.data.l - minL)/(maxL - minL)
+		return (this.props.data.l - minL) / (maxL - minL)
 	}
 }
-FGaussianDistribution = connectToData(FGaussianDistribution, plotId, { initial: { l : initialL } })
+FGaussianDistribution = connectToData(FGaussianDistribution, plotId, { initial: { l: initialL } })
 
 // Set up the corresponding plot.
 class PGaussianDistribution extends LinePlot {
@@ -92,10 +95,25 @@ class PGaussianDistribution extends LinePlot {
 				max: 0.2,
 			},
 		}
+
+		// Set up important settings that will be used by D3 to display the blocks.
+		this.padding = 2 // The number of pixels that we pull in the blocks.
+		this.stepSize = 1 // The width of the blocks, in plot coordinates.
+		this.lineFunction = line()
+			.x(point => this.scale.input(point.input))
+			.y(point => this.scale.output(point.output))
+			.curve(curveLinear)
+
+		// Set up the function to be plotted.
+		this.function = (x, l) => 1 / (Math.sqrt(2 * Math.PI) * l) * Math.exp(-0.5 * (x / l) ** 2)
 	}
 	componentDidMount() {
 		super.componentDidMount()
 		this.recalculate()
+
+		// Set up SVG container for blocks and calculate the block coordinates.
+		this.blockContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'blocks')
+		this.initializeBlocks()
 	}
 	componentDidUpdate() {
 		super.componentDidUpdate()
@@ -105,17 +123,76 @@ class PGaussianDistribution extends LinePlot {
 		return super.getInputAxisStyle().tickFormat(v => `${v} °C`)
 	}
 	getOutputAxisStyle() {
-		return super.getOutputAxisStyle().tickFormat(v => `${Math.round(v*100)}%`)
+		return super.getOutputAxisStyle().tickFormat(v => `${Math.round(v * 100)}%`)
 	}
 	recalculate() {
-		const l = this.props.data.l
 		this.setLine({
 			color: '#1133aa',
 			width: 3,
-			function: x => 1/(Math.sqrt(2*Math.PI)*l)*Math.exp(-0.5*(x/l) ** 2),
+			function: x => this.function(x, this.props.data.l),
 		})
 	}
-	// ToDo next: add hover functionalities, to show plot blocks upon hover, as well as a globally defined indicator showing info.
+	update() {
+		this.drawLines()
+		this.drawBlocks()
+	}
+	initializeBlocks() {
+		// Set up important parameters to remember.
+		this.blockData = []
+		this.hPadding = this.scale.input.invert(this.padding) - this.scale.input.invert(0) // The horizontal padding in plot coordinates.
+		this.vPadding = -(this.scale.output.invert(this.padding) - this.scale.output.invert(0)) // The vertical padding in plot coordinates.
+
+		// Set up the blocks with the right coordinates.
+		let start = this.range.input.min, end = this.range.input.min + this.stepSize // We're starting from the minimum input.
+		while (start < this.range.input.max) { // Walk with blocks through the whole plot.
+			// Add all the points. For the bottom points, we can already determine the output value. For the bottom points that will not work.
+			const block = [].concat(
+				{ // Bottom right point.
+					input: end - this.hPadding/2,
+					output: 0,
+				},
+				{ // Bottom left point.
+					input: start + this.hPadding/2,
+					output: 0,
+				},
+				{ // Top left point. The output will be set later for all the top points, as it depends on the plot settings.
+					input: start + this.hPadding/2,
+				},
+				this.plotPoints.filter(input => (input > start + this.hPadding/2 && input < end - this.hPadding/2)).map(input => ({ input })), // All the points at the top, from the plotPoints.
+				{ // Top right point.
+					input: end - this.hPadding/2,
+				},
+			)
+
+			// Store the block.
+			this.blockData.push(block)
+
+			// Shift the start and end coordinates.
+			start = end
+			end += this.stepSize
+		}
+	}
+	drawBlocks() {
+		// Calculate the block output values.
+		this.blockData.forEach(block => block.forEach((point, index) => {
+			// Ignore the first two points, as they are the bottom points. Their output values are already set and won't change.
+			if (index <= 1)
+				return
+			point.output = Math.max(this.function(point.input, this.props.data.l), 0)
+		}))
+
+		// Set up a path for each line using D3.
+		const blocks = this.blockContainer
+			.selectAll('path')
+			.data(this.blockData)
+		blocks.enter()
+			.append('path')
+			.attr('class', 'block')
+			.merge(blocks)
+			.attr('d', line => this.lineFunction(line) + 'Z')
+		blocks.exit()
+			.remove()
+	}
 }
 PGaussianDistribution = connectToData(PGaussianDistribution, plotId)
 
