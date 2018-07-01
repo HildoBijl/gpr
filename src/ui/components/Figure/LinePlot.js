@@ -106,9 +106,9 @@ export default class LinePlot extends Plot {
 		this.drawLines()
 	}
 
-	// drawLines ToDo
+	// drawLines will (re)draw all the lines that are known in this LinePlot. For this, it pulls the current lines out of the transitioners and puts them on the screen using D3.
 	drawLines() {
-		// Extract an array with all lines.
+		// Extract an array with all line values from the transitioners.
 		const lineData = this.linePoints.map(linePoints => {
 			return linePoints.map(point => ({
 				input: point.input,

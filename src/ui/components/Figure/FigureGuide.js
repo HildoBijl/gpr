@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 
 const FigureGuide = (props) => {
 	if (!props.display)
-		return ''
+		return null
 	return (
 		<div className="figureGuide">
 			{props.children}

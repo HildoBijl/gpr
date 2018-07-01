@@ -4,6 +4,8 @@ import Link from 'redux-first-router-link'
 import { line, curveLinear } from 'd3-shape'
 
 import { connectToData } from '../../../../redux/dataStore.js'
+import { connectToExplainer } from '../../../../redux/explainer.js'
+import { getRange } from '../../../../logic/util.js'
 
 import Section from '../../../components/Section/Section.js'
 import Figure from '../../../components/Figure/Figure.js'
@@ -26,15 +28,16 @@ class CurrentSection extends Section {
 				<p>We can mathematically define this by saying that the temperature, at any given time, has a <Term>Guassian (normal) distribution</Term>. <Note>Of course we could also use any other type of distribution, instead of a Gaussian distribution. However, Gaussian distributions occur a lot in real life. In addition, using a Gaussian distributions results in relatively easy equations. So let's stick with Gaussian distributions.</Note> We set the mean of this distribution to 0 °C. After all, on average we're near the freezing point. But what should the standard deviation (the width of our bell curve) be?</p>
 				<FGaussianDistribution section={this} number={++this.counters.figure} />
 				<FigureGuide>
-					<p>In the above figure, you see the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero.</p>
-					<p>Below the figure, you can adjust the slider. With that, you can adjust the variation in probabilities. Set it to a value that you think is likely.</p>
+					<p>In the above figure, you see the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. Hover your mouse over the plot to learn more about this.</p>
+					<p>Below the figure, you can adjust the slider. With that, you can adjust the variation in probabilities. Adjust the plot to something that you find likely. (Hint: temperatures below -10 °C happen only very rarely in the Netherlands.)</p>
 				</FigureGuide>
-				<p>Based on the above figure, you seem to find a standard deviation of <Num>{this.props.data.l.toFixed(1)} °C</Num> appropriate here. (Based on my experiences with Dutch winter weather, I would go 4.0 °C.) This number is the <Term>standard deviation</Term> for the temperature (our output value). You can see it as a <Term>length scale</Term>: how much does our temperature really vary? The bigger the number, the more we assume our temperature varies.</p>
+				<p>Based on the above figure, you seem to find a standard deviation of <Num>{this.props.data.l.toFixed(1)} °C</Num> appropriate here. (Based on my experiences with Dutch winter weather, I would go for 4.0 °C.) This number is the <Term>standard deviation</Term> for the temperature (our output value). You can see it as a <Term>length scale</Term>: how much does our temperature really vary? The bigger the number, the more we assume our temperature varies.</p>
 				{/* ToDo: add equations for this. */}
 
 				<h4>Visualizing the distribution</h4>
 				<p>We just defined the distribution of the temperature. Next, we want to visualize it. This improves our understand of what is happening.</p>
 				<p>We already saw one visualization: the Gaussian bell curve above, showing the probability distribution of the temperature at 8:00. This works well if we only care about the temperature at 8:00. But if we also want to know the temperatures at other times, it's often better to instead use color gradients to indicate distributions. That gives us another type of visualization.</p>
+				{/* TODO NEXT: Set up this plot. */}
 				<SampleFigure section={this} number={++this.counters.figure} className="twoColumn" />
 				<FigureGuide>
 					<p>In the above figure, the left graph shows the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero. At the same time, the right plot also shows this temperature distribution, but now with a color gradient. The lighter the color is, the more likely the temperature is to occur.</p>
@@ -139,7 +142,7 @@ class PGaussianDistribution extends LinePlot {
 		// Set up important parameters to remember.
 		this.blockData = []
 		this.hPadding = this.scale.input.invert(this.padding) - this.scale.input.invert(0) // The horizontal padding in plot coordinates.
-		this.vPadding = -(this.scale.output.invert(this.padding) - this.scale.output.invert(0)) // The vertical padding in plot coordinates.
+		this.vPadding = -(this.scale.output.invert(this.padding) - this.scale.output.invert(0)) // The vertical padding in plot coordinates. At the moment it's not being used.
 
 		// Set up the blocks with the right coordinates.
 		let start = this.range.input.min, end = this.range.input.min + this.stepSize // We're starting from the minimum input.
@@ -192,22 +195,28 @@ class PGaussianDistribution extends LinePlot {
 			.merge(blocks)
 			.attr('d', block => this.lineFunction(block) + 'Z')
 			.on('mouseover', this.handleBlockMouseOver.bind(this))
-			.on('mousemove', this.handleBlockMouseMove.bind(this))
 			.on('mouseout', this.handleBlockMouseOut.bind(this))
 		blocks.exit()
 			.remove()
 	}
 	handleBlockMouseOver(block, index) {
-		console.log('Over')
-	}
-	handleBlockMouseMove(block, index) {
-		console.log('Move')
+		// Calculate the right probability using the cumulative distribution. We kind of cheat, and simply take the mean of several values.
+		const numPoints = 11
+		const start = this.range.input.min + index * this.stepSize
+		const end = start + this.stepSize
+		const samplePoints = getRange(start, end, numPoints)
+		const sum = samplePoints.reduce((sum, x) => sum + this.function(x, this.props.data.l), 0)
+		const meanValue = sum / numPoints
+		const probability = meanValue * this.stepSize * 100
+
+		// Set the right message in the explainer.
+		this.props.explainer.setContents(<div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>)
 	}
 	handleBlockMouseOut(block, index) {
-		console.log('Out')
+		this.props.explainer.setVisible(false)
 	}
 }
-PGaussianDistribution = connectToData(PGaussianDistribution, plotId)
+PGaussianDistribution = connectToExplainer(connectToData(PGaussianDistribution, plotId))
 
 class SampleFigure extends Figure {
 	renderSubFigures() {

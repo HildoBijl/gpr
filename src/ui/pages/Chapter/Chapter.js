@@ -225,7 +225,7 @@ const stateMap = (state) => {
 	else if (state.location.prev.payload && state.location.prev.payload.chapter)
 		payload = state.location.prev.payload
 
-	// TODO: Use local storage to keep track of what the last section was that the user visited. Apply that here.
+	// TODO IN FUTURE: Use local storage to keep track of what the last section was that the user visited. Apply that here.
 	const chapter = chapters[payload.chapter]
 	let section
 	if (chapter && chapter.sections)

@@ -12,7 +12,6 @@ import Header from '../Header/Header.js'
 import Page from '../Page/Page.js'
 
 import settingsActions from '../../../redux/settings.js'
-import explainerActions from '../../../redux/explainer.js'
 
 class App extends Component {
   componentWillMount() {

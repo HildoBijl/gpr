@@ -8,9 +8,21 @@ import ct from 'cholesky-tools'
  * Matrix stuff.
  */
 
-// choleskyDecomposition(A) returns the Cholesky decomposition of a symmetric positive definite matrix A. That is, the lower diagonal matrix such that L*L^T = A. It may fail for large (say, 20 by 20) matrices.
+// choleskyDecomposition(A) returns the Cholesky decomposition of a symmetric positive definite matrix A. That is, the lower diagonal matrix such that L*L^T = A. It may fail for large (say, 20 by 20) matrices, in which case an automatic work-around (that may slightly distort results) is applied.
 export function choleskyDecomposition(A) {
-  return ct.cholesky(A)
+  // Use the CholeskyTools package to get a Cholesky decomposition. Note that this may fail due to numerical reasons.
+  let chol = ct.cholesky(A)
+
+  // If the Cholesky decomposition did fail, increase the diagonal and try again. Every iteration, increase the addition to the diagonal addition until it works.
+  for (let i = -30; isNaN(chol[chol.length-1][chol.length-1]); i++) {
+    const newA = A.map((row, rowIndex) => row.map((value, colIndex) => { // Clone the array and add e^i to the diagonal.
+      return (rowIndex === colIndex ? value + Math.pow(Math.E, i) : value)
+    }))
+    chol = choleskyDecomposition(newA) // Let's try the Cholesky decomposition again.
+  }
+
+  // Return the final result.
+  return chol
 }
 
 // logDet(A) returns log(det(A)) (the logarithm of the determinant) of a positive definite matrix A. A base e logarithm is used. It does this in a more efficient and numerically stable way than by first calculating det(A) and then taking the logarithm. To be precise, it first calculates the LU-decomposition of the matrix, and then uses that to calculate the logarithm of the determinant.

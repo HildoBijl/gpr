@@ -6,7 +6,7 @@ import { applyFunctionToPairs, deepClone, getRange, getMinimum, getMaximum } fro
 import { logDet, multiplyMatrices, mergeMatrices, arrayAsColumn, arrayAsRow, scalarAsMatrix, choleskyDecomposition, getGaussianRand, getGaussianSampleFromCholesky, removeRow, removeColumn } from '../math.js'
 import GaussianDistribution from '../gaussianDistribution.js'
 
-const randomVectorLength = 25 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20) then the Cholesky decomposition needed to generate a sample is likely to fail and alternative methods are applied to still get decent results.
+const randomVectorLength = 26 // The number of numbers in a random vector, used for generating samples. If this number is too high (gets above 20 or so) then the Cholesky decomposition needed to generate a sample is likely to fail, and it will try a work-around. This will distort results and may slow down the algorithm.
 
 export default class GaussianProcess {
 	/*
@@ -162,7 +162,7 @@ export default class GaussianProcess {
 		const beta = math.multiply(Ksm, this.Kni) // Ksm/(Kmm + Sn).
 		return {Kms, Kss, Ksm, beta}
 	}
-	// TODO: IMPLEMENT ABOVE FUNCTIONS THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT. CHECK OUT https://davidea.st/articles/comlink-simple-web-worker FOR DETAILS?
+	// TODO IN FUTURE: IMPLEMENT ABOVE FUNCTIONS THROUGH A WORKER. IT RETURNS A PROMISE FOR THE RESULT. CHECK OUT https://davidea.st/articles/comlink-simple-web-worker FOR DETAILS?
 
 	/* 
 	 * getPrior returns the prior distribution of the GP for the given test points. So that's the distribution when no measurements at all have been added. The set-up is identical as that of getPrediction.
@@ -460,15 +460,7 @@ export default class GaussianProcess {
 			input: sampleInput,
 			joint: true,
 		})
-		let chol = choleskyDecomposition(predictionPart.output.variance)
-
-		// If the Cholesky decomposition did fail, increase the diagonal and try again. Every iteration, increase the addition to the diagonal addition until it works.
-		for (let i = -20; isNaN(chol[chol.length-1][chol.length-1]); i++) {
-			const variance = predictionPart.output.variance.map((row, rowIndex) => row.map((value, colIndex) => {
-				return (rowIndex === colIndex ? value + (this.state.defaultOutputNoiseVariance || 0.0001)*Math.pow(Math.E, i) : value)
-			}))
-			chol = choleskyDecomposition(variance)
-		}
+		const chol = choleskyDecomposition(predictionPart.output.variance)
 
 		// Add the measurements to the GP and extract regression matrices.
 		const Kni = deepClone(this.Kni) // Store a copy of Kni to prevent drifts due to numerical innacuracies.

@@ -29,7 +29,7 @@ export default class Figure extends Component {
 
 		// If there are no items on the control bar, show nothing.
 		if (items.length === 0)
-			return ''
+			return null
 		return <div className="controlBar">{items}</div>
 	}
 
@@ -74,7 +74,7 @@ export default class Figure extends Component {
 	renderFigureNumber() {
 		// Verify that a number is given. If not, do nothing.
 		if (this.props.number === undefined)
-			return ''
+			return null
 
 		// Verify that a section is given. If not, throw an error.
 		if (this.props.section === undefined)

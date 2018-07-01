@@ -2,9 +2,11 @@ import './Explainer.css'
 
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import classnames from 'classnames'
 
 import explainerActions from '../../../redux/explainer.js'
+
+const dx = 1 // The number of pixels which the explainer arrow should deviate from the cursor. (Positive right.)
+const dy = -6 // The number of pixels which the explainer arrow should deviate from the cursor. (Positive downwards.)
 
 class Explainer extends Component {
 	constructor() {
@@ -18,25 +20,75 @@ class Explainer extends Component {
 		window.removeEventListener('mousemove', this.handleMouseMove)
 	}
 	handleMouseMove(event) {
-		console.log(event)
 		this.props.setMousePosition({
 			x: event.pageX,
 			y: event.pageY,
 		})
-		console.log(this.props.pos)
+	}
+	componentDidUpdate(prevProps) {
+		// If the message changed, adjust the contents box width.
+		if (prevProps && prevProps.contents !== this.props.contents)
+			this.adjustWidth()
+	}
+	adjustWidth() {
+		// Verify that there are contents.
+		if (!this.props.contents)
+			return
+
+		// Set up important settings.
+		const maxAspectRatio = 8 // The maximum ratio between the width and the height of the box. We don't want a box that's very wide but only one line high. It's better to use two lines then.
+		let minWidth = 0 // The minimum width of the container. The container is also an indication of how much the arrow can move, so less than zero should not happen. Zero is still OK (albeit small).
+		let maxWidth = Math.min(800, 0.75 * document.body.clientWidth) // The maximum width. It depends on both the page width and on an absolute number in case of a very wide page.
+
+		// First run a binary search with as criterion the aspect ratio. We find the smallest height for which there is a satisfactory aspect ratio.
+		while (maxWidth - minWidth > 0.1) {
+			const attemptedWidth = (maxWidth + minWidth) / 2
+			this.contentsContainer.style.width = `${attemptedWidth}px`
+			if (this.contents.clientWidth / this.contents.clientHeight > maxAspectRatio)
+				maxWidth = attemptedWidth // The situation doesn't satisfy the aspect ratio requirement. We cannot use this width and must use something smaller. Lower the maximum width.
+			else
+				minWidth = attemptedWidth // The situation is fine. Raise the minimum width.
+		}
+		this.contentsContainer.style.width = `${minWidth}px`
+		const height = this.contents.clientHeight
+
+		// Second run a binary search with as criterion the height. We find the smallest width such that the height is satisfied.
+		minWidth = 0 // Reset the minimum width. We can use smaller width now. Higher widths are not allowed, because they violate the aspect ratio requirement, so we don't raise the maximum again.
+		while (maxWidth - minWidth > 4) {
+			const attemptedWidth = (maxWidth + minWidth) / 2
+			this.contentsContainer.style.width = `${attemptedWidth}px`
+			if (this.contents.clientHeight > height)
+				minWidth = attemptedWidth // The situation satisfies requirements. 
+			else
+				maxWidth = attemptedWidth
+		}
+
+		// Apply the final setting.
+		this.contentsContainer.style.width = `${maxWidth}px`
 	}
 	render() {
-		const style = {
-			left: this.props.mousePosition.x,
-			top: this.props.mousePosition.y,
+		// Check visibility.
+		if (!this.props.visible)
+			return null
+
+		// Make the container follow the mouse.
+		const containerStyle = {
+			left: this.props.mousePosition.x + dx,
+			top: this.props.mousePosition.y + dy,
 		}
-		const percentage = this.props.mousePosition.x/document.body.clientWidth*100
-		console.log(percentage)
+
+		// Make the contents move towards the center of the page, to prevent edge-of-page trouble.
+		const part = this.props.mousePosition.x / document.body.clientWidth // The part of the page (horizontally speaking) which the mouse pointer is at.
+		const contentsStyle = {
+			transform: `translateX(-${part*100}%)`,
+		}
+
+		// Set up the HTML.
 		return (
-			<div className="explainer" style={style}>
-				<div className="contents">This is a test text. It will show useful info to the reader.</div>
-				<div className="cornerContainer">
-					<div className="corner" style={{left: `${percentage}%`, transform: `translateX(-${percentage}%)`}} />
+			<div className="explainer" style={containerStyle}>
+				<div className="arrow" />
+				<div className="contentsContainer" style={contentsStyle} ref={obj => this.contentsContainer = obj}>
+					<div className="contents" ref={obj => this.contents = obj}>{this.props.contents}</div>
 				</div>
 			</div>
 		)
@@ -44,7 +96,7 @@ class Explainer extends Component {
 }
 
 const stateMap = (state) => ({
-	mousePosition: state.explainer.mousePosition, // TODO REMOVE
+	...state.explainer,
 })
 const actionMap = (dispatch) => ({
 	setMousePosition: (position) => dispatch(explainerActions.setMousePosition(position)),

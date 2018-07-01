@@ -80,8 +80,6 @@ class InteractivePlot extends GPPlot {
 		return super.getOutputAxisStyle().tickFormat(v => `${v.toFixed(1)} °C`)
 	}
 	handleClick(pos, evt) {
-		console.log(this.props.data) // TODO REMOVE
-		window.g = this.gp // TODO REMOVE
 		this.props.data.gp.addMeasurement({
 			input: this.scale.input.invert(pos.x),
 			output: new GaussianDistribution(this.scale.output.invert(pos.y), Math.random()),

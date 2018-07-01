@@ -1,28 +1,55 @@
+@import '../../shared/params.less';
+
+@paddingVertical: 0.5rem;
+@paddingHorizontal: 0.75rem;
+@borderRadius: 0.75rem;
+@arrowHeight: 1rem;
+@arrowWidth: 2*0.577*@arrowHeight; // Two times sqrt(3)/3, to make the triangle equilateral.
+
 .explainer {
-	align-items: stretch;
-	display: flex;
-	flex-flow: column nowrap;
-	justify-content: flex-end;
 	position: absolute;
 	transform: translate(-50%, -100%);
 	z-index: 120; // Something high.
 
-	.contents {
-		background: #ff0000;
-		border-radius: 0.75rem;
-		padding: 0.5rem;
+	.arrow {
+		border-left: @arrowWidth/2 solid transparent;
+		border-right: @arrowWidth/2 solid transparent;
+		border-top: @arrowHeight solid #f00;
+		height: 0; 
+		width: 0;
 	}
-	.cornerContainer {
-		background: rgba(0, 0, 255, 0.2);
-		height: 1rem;
-		margin: 0 0.75rem;
-		position: relative;
 
-		.corner {
-			background: #00ff00;
-			height: 1rem;
+	.contentsContainer {
+		bottom: @arrowHeight;
+		position: absolute;
+
+		.contents {
+			border-radius: @borderRadius;
+			bottom: 0;
+			left: -@borderRadius;
+			padding: @paddingVertical @paddingHorizontal;
 			position: absolute;
-			width: 1rem;
+			text-align: center;
+			width: calc(~'100% + 2*@{borderRadius} + @{arrowWidth}');
 		}
+	}
+}
+
+.lightTheme .explainer {
+	.arrow {
+		border-top-color: darken(@lightThemeColor, 15%); // This color is matching with the Chapter section buttons color.
+	}
+	.contentsContainer .contents {
+		background: darken(@lightThemeColor, 15%);
+		color: #fff;
+	}
+}
+.darkTheme .explainer {
+	.arrow {
+		border-top-color: darken(@lightThemeColor, 20%);
+	}
+	.contentsContainer .contents {
+		background: darken(@lightThemeColor, 20%);
+		color: #fff;
 	}
 }

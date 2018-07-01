@@ -74,6 +74,5 @@ export default class GaussianDistribution {
 				this.chol = Math.sqrt(this.variance) // The Cholesky decomposition of the variance. For scalars, this is simply the standard deviation.
 			return this.mean + getGaussianRand()*this.chol
 		}
-		// TODO: VERIFY IF THIS FUNCTION WORKS PROPERLY FOR LARGER INPUTS. IT WILL PROBABLY FAIL FOR DISTRIBUTIONS ABOVE 20 ELEMENTS, MAYBE EVEN AT TIME ALSO FOR ABOVE 15 ELEMENTS. POSSIBLY WE SHOULD CHECK FOR THIS?
 	}
 }
