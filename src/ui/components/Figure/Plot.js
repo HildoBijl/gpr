@@ -15,6 +15,7 @@ const functionsToBind = [
 	'handleMouseEnter',
 	'handleMouseMove',
 	'handleMouseLeave',
+	'stopPropagationOnTouchMove',
 ]
 const eventHandlers = [
 	{ event: 'click', handler: 'handleClick' },
@@ -77,6 +78,9 @@ export default class Plot extends Component {
 			// Start listening to the event.
 			this.container.addEventListener(data.event, this.handler[data.handler])
 		})
+
+		// Set up an additional handler on touchMove, which is used only internally. It prevents the swiping of a plot from swiping a page as well.
+		this.container.addEventListener('touchmove', this.stopPropagationOnTouchMove)
 		
 		// Set up containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
@@ -119,6 +123,21 @@ export default class Plot extends Component {
 				return // Ignore this event type if the corresponding handler is not specified by a child class.
 			this.container.removeEventListener(data.event, data.expandedHandler)
 		})
+	}
+
+	// stopPropagationOnTouchMove will be called upon touch moving. This event is then not propagated further. The reason is that, if we don't, then touch moves upon plots will activate the section handling, and we might accidentally swipe to the previous/next section.
+	stopPropagationOnTouchMove(event) {
+		// Prevent the page from swiping or anything similar.
+		event.stopPropagation()
+
+		// Make sure that the explainer knows of the position of the finger, if this class is connected to it.
+		if (this.props.explainer && this.props.explainer.setMousePosition) {
+			const touch = event.changedTouches[0] // We only support single touch stuff.
+			this.props.explainer.setMousePosition({
+				x: touch.pageX,
+				y: touch.pageY,
+			})
+		}
 	}
 
 	// cycleUpdates is called on every animation frame request. It calls the update function of the plot, if it exists. To start animating, this function also needs to be called. Optionally, it can be given `true' to skip the first update. This is useful if the calling script is still initializing things.

@@ -72,6 +72,7 @@ export function connectToExplainer(Class) {
 	const stateMap = (state) => ({})
 	const actionMap = (dispatch) => ({
 		explainer: {
+			setMousePosition: (position) => dispatch(actions.setMousePosition(position)),
 			setVisible: (visible) => dispatch(actions.setVisible(visible)),
 			setContents: (contents, visible) => dispatch(actions.setContents(contents, visible)),
 		}

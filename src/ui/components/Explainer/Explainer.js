@@ -12,17 +12,27 @@ class Explainer extends Component {
 	constructor() {
 		super()
 		this.handleMouseMove = this.handleMouseMove.bind(this)
+		this.handleTouchMove = this.handleTouchMove.bind(this)
 	}
 	componentDidMount() {
 		window.addEventListener('mousemove', this.handleMouseMove)
+		window.addEventListener('touchmove', this.handleTouchMove, false)
 	}
 	componentWillUnmount() {
 		window.removeEventListener('mousemove', this.handleMouseMove)
+		window.removeEventListener('touchmove', this.handleTouchMove)
 	}
 	handleMouseMove(event) {
 		this.props.setMousePosition({
 			x: event.pageX,
 			y: event.pageY,
+		})
+	}
+	handleTouchMove(event) {
+		const touch = event.changedTouches[0]
+		this.props.setMousePosition({
+			x: touch.pageX,
+			y: touch.pageY,
 		})
 	}
 	componentDidUpdate(prevProps) {

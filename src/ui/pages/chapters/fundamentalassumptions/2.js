@@ -68,12 +68,13 @@ class FGaussianDistribution extends Figure {
 	}
 	setSlider(newValue) {
 		this.props.data.set({ l: minL + newValue * (maxL - minL) })
+		this.props.explainer.setVisible(false) // On smartphones the explainer may still be visible even when dragging the slider. In that case, manually turn off the explainer.
 	}
 	getSlider(index) {
 		return (this.props.data.l - minL) / (maxL - minL)
 	}
 }
-FGaussianDistribution = connectToData(FGaussianDistribution, plotId, { initial: { l: initialL } })
+FGaussianDistribution = connectToExplainer(connectToData(FGaussianDistribution, plotId, { initial: { l: initialL } }))
 
 // Set up the corresponding plot.
 class PGaussianDistribution extends LinePlot {
@@ -94,7 +95,7 @@ class PGaussianDistribution extends LinePlot {
 			},
 			output: {
 				min: 0,
-				max: 0.2,
+				max: 0.16,
 			},
 		}
 
@@ -200,6 +201,12 @@ class PGaussianDistribution extends LinePlot {
 			.remove()
 	}
 	handleBlockMouseOver(block, index) {
+		this.setExplainerMessage(index)
+	}
+	handleBlockMouseOut(block, index) {
+		this.props.explainer.setVisible(false)
+	}
+	setExplainerMessage(index) {
 		// Calculate the right probability using the cumulative distribution. We kind of cheat, and simply take the mean of several values.
 		const numPoints = 11
 		const start = this.range.input.min + index * this.stepSize
@@ -211,9 +218,6 @@ class PGaussianDistribution extends LinePlot {
 
 		// Set the right message in the explainer.
 		this.props.explainer.setContents(<div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>)
-	}
-	handleBlockMouseOut(block, index) {
-		this.props.explainer.setVisible(false)
 	}
 }
 PGaussianDistribution = connectToExplainer(connectToData(PGaussianDistribution, plotId))
