@@ -5,9 +5,9 @@ import { connect } from 'react-redux'
 import { redirect } from 'redux-first-router'
 import Link from 'redux-first-router-link'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import { Tabs, Tab } from 'material-ui/Tabs';
-import SwipeableViews from 'react-swipeable-views';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import { Tabs, Tab } from 'material-ui/Tabs'
+import SwipeableViews from 'react-swipeable-views'
 
 import Spinner from '../../components/Spinner/Spinner.js'
 import chapters from '../chapters'
@@ -20,15 +20,23 @@ class Chapter extends Component {
 			status: [], // An array with loading statuses for each section in the chapter. Elements can be 'loading', 'failed' or 'loaded'.
 		}
 		this.adjustSection = this.adjustSection.bind(this)
+		this.handleScroll = this.handleScroll.bind(this)
 	}
 	componentDidMount() {
 		this.checkForURLUpdate()
 		this.loadSections()
+
+		window.addEventListener('scroll', this.handleScroll)
+	}
+	componentWillUnmount() {
+		window.removeEventListener('scroll', this.handleScroll)
 	}
 	componentDidUpdate(prevProps) {
 		this.checkForURLUpdate()
 		if (prevProps.chapter !== this.props.chapter)
 			this.loadSections()
+		else if (prevProps.section !== this.props.section)
+			this.adjustScrollToIndex(this.props.section - 1)
 	}
 
 	checkForURLUpdate() {
@@ -48,6 +56,7 @@ class Chapter extends Component {
 
 		// Initialize relevant arrays and start the loading through the imports.
 		this.sections = new Array(chapter.sections.length).fill(undefined)
+		this.scrollAmount = new Array(this.sections.length).fill(0)
 		this.setState({ status: new Array(chapter.sections.length).fill('loading') })
 		this.sections.forEach((_, ind) => {
 			const section = ind + 1
@@ -80,15 +89,35 @@ class Chapter extends Component {
 		})
 	}
 
-	adjustSection(ind) {
+	adjustSection(index) {
 		// Go to the section corresponding to the given index. (Section numbers start counting at 1. The index starts counting at 0.)
-		const section = ind + 1
+		const section = index + 1
 		if (section === this.props.section)
 			return
 		this.props.goToChapterSection({
 			chapter: this.props.chapter,
 			section,
 		})
+	}
+
+	// handleScroll is called upon a page scroll and keeps track of where we are on the page. This is useful when transitioning between sections.
+	handleScroll(event) {
+		const doc = document.documentElement
+		const scrollY = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0) // This method is cross-browser compatible.
+		if (scrollY !== this.ignoreScroll) // Only process the scroll if it's an input from the user, and not a result of our own call to scroll (which we registered in the ignoreScroll parameter).
+			this.scrollAmount[this.props.section-1] = scrollY
+	}
+
+	// adjustScrollToIndex is called when going from one page (tab) to another. We want to go to the previous place which the reader was on that page, scroll-wise. So we linearly transition to it.
+	adjustScrollToIndex(index) {
+		const from = this.props.section - 1 // The index of the page we slide from.
+		const to = Math.floor(index) === from ? Math.ceil(index) : Math.floor(index) // The index of the page we slide to.
+		const diff = from === to ? 0 : Math.abs((index - from)/(to - from)) // The amount we've slid towards our target.
+		const scrollY = Math.round(this.scrollAmount[from]*(1 - diff) + this.scrollAmount[to]*diff) // The desired scroll position in Y-direction.
+		this.ignoreScroll = scrollY // We remember that we manually scroll to this amount, so we can ignore it in the event handler.
+		const doc = document.documentElement
+		const scrollX = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0) // The current scroll position, in a cross-browser compatible way. We need this so as not to change the x-coordinate of the scrolling.
+		window.scrollTo(scrollX, scrollY)
 	}
 
 	render() {
@@ -123,7 +152,7 @@ class Chapter extends Component {
 		const tabs = (
 			<Tabs key="tabs" className="tabs" value={this.props.section - 1} onChange={this.adjustSection}>
 				{chapter.sections.map((sectionTitle, ind) => {
-					const titleWithEnters = sectionTitle.split('\n').map((item, key) => <span key={key}>{item}<br/></span> )
+					const titleWithEnters = sectionTitle.split('\n').map((item, key) => <span key={key}>{item}<br /></span>)
 					const label = (
 						<div>
 							<span className="title">{titleWithEnters}</span>
@@ -139,7 +168,7 @@ class Chapter extends Component {
 		// Render the sections, each depending on whether it's been loaded already or not.
 		const sections = (
 			<div key="sections" className="sections">
-				<SwipeableViews className="swiper" index={this.props.section - 1} onChangeIndex={this.adjustSection} animateHeight={true}>
+				<SwipeableViews className="swiper" index={this.props.section - 1} onChangeIndex={this.adjustSection} onSwitching={this.adjustScrollToIndex.bind(this)} animateHeight={true}>
 					{chapter.sections.map((_, ind) => {
 						const status = this.state.status[ind]
 						switch (status) {
