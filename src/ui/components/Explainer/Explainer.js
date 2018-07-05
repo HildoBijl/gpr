@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 
 import explainerActions from '../../../redux/explainer.js'
 
-const dx = 1 // The number of pixels which the explainer arrow should deviate from the cursor. (Positive right.)
+const dx = 0 // The number of pixels which the explainer arrow should deviate from the cursor. (Positive right.)
 const dy = -6 // The number of pixels which the explainer arrow should deviate from the cursor. (Positive downwards.)
 
 class Explainer extends Component {
@@ -41,8 +41,10 @@ class Explainer extends Component {
 			this.adjustWidth()
 	}
 	adjustWidth() {
-		// Verify that there are contents.
+		// Verify that there are contents and that there's a container containing them.
 		if (!this.props.contents)
+			return
+		if (!this.contentsContainer)
 			return
 
 		// Set up important settings.
@@ -82,13 +84,14 @@ class Explainer extends Component {
 			return null
 
 		// Make the container follow the mouse.
+		const position = this.props.position || this.props.mousePosition
 		const containerStyle = {
-			left: this.props.mousePosition.x + dx,
-			top: this.props.mousePosition.y + dy,
+			left: position.x + dx,
+			top: position.y + dy,
 		}
 
 		// Make the contents move towards the center of the page, to prevent edge-of-page trouble.
-		const part = this.props.mousePosition.x / document.body.clientWidth // The part of the page (horizontally speaking) which the mouse pointer is at.
+		const part = position.x / document.body.clientWidth // The part of the page (horizontally speaking) which the mouse pointer is at.
 		const contentsStyle = {
 			transform: `translateX(-${part*100}%)`,
 		}

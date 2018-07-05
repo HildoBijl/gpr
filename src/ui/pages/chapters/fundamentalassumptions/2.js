@@ -9,12 +9,28 @@ import { getRange } from '../../../../logic/util.js'
 
 import Section from '../../../components/Section/Section.js'
 import Figure from '../../../components/Figure/Figure.js'
-import SubFigure from '../../../components/Figure/SubFigure.js'
 import FigureGuide from '../../../components/Figure/FigureGuide.js'
 import LinePlot from '../../../components/Figure/LinePlot.js'
+import GPPlot from '../../../components/Figure/GPPlot.js'
 import { Note, Term, Num } from '../../../components/Textbox/index.js'
 
-const plotId = 'gaussianDistribution'
+// All the plots on this page use a single data store.
+const dataStoreID = 'gaussianDistributionIdea'
+
+// Define settings for the plots.
+const minL = 0.4
+const maxL = 6
+const initialL = (maxL + minL) / 2
+const gpData = {}
+
+// Style data for lines.
+const indicatorLineStyle = {
+	'stroke': '#eeeeee',
+	'stroke-width': '4',
+}
+
+// The message shown in the visualization plot.
+const temperatureMessage = (T) => <div>This point in the plot corresponds to {T.toFixed(1)} °C in the adjacent plot: see the line there too.</div>
 
 class CurrentSection extends Section {
 	render() {
@@ -29,7 +45,7 @@ class CurrentSection extends Section {
 				<FGaussianDistribution section={this} number={++this.counters.figure} />
 				<FigureGuide>
 					<p>In the above figure, you see the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. Hover your mouse over the plot to learn more about this.</p>
-					<p>Below the figure, you can adjust the slider. With that, you can adjust the variation in probabilities. Adjust the plot to something that you find likely. (Hint: temperatures below -10 °C happen only very rarely in the Netherlands.)</p>
+					<p>Below the figure, you can adjust the slider. With that, you can adjust the variation in probabilities. Adjust the plot to something that you find likely. (Hint: temperatures below -10 °C happen in the Netherlands, but only very rarely.)</p>
 				</FigureGuide>
 				<p>Based on the above figure, you seem to find a standard deviation of <Num>{this.props.data.l.toFixed(1)} °C</Num> appropriate here. (Based on my experiences with Dutch winter weather, I would go for 4.0 °C.) This number is the <Term>standard deviation</Term> for the temperature (our output value). You can see it as a <Term>length scale</Term>: how much does our temperature really vary? The bigger the number, the more we assume our temperature varies.</p>
 				{/* ToDo: add equations for this. */}
@@ -38,7 +54,7 @@ class CurrentSection extends Section {
 				<p>We just defined the distribution of the temperature. Next, we want to visualize it. This improves our understand of what is happening.</p>
 				<p>We already saw one visualization: the Gaussian bell curve above, showing the probability distribution of the temperature at 8:00. This works well if we only care about the temperature at 8:00. But if we also want to know the temperatures at other times, it's often better to instead use color gradients to indicate distributions. That gives us another type of visualization.</p>
 				{/* TODO NEXT: Set up this plot. */}
-				<SampleFigure section={this} number={++this.counters.figure} className="twoColumn" />
+				<FVisualizations section={this} number={++this.counters.figure} className="twoColumn" />
 				<FigureGuide>
 					<p>In the above figure, the left graph shows the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero. At the same time, the right plot also shows this temperature distribution, but now with a color gradient. The lighter the color is, the more likely the temperature is to occur.</p>
 					<p>To use the figure, hover your mouse over one of the plots. It shows you, through the colored lines that appear, which position on the left graph corresponds to which position on the right one.</p>
@@ -52,12 +68,9 @@ class CurrentSection extends Section {
 		)
 	}
 }
-export default connectToData(CurrentSection, plotId)
+export default connectToData(CurrentSection, dataStoreID, { initial: { l: initialL, gp: gpData } })
 
 // Set up the Gaussian distribution figure.
-const minL = 0.4
-const maxL = 6
-const initialL = (maxL + minL) / 2
 class FGaussianDistribution extends Figure {
 	constructor() {
 		super()
@@ -68,13 +81,14 @@ class FGaussianDistribution extends Figure {
 	}
 	setSlider(newValue) {
 		this.props.data.set({ l: minL + newValue * (maxL - minL) })
-		this.props.explainer.setVisible(false) // On smartphones the explainer may still be visible even when dragging the slider. In that case, manually turn off the explainer.
+		this.props.explainer.reset() // On smartphones the explainer may still be visible even when dragging the slider. In that case, manually turn off the explainer.
 	}
 	getSlider(index) {
 		return (this.props.data.l - minL) / (maxL - minL)
 	}
 }
-FGaussianDistribution = connectToExplainer(connectToData(FGaussianDistribution, plotId, { initial: { l: initialL } }))
+FGaussianDistribution = connectToData(FGaussianDistribution, dataStoreID)
+FGaussianDistribution = connectToExplainer(FGaussianDistribution)
 
 // Set up the corresponding plot.
 class PGaussianDistribution extends LinePlot {
@@ -99,13 +113,13 @@ class PGaussianDistribution extends LinePlot {
 			},
 		}
 
-		// Set up important settings that will be used by D3 to display the blocks.
-		this.padding = 2 // The number of pixels that we pull in the blocks.
-		this.stepSize = 1 // The width of the blocks, in plot coordinates.
+		// Set up important settings that will be used by D3 to display the line and blocks.
 		this.lineFunction = line()
 			.x(point => this.scale.input(point.input))
 			.y(point => this.scale.output(point.output))
 			.curve(curveLinear)
+		this.padding = 2 // The number of pixels that we pull in the blocks.
+		this.stepSize = 1 // The width of the blocks, in plot coordinates.
 
 		// Set up the function to be plotted.
 		this.function = (x, l) => 1 / (Math.sqrt(2 * Math.PI) * l) * Math.exp(-0.5 * (x / l) ** 2)
@@ -136,7 +150,7 @@ class PGaussianDistribution extends LinePlot {
 		})
 	}
 	update() {
-		this.drawLines()
+		this.drawPlotLines()
 		this.drawBlocks()
 	}
 	initializeBlocks() {
@@ -204,7 +218,7 @@ class PGaussianDistribution extends LinePlot {
 		this.setExplainerMessage(index)
 	}
 	handleBlockMouseOut(block, index) {
-		this.props.explainer.setVisible(false)
+		this.props.explainer.reset()
 	}
 	setExplainerMessage(index) {
 		// Calculate the right probability using the cumulative distribution. We kind of cheat, and simply take the mean of several values.
@@ -217,26 +231,165 @@ class PGaussianDistribution extends LinePlot {
 		const probability = meanValue * this.stepSize * 100
 
 		// Set the right message in the explainer.
-		this.props.explainer.setContents(<div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>)
+		const middle = (start + end)/2
+		this.props.explainer.set({
+			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
+			position: this.toPageCoordinates({
+				x: middle,
+				y: Math.min(this.function(middle, this.props.data.l), this.range.output.max),
+			}),
+		})
 	}
 }
-PGaussianDistribution = connectToExplainer(connectToData(PGaussianDistribution, plotId))
+PGaussianDistribution = connectToData(PGaussianDistribution, dataStoreID)
+PGaussianDistribution = connectToExplainer(PGaussianDistribution)
 
-class SampleFigure extends Figure {
+// Set up the visualizations figure.
+class FVisualizations extends Figure {
 	renderSubFigures() {
 		return [
-			<SubFigure title="The probability distribution of the temperature at 8:00" key="left">
-				<svg viewBox="0 0 1000 750">
-					<rect x="50" y="500" width="900" height="200" fill="#888" />
-					<rect x="300" y="50" width="400" height="400" fill="#888" />
-				</svg>
-			</SubFigure>,
-			<SubFigure title="The same distribution, but then with a color gradient" key="right">
-				<svg viewBox="0 0 1000 750">
-					<rect x="50" y="50" width="900" height="200" fill="#888" />
-					<rect x="300" y="300" width="400" height="400" fill="#888" />
-				</svg>
-			</SubFigure>
+			<PVisualizations1 className="extraMargin" key="visualization1" title="The probability distribution of the temperature at 8:00" />,
+			<PVisualizations2 className="extraMargin" key="visualization2" title="The same distribution, but then with a color gradient" />,
 		]
 	}
 }
+
+// Set up the first visualizations plot.
+class PVisualizations1 extends LinePlot {
+	constructor() {
+		super()
+
+		// Define important settings.
+		this.numPlotPoints = 201 // Useful when the length scale is cut down and samples vary quickly.
+		this.transitionTime = 0 // To prevent lag of the line when sliding the slider.
+
+		// Set up the plot range.
+		this.range = {
+			input: {
+				min: -10,
+				max: 10,
+			},
+			output: {
+				min: 0,
+				max: 0.16,
+			},
+		}
+
+		// Set up important settings that will be used by D3 to display the line.
+		this.lineFunction = line()
+			.x(point => this.scale.input(point.input))
+			.y(point => this.scale.output(point.output))
+			.curve(curveLinear)
+
+		// Set up the function to be plotted.
+		this.function = (x, l) => 1 / (Math.sqrt(2 * Math.PI) * l) * Math.exp(-0.5 * (x / l) ** 2)
+	}
+	componentDidMount() {
+		super.componentDidMount()
+		this.indicatorContainer = this.svgContainer.append('g')
+		this.recalculate()
+	}
+	componentDidUpdate() {
+		super.componentDidUpdate()
+		this.recalculate()
+	}
+	getInputAxisStyle() {
+		return super.getInputAxisStyle().tickFormat(v => `${v} °C`)
+	}
+	getOutputAxisStyle() {
+		return super.getOutputAxisStyle().tickFormat(v => `${Math.round(v * 100)}%`)
+	}
+	handleMouseMove(pos, evt) {
+		const T = this.scale.input.invert(pos.x)
+		this.props.data.set({ T })
+		this.props.explainer.set({
+			contents: temperatureMessage(T),
+			position: this.toPageCoordinates({ x: T, y: Math.min(this.function(T, this.props.data.l), this.range.output.max) }),
+		})
+	}
+	handleMouseLeave(pos, evt) {
+		this.props.data.delete('T')
+		this.props.explainer.reset()
+	}
+	recalculate() {
+		this.setLine({
+			color: '#1133aa',
+			width: 3,
+			function: x => this.function(x, this.props.data.l),
+		})
+	}
+	update() {
+		super.update()
+
+		// Draw the line. We need an array of arrays.
+		const lineData = this.props.data.T === undefined ? [] : [[
+			{ input: this.props.data.T, output: 0 },
+			{ input: this.props.data.T, output: Math.min(this.function(this.props.data.T, this.props.data.l), this.range.output.max) },
+		]]
+		this.drawLines(this.indicatorContainer, lineData, indicatorLineStyle)
+	}
+}
+PVisualizations1 = connectToData(PVisualizations1, dataStoreID)
+PVisualizations1 = connectToExplainer(PVisualizations1)
+
+// Set up the second visualizations plot.
+class PVisualizations2 extends GPPlot {
+	constructor() {
+		super()
+		this.range = {
+			input: {
+				min: -1,
+				max: 7,
+			},
+			output: {
+				min: -10,
+				max: 10,
+			},
+		}
+	}
+	componentDidMount() {
+		super.componentDidMount()
+		this.indicatorContainer = this.svgContainer.append('g')
+	}
+	getInputAxisStyle() {
+		return super.getInputAxisStyle().tickFormat(v => `${(v + 6 + 24) % 24}:00`)
+	}
+	getOutputAxisStyle() {
+		return super.getOutputAxisStyle().tickFormat(v => `${v} °C`)
+	}
+	handleMouseMove(pos, evt) {
+		const T = this.scale.output.invert(pos.y)
+		this.props.data.set({ T })
+		this.props.explainer.set({
+			contents: temperatureMessage(T),
+			position: this.toPageCoordinates({ x: 2, y: T }),
+		})
+	}
+	handleMouseLeave(pos, evt) {
+		this.props.data.delete('T')
+		this.props.explainer.reset()
+	}
+	update() {
+		// First draw the sliver.
+		const left = {
+			x: 1.9,
+			mean: 0,
+			std: this.props.data.l,
+		}
+		const right = {
+			x: 2.1,
+			mean: 0,
+			std: this.props.data.l,
+		}
+		this.drawStdSliver(left, right)
+
+		// Draw the line. We need an array of arrays.
+		const lineData = this.props.data.T === undefined ? [] : [[
+			{ input: left.x, output: this.props.data.T },
+			{ input: right.x, output: this.props.data.T },
+		]]
+		this.drawLines(this.indicatorContainer, lineData, indicatorLineStyle)
+	}
+}
+PVisualizations2 = connectToData(PVisualizations2, dataStoreID, { gp: true })
+PVisualizations2 = connectToExplainer(PVisualizations2)

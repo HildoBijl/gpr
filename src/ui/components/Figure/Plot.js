@@ -4,6 +4,7 @@ import classnames from 'classnames'
 import { select } from 'd3-selection'
 import { scaleLinear } from 'd3-scale'
 import { axisLeft, axisBottom } from 'd3-axis'
+import { line, curveLinear } from 'd3-shape'
 
 import { getRange } from '../../../logic/util.js'
 
@@ -59,7 +60,8 @@ export default class Plot extends Component {
 			this.ctx = this.canvas.getContext('2d') // Note that we cannot use `this.context` as the context parameter is also used behind the scenes by React. It will be cleared.
 		
 		// Extract the (SubFigure) container of the plot.
-		this.container = (this.svg || this.canvas).parentElement.parentElement
+		this.innerContainer = (this.svg || this.canvas).parentElement
+		this.outerContainer = this.innerContainer.parentElement
 
 		// Ensure plotpoints are present. They can be defined manually, or only defined through their properties.
 		if (!this.plotPoints)
@@ -73,24 +75,31 @@ export default class Plot extends Component {
 			
 			// Check if the handler has already been set up. If not, set it up.
 			if (!this.handler[data.handler])
-				this.handler[data.handler] = (evt) => this[data.handler](this.getPositionFromEvent(evt), evt)
+				this.handler[data.handler] = (event) => this[data.handler](this.getPositionFromEvent(event), event)
 			
 			// Start listening to the event.
-			this.container.addEventListener(data.event, this.handler[data.handler])
+			this.innerContainer.addEventListener(data.event, this.handler[data.handler])
 		})
 
 		// Set up an additional handler on touchMove, which is used only internally. It prevents the swiping of a plot from swiping a page as well.
-		this.container.addEventListener('touchmove', this.stopPropagationOnTouchMove)
+		this.innerContainer.addEventListener('touchmove', this.stopPropagationOnTouchMove)
 		
 		// Set up containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
 		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
 
+		window.t = this // TODO REMOVE
 		// Set up the scales.
 		this.scale = {
 			input: scaleLinear().domain([this.range.input.min, this.range.input.max]).range([0, this.width]),
 			output: scaleLinear().domain([this.range.output.min, this.range.output.max]).range([this.height, 0]),
 		}
+
+		// Set up a line function for any lines that may be used. This tells us how to transform a set of data points into coordinates.
+		this.lineFunction = line()
+			.x(point => this.scale.input(point.input))
+			.y(point => this.scale.output(point.output))
+			.curve(curveLinear)
 
 		// Set up the axes.
 		const inputAxis = this.getInputAxisStyle()
@@ -121,7 +130,7 @@ export default class Plot extends Component {
 		eventHandlers.forEach(data => {
 			if (!this[data.handler])
 				return // Ignore this event type if the corresponding handler is not specified by a child class.
-			this.container.removeEventListener(data.event, data.expandedHandler)
+			this.innerContainer.removeEventListener(data.event, data.expandedHandler)
 		})
 	}
 
@@ -160,10 +169,10 @@ export default class Plot extends Component {
 	}
 
 	// getPositionFromEvent takes an event object and (based on the clientX and clientY parameters) turns it into the internal coordinates which the event took place at.
-	getPositionFromEvent(evt) {
+	getPositionFromEvent(event) {
 		return {
-			x: evt.offsetX / this.container.offsetWidth * this.width,
-			y: evt.offsetY / this.container.offsetHeight * this.height,
+			x: event.offsetX / this.innerContainer.offsetWidth * this.width,
+			y: event.offsetY / this.innerContainer.offsetHeight * this.height,
 		}
 	}
 
@@ -172,6 +181,25 @@ export default class Plot extends Component {
 		if (!this.canvas)
 			throw new Error('No canvas: the clear canvas function cannot be called when no canvas has been ordered to be present.')
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+	}
+
+	// drawLines is used to draw lines in some given SVG container.
+	drawLines(container, lineData, attributes) {
+		const attributeKeys = Object.keys(attributes)
+		const lines = container
+			.selectAll('path')
+			.data(lineData)
+		const enteringLines = lines.enter()
+			.append('path')
+		attributeKeys.forEach(key => {
+			enteringLines.attr(key, attributes[key])
+		})
+		enteringLines
+			.merge(lines)
+			.attr('d', this.lineFunction)
+		lines.exit()
+			.remove()
+		return lines
 	}
 
 	// isWithinRange checks whether a point (with an input and an output) falls within the range of this plot.
@@ -187,12 +215,22 @@ export default class Plot extends Component {
 		return true
 	}
 
+	// toPageCoordinates takes a point in plot coordinates and outputs it in page coordinates.
+	toPageCoordinates(point) {
+		const bodyRect = document.body.getBoundingClientRect()
+		const plotRect = this.innerContainer.getBoundingClientRect()
+		return {
+			x: this.scale.input(point.x)/this.width*plotRect.width + plotRect.left - bodyRect.left,
+			y: this.scale.output(point.y)/this.height*plotRect.height + plotRect.top - bodyRect.top,
+		}
+	}
+
 	// render sets up the HTML of the plot. Based on what has been requested (through useSVG and useCanvas) it adds an SVG or Canvas object.
 	render() {
 		if (!this.useSVG && !this.useCanvas)
 			throw new Error('Plot render error: cannot generate a plot without either an SVG or a canvas.')
 		return (
-			<SubFigure width={this.width} height={this.height} title={this.props.title} className={classnames(this.className)}>
+			<SubFigure width={this.width} height={this.height} title={this.props.title} className={classnames(this.className, this.props.className)}>
 				{this.useSVG ? (
 					<svg ref={obj => { this.svg = obj }} viewBox={`0 0 ${this.width} ${this.height}`}>
 						<defs>

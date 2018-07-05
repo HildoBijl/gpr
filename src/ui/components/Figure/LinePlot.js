@@ -1,7 +1,6 @@
 import './LinePlot.css'
 
 import { select } from 'd3-selection'
-import { line, curveLinear } from 'd3-shape'
 
 import colors, { colorToHex } from '../../../logic/colors.js'
 
@@ -34,12 +33,6 @@ export default class LinePlot extends Plot {
 		// Set up all containers. The order matters: later containers are on top of earlier containers.
 		this.svgContainer = select(this.svg)
 		this.lineContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'lines')
-
-		// Set up the line function for all lines. This tells us how to transform a set of data points into coordinates.
-		this.lineFunction = line()
-			.x(prediction => this.scale.input(prediction.input))
-			.y(prediction => this.scale.output(prediction.output))
-			.curve(curveLinear)
 	}
 
 	// addLine will add a line object to the lines array, which will subsequently be shown on the plot. It returns the index of the element that was added.
@@ -103,11 +96,11 @@ export default class LinePlot extends Plot {
 
 	// update will often be overwritten by the child class, but the default action is that it draws the mean, the standard deviation and the measurements.
 	update() {
-		this.drawLines()
+		this.drawPlotLines()
 	}
 
 	// drawLines will (re)draw all the lines that are known in this LinePlot. For this, it pulls the current lines out of the transitioners and puts them on the screen using D3.
-	drawLines() {
+	drawPlotLines() {
 		// Extract an array with all line values from the transitioners.
 		const lineData = this.linePoints.map(linePoints => {
 			return linePoints.map(point => ({
@@ -117,17 +110,10 @@ export default class LinePlot extends Plot {
 		})
 
 		// Set up a path for each line using D3.
-		const lines = this.lineContainer
-			.selectAll('path')
-			.data(lineData)
-		lines.enter()
-			.append('path')
-			.attr('class', 'line')
-			.attr('stroke', (line, index) => this.lines[index].color)
-			.attr('stroke-width', (line, index) => this.lines[index].width)
-			.merge(lines)
-			.attr('d', line => this.lineFunction(line) + 'l10000,0l10000,10000l10000,-10000') // We add the line segments at the end to work around a bug in chrome where a clipping mask combined with a completely straight SVG path results in an invisible line. So we just prevent the line from being straight by adding a large invisible section.
-		lines.exit()
-			.remove()
+		this.drawLines(this.lineContainer, lineData, {
+			class: 'line',
+			stroke: (line, index) => this.lines[index].color,
+			'stroke-width': (line, index) => this.lines[index].width,
+		})
 	}
 }

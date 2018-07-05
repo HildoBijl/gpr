@@ -71,14 +71,13 @@ export function reducer(state = initialState, action) {
 
 		// SetData will set certain key-value pairs in the data storage. Other key-value pairs will be unmodified.
 		case 'SetData': {
-			const id = action.id
 			verifyKeys(Object.keys(action.data))
 			return {
 				...state,
-				[id]: {
-					...state[id],
+				[action.id]: {
+					...state[action.id],
 					...action.data,
-				}
+				},
 			}
 		}
 
@@ -93,7 +92,12 @@ export function reducer(state = initialState, action) {
 		}
 
 		case 'DeleteKey': {
-			state = {...state}
+			state = {
+				...state,
+				[action.id]: {
+					...state[action.id],
+				},
+			}
 			const keysToDelete = (Array.isArray(action.key) ? action.key : [action.key])
 			verifyKeys(keysToDelete)
 			keysToDelete.forEach(key => {
@@ -170,7 +174,7 @@ export function connectToData(Class, id, options = {}) {
 }
 
 // adjustInitialStateFromOptions will look at the options and check if the initial state needs to be adjusted, based on it.
-function adjustInitialStateFromOptions(id, options) {
+function adjustInitialStateFromOptions(id, options = {}) {
 	// Check that an initial parameter is given in the options.
 	if (!options.initial)
 		return
@@ -222,6 +226,6 @@ function getModifierFunctionsFromOptions(options, dispatch, id) {
 function verifyKeys(keys) {
 	keys.forEach(key => {
 		if (invalidKeys[key])
-			throw new Error(`Illegal key used: tried to add data to a data store but used the key "${key}" which is reserved.`)
+			throw new Error(`Illegal key used: tried to add/remove data in a data store but used the key "${key}" which is reserved.`)
 	})
 }

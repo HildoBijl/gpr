@@ -5,6 +5,7 @@ const defaultState = {
 		x: 0,
 		y: 0,
 	},
+	position: undefined, // The position where the explainer should be shown. If it is falsy, then the mouse position is used.
 	visible: false, // Whether the explainer should be visible or not.
 }
 
@@ -13,18 +14,34 @@ const defaultState = {
  */
 
 const actions = {
+	set: (data) => {
+		const action = {
+			...data,
+			type: 'SetExplainer',
+		}
+		if (data.visible === undefined && data.contents !== undefined)
+			action.visible = true // Automatically make the explainer visible when contents are added.
+		return action
+	},
 	setMousePosition: (position) => ({
 		type: 'SetMousePosition',
 		position,
 	}),
+	setPosition: (position) => ({
+		type: 'SetExplainer',
+		position,
+	}),
 	setVisible: (visible) => ({
-		type: 'SetExplainerVisible',
+		type: 'SetExplainer',
 		visible,
 	}),
 	setContents: (contents, visible = true) => ({
-		type: 'SetExplainerContents',
+		type: 'SetExplainer',
 		contents,
 		visible,
+	}),
+	reset: () => ({
+		type: 'ResetExplainer',
 	}),
 }
 export default actions
@@ -34,7 +51,18 @@ export default actions
  */
 
 export function reducer(state = defaultState, action) {
-  switch (action.type) {
+	switch (action.type) {
+		case 'SetExplainer': {
+			state = { ...state }
+			if (action.contents !== undefined)
+				state.contents = action.contents
+			if (action.position !== undefined)
+				state.position = action.position
+			if (action.visible !== undefined)
+				state.visible = action.visible
+			return state
+		}
+
 		case 'SetMousePosition': {
 			return {
 				...state,
@@ -42,39 +70,31 @@ export function reducer(state = defaultState, action) {
 			}
 		}
 
-		case 'SetExplainerVisible': {
-			return {
-				...state,
-				visible: action.visible,
-			}
-		}
-
-		case 'SetExplainerContents': {
-			return {
-				...state,
-				contents: action.contents,
-				visible: action.visible,
-			}
+		case 'ResetExplainer': {
+			return { ...defaultState }
 		}
 
 		default: {
-      return state
-    }
-  }
+			return state
+		}
+	}
 }
 
 /*
  * Third, set up getter functions for various useful parameters.
  */
- 
+
 // connectToExplainer is used to give the explainer control functions (setVisible, setContents, etcetera) to the given class. It should only be given the class that is to be connected. After connection, the functions can be accessed through for instance this.props.explainer.setContents(...).
 export function connectToExplainer(Class) {
 	const stateMap = (state) => ({})
 	const actionMap = (dispatch) => ({
 		explainer: {
+			set: (data) => dispatch(actions.set(data)),
 			setMousePosition: (position) => dispatch(actions.setMousePosition(position)),
+			setPosition: (position) => dispatch(actions.setPosition(position)),
 			setVisible: (visible) => dispatch(actions.setVisible(visible)),
 			setContents: (contents, visible) => dispatch(actions.setContents(contents, visible)),
+			reset: () => dispatch(actions.reset()),
 		}
 	})
 	return connect(stateMap, actionMap)(Class)

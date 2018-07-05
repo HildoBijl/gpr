@@ -18,6 +18,11 @@ export default class GPPlot extends Plot {
 		// Define settings that may be overwritten by the child class.
 		this.measurementRadius = 6
 	}
+	
+	// getGPData pulls the GP data (the state) out of the data props. How this is done depends on whether there are multiple data stores connected to this object. If so, it should be separately specified which dataStoreID contains the GP data.
+	getGPData() {
+		return (this.dataStoreID ? this.props.data[this.dataStoreID] : this.props.data)[this.dataName]
+	}
 
 	// componentDidMount sets up all parameters (mostly D3 objects, but also transitioners) that are needed to properly plot the Gaussian Process.
 	componentDidMount() {
@@ -25,7 +30,7 @@ export default class GPPlot extends Plot {
 		super.componentDidMount()
 
 		// Set up the GP object, using data from redux.
-		this.gp = new GaussianProcess(this.props.data[this.dataName])
+		this.gp = new GaussianProcess(this.getGPData())
 
 		// Set up containers. The order matters: later containers are on top of earlier containers.
 		this.sampleContainer = this.svgContainer.append('g').attr('mask', 'url(#noOverflow)').attr('class', 'samples')
@@ -62,8 +67,7 @@ export default class GPPlot extends Plot {
 
 	// componentDidUpdate is called when the data of a GP is potentially updated. It tells the GP to check if recalculations are necessary.
 	componentDidUpdate(prevProps, prevState, snapshot) {
-		const gpData = this.props.data[this.dataName]
-		if (this.gp.processUpdate(gpData))
+		if (this.gp.processUpdate(this.getGPData()))
 			this.recalculate()
 	}
 
@@ -157,7 +161,7 @@ export default class GPPlot extends Plot {
 
 		// Extract the current prediction data from the transitioners and walk through all the points, drawing gradient rectangles to the left of each of them (apart from the first).
 		const prediction = this.getCurrentPrediction()
-		let left, right // We will draw vertical rectangles. The left and right parameters will take into account the data on either side of the rectangle.
+		let left = {}, right = {} // We will draw vertical rectangles. The left and right parameters will take into account the data on either side of the rectangle.
 		for (let i = 0; i < prediction.length; i++) {
 			// Shift the data forward.
 			left = right
