@@ -137,8 +137,10 @@ export default class GaussianProcess {
 
 		// Set up necessary matrices and apply the inference.
 		const { Kms, Kss, beta } = this.getGPRMatrices(input)
+		const measurementMean = this.getMeasurementInputs().map(this.meanFunction)
+		const priorMean = input.map(this.meanFunction)
 		const ym = this.getMeasurementOutputs()
-		const mean = math.multiply(beta, ym)
+		const mean = math.add(priorMean, math.multiply(beta, math.subtract(ym, measurementMean)))
 		const covariance = math.subtract(Kss, math.multiply(beta, Kms))
 
 		// Set up final result.
@@ -450,7 +452,7 @@ export default class GaussianProcess {
 		if (!Array.isArray(param.input))
 			throw new Error('Missing input parameter: the getSamples function was given a parameter that did not have an "input" parameter with all the sample input points.')
 
-		// If there are now samples, don't do anything.
+		// If there are no samples, don't do anything.
 		if ((this.state.samples || []).length === 0)
 			return []
 

@@ -21,7 +21,7 @@ export default class GPPlot extends Plot {
 	
 	// getGPData pulls the GP data (the state) out of the data props. How this is done depends on whether there are multiple data stores connected to this object. If so, it should be separately specified which dataStoreID contains the GP data.
 	getGPData() {
-		return (this.dataStoreID ? this.props.data[this.dataStoreID] : this.props.data)[this.dataName]
+		return (this.dataStoreID ? this.props.data[this.dataStoreID] : this.props.data)[this.dataName] || {}
 	}
 
 	// componentDidMount sets up all parameters (mostly D3 objects, but also transitioners) that are needed to properly plot the Gaussian Process.

@@ -35,7 +35,7 @@ export default class Figure extends Component {
 
 	/*
 	 * getSliders returns an array with slider components, ready to be added to the control bar. This only works if a setSlider and a getSlider function has been defined. Otherwise an empty array is returned.
-	 * Sliders will have a value between 0 (left) and 1 (right). The setSlider function can have three parameters: value (obviously), definite (a boolean that says whether the value is still definite - we are done dragging/sliding) and index (the index of the slider, in case we have multiple). The getSlider should return the slider value, and is used to render the slider button properly. Storage of the slider value should be arranged by the child class.
+	 * Sliders will have a value between 0 (left) and 1 (right). The setSlider function can have three parameters: value (obviously), index (the index of the slider, in case we have multiple) and definite (a boolean that says whether the value is final: whether we are done dragging/sliding). The getSlider should return the slider value, and is used to render the slider button properly. Storage of the slider value should be arranged by the child class.
 	 */
 	getSliders() {
 		// Check if slider functions are defined.
@@ -44,7 +44,7 @@ export default class Figure extends Component {
 
 		// Set up sliders.
 		const numSliders = this.numSliders || 1 // It is possible to use multiple sliders. In this case, the parameter `numSliders` should be set in the constructor.
-		return new Array(numSliders).fill(0).map((_, index) => <Slider key={`slider${index}`} value={this.getSlider(index)} setValue={(value, definite) => this.setSlider(value, definite, index)} />)
+		return new Array(numSliders).fill(0).map((_, index) => <Slider key={`slider${index}`} value={this.getSlider(index)} setValue={(value, definite) => this.setSlider(value, index, definite)} />)
 	}
 
 	/*

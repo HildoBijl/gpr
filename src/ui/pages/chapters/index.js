@@ -53,9 +53,9 @@ chapters.fundamentalassumptions = {
 	),
 	sections: [
 		'Why make assumptions?',
-		'A single value',
-		'Two values',
-		'Infinitely many values',
+		'The temperature distribution',
+		'Links between temperatures',
+		'The final result',
 	],
 	parents: [chapters.whatisgpr],
 	position: {
