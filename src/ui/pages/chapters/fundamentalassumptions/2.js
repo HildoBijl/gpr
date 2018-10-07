@@ -6,6 +6,7 @@ import { line, curveLinear } from 'd3-shape'
 import { connectToData } from '../../../../redux/dataStore.js'
 import { connectToExplainer } from '../../../../redux/explainer.js'
 import { getRange } from '../../../../logic/util.js'
+import { gaussianPDF } from '../../../../logic/math.js'
 
 import Section from '../../../components/Section/Section.js'
 import Figure from '../../../components/Figure/Figure.js'
@@ -14,17 +15,7 @@ import LinePlot from '../../../components/Figure/LinePlot.js'
 import GPPlot from '../../../components/Figure/GPPlot.js'
 import { Note, Term, Num, Emph } from '../../../components/Textbox/index.js'
 
-// All the plots on this page use a single data store.
-const dataStoreID = 'gaussianDistributionIdea'
-
-// Define settings for the plots.
-const minM = -2
-const maxM = 6
-const initialM = (maxM + minM) / 2
-const minL = 0.4
-const maxL = 6
-const initialL = (maxL + minL) / 2
-const gaussian = (x, m, l) => 1 / (Math.sqrt(2 * Math.PI) * l) * Math.exp(-0.5 * ((x - m) / l) ** 2)
+import { priorId, priorInitial, minM, maxM, minL, maxL } from './parameters.js'
 
 // Style data for lines.
 const indicatorLineStyle = {
@@ -55,7 +46,6 @@ class CurrentSection extends Section {
 
 				<h4>Visualizing the distribution</h4>
 				<p>We just visualized the distribution of the temperature at 8:00, using a Gaussian bell curve. This works well if we only care about the temperature at 8:00. But if we also want to include the temperatures at other times, it's better to use color gradients instead. That gives us another type of visualization.</p>
-				{/* TODO NEXT: Set up this plot. */}
 				<FVisualizations section={this} number={++this.counters.figure} className="twoColumn" />
 				<FigureGuide>
 					<p>In the above figure, the left graph shows the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero. At the same time, the right plot also shows this temperature distribution, but now with a color gradient. The horizontal axis denotes the time and the vertical axis the temperature. In this plot, the color represents the probability: the lighter the color, the more likely the temperature is to occur.</p>
@@ -80,7 +70,7 @@ class CurrentSection extends Section {
 		)
 	}
 }
-export default connectToData(CurrentSection, dataStoreID, { initial: { m: initialM, l: initialL, c3: 0.5, c5: 0.5 } })
+export default connectToData(CurrentSection, priorId, { initial: priorInitial })
 
 // Set up the Gaussian distribution figure.
 class FGaussianDistribution extends Figure {
@@ -105,7 +95,7 @@ class FGaussianDistribution extends Figure {
 		return (this.props.data.l - minL) / (maxL - minL)
 	}
 }
-FGaussianDistribution = connectToData(FGaussianDistribution, dataStoreID)
+FGaussianDistribution = connectToData(FGaussianDistribution, priorId)
 FGaussianDistribution = connectToExplainer(FGaussianDistribution)
 
 // Set up the corresponding plot.
@@ -157,7 +147,7 @@ class PGaussianDistribution extends LinePlot {
 		this.setLine({
 			color: '#1133aa',
 			width: 3,
-			function: x => gaussian(x, this.props.data.m, this.props.data.l),
+			function: x => gaussianPDF(x, this.props.data.m, this.props.data.l),
 		})
 	}
 	update() {
@@ -208,7 +198,7 @@ class PGaussianDistribution extends LinePlot {
 			// Ignore the first two points, as they are the bottom points. Their output values are already set and won't change.
 			if (index <= 1)
 				return
-			point.output = Math.max(gaussian(point.input, this.props.data.m, this.props.data.l), 0)
+			point.output = Math.max(gaussianPDF(point.input, this.props.data.m, this.props.data.l), 0)
 		}))
 
 		// Set up a path for each line using D3.
@@ -237,7 +227,7 @@ class PGaussianDistribution extends LinePlot {
 		const start = this.range.input.min + index * this.stepSize
 		const end = start + this.stepSize
 		const samplePoints = getRange(start, end, numPoints)
-		const sum = samplePoints.reduce((sum, x) => sum + gaussian(x, this.props.data.m, this.props.data.l), 0)
+		const sum = samplePoints.reduce((sum, x) => sum + gaussianPDF(x, this.props.data.m, this.props.data.l), 0)
 		const meanValue = sum / numPoints
 		const probability = meanValue * this.stepSize * 100
 
@@ -247,12 +237,12 @@ class PGaussianDistribution extends LinePlot {
 			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
 			position: this.toPageCoordinates({
 				x: middle,
-				y: Math.min(gaussian(middle, this.props.data.m, this.props.data.l), this.range.output.max),
+				y: Math.min(gaussianPDF(middle, this.props.data.m, this.props.data.l), this.range.output.max),
 			}),
 		})
 	}
 }
-PGaussianDistribution = connectToData(PGaussianDistribution, dataStoreID)
+PGaussianDistribution = connectToData(PGaussianDistribution, priorId)
 PGaussianDistribution = connectToExplainer(PGaussianDistribution)
 
 // Set up the visualizations figure.
@@ -312,7 +302,7 @@ class PVisualizations1 extends LinePlot {
 		this.props.data.set({ T })
 		this.props.explainer.set({
 			contents: temperatureMessage(T),
-			position: this.toPageCoordinates({ x: T, y: Math.min(gaussian(T, this.props.data.m, this.props.data.l), this.range.output.max) }),
+			position: this.toPageCoordinates({ x: T, y: Math.min(gaussianPDF(T, this.props.data.m, this.props.data.l), this.range.output.max) }),
 		})
 	}
 	handleMouseLeave(pos, evt) {
@@ -323,7 +313,7 @@ class PVisualizations1 extends LinePlot {
 		this.setLine({
 			color: '#1133aa',
 			width: 3,
-			function: x => gaussian(x, this.props.data.m, this.props.data.l),
+			function: x => gaussianPDF(x, this.props.data.m, this.props.data.l),
 		})
 	}
 	update() {
@@ -332,12 +322,12 @@ class PVisualizations1 extends LinePlot {
 		// Draw the line. We need an array of arrays.
 		const lineData = this.props.data.T === undefined ? [] : [[
 			{ input: this.props.data.T, output: 0 },
-			{ input: this.props.data.T, output: Math.min(gaussian(this.props.data.T, this.props.data.m, this.props.data.l), this.range.output.max) },
+			{ input: this.props.data.T, output: Math.min(gaussianPDF(this.props.data.T, this.props.data.m, this.props.data.l), this.range.output.max) },
 		]]
 		this.drawLines(this.indicatorContainer, lineData, indicatorLineStyle)
 	}
 }
-PVisualizations1 = connectToData(PVisualizations1, dataStoreID)
+PVisualizations1 = connectToData(PVisualizations1, priorId)
 PVisualizations1 = connectToExplainer(PVisualizations1)
 
 // Set up the second visualizations plot.
@@ -399,7 +389,7 @@ class PVisualizations2 extends GPPlot {
 		this.drawLines(this.indicatorContainer, lineData, indicatorLineStyle)
 	}
 }
-PVisualizations2 = connectToData(PVisualizations2, dataStoreID)
+PVisualizations2 = connectToData(PVisualizations2, priorId)
 PVisualizations2 = connectToExplainer(PVisualizations2)
 
 // Set up the figure with two temperatures visualized.
@@ -499,7 +489,7 @@ class PTwoTemperatures extends GPPlot {
 		const start = Math.floor(T)
 		const end = start + stepSize
 		const samplePoints = getRange(start, end, numPoints)
-		const sum = samplePoints.reduce((sum, x) => sum + gaussian(x, this.props.data.m, this.props.data.l), 0)
+		const sum = samplePoints.reduce((sum, x) => sum + gaussianPDF(x, this.props.data.m, this.props.data.l), 0)
 		const meanValue = sum / numPoints
 		const probability = meanValue * stepSize * 100
 
@@ -514,5 +504,5 @@ class PTwoTemperatures extends GPPlot {
 		})
 	}
 }
-PTwoTemperatures = connectToData(PTwoTemperatures, dataStoreID)
+PTwoTemperatures = connectToData(PTwoTemperatures, priorId)
 PTwoTemperatures = connectToExplainer(PTwoTemperatures)

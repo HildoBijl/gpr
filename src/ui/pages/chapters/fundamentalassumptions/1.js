@@ -1,12 +1,13 @@
 import React from 'react'
 
-import GP from '../../../../logic/GaussianProcess/GaussianProcess.js'
 import { connectToData } from '../../../../redux/dataStore.js'
 
 import Section from '../../../components/Section/Section.js'
 import Figure from '../../../components/Figure/Figure.js'
 import FigureGuide from '../../../components/Figure/FigureGuide.js'
 import GPPlot from '../../../components/Figure/GPPlot.js'
+
+import { gradualId, gradualInitial } from './parameters.js'
 
 export default class CurrentSection extends Section {
 	render() {
@@ -31,32 +32,6 @@ export default class CurrentSection extends Section {
 			</div>
 		)
 	}
-}
-
-// Define data for the GP.
-const id = 'gradual'
-const gpData = {
-	meanData: {
-		type: 'Constant',
-		m: 2,
-	},
-	covarianceData: {
-		type: 'SquaredExponential',
-		Vx: 0.5 ** 2,
-		Vy: 0.5 ** 2,
-	},
-	measurements: [
-		{
-			input: 2,
-			output: 2,
-		},
-		{
-			input: 4,
-			output: 4,
-		},
-	],
-	defaultOutputNoiseVariance: 0.0001,
-	samples: [GP.generateSample()],
 }
 
 // Define figure variation data.
@@ -102,7 +77,7 @@ class FGradual extends Figure {
 		return Math.log(Math.sqrt(V)/minL)/multip
 	}
 }
-FGradual = connectToData(FGradual, id, { gp: true, initial: { gp: gpData } })
+FGradual = connectToData(FGradual, gradualId, { gp: true, initial: gradualInitial })
 
 // Set up the plot.
 class PGradual extends GPPlot {
@@ -138,4 +113,4 @@ class PGradual extends GPPlot {
 		this.drawMeasurements()
 	}
 }
-PGradual = connectToData(PGradual, id, { gp: true })
+PGradual = connectToData(PGradual, gradualId, { gp: true })

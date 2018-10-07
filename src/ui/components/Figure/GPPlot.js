@@ -207,7 +207,7 @@ export default class GPPlot extends Plot {
 	// scaleSliverPoint(point) takes a point given to drawStdSliver (the left or right part of a sliver, containing an x-value, a mean and an std) and transforms it to canvas coordinates.
 	scaleSliverPoint(point) {
 		return {
-			x: Math.round(this.scale.input(point.x)), // We can only have integer x-coordinates in the canvas.
+			x: Math.floor(this.scale.input(point.x)), // We can only have integer x-coordinates in the canvas.
 			mean: this.scale.output(point.mean),
 			std: this.scale.output(point.std) - this.scale.output(0), // Because std is a distance and not a coordinate, we should not just apply regular scaling, but only get the distance with respect to zero.
 		}
@@ -226,6 +226,8 @@ export default class GPPlot extends Plot {
 			.append('circle')
 			.attr('class', 'measurement')
 			.attr('r', this.measurementRadius)
+			.on('mouseover', this.handleMeasurementMouseOver.bind(this))
+			.on('mouseout', this.handleMeasurementMouseOut.bind(this))
 			.merge(points) // New and existing points.
 			.attr('cx', measurement => this.scale.input(GaussianProcess.getInputFromMeasurement(measurement)))
 			.attr('cy', measurement => this.scale.output(GaussianProcess.getOutputFromMeasurement(measurement)))
@@ -254,4 +256,8 @@ export default class GPPlot extends Plot {
 		lines.exit()
 			.remove()
 	}
+
+	// The following functions are event handlers that can be overwritten by child classes.
+	handleMeasurementMouseOver() {}
+	handleMeasurementMouseOut() {}
 }

@@ -179,6 +179,11 @@ export function removeColumn(matrix, col) {
 
 const gaussianDist = gaussian(0, 1) // We need this one to generate Gaussian number samples.
 
+// gaussian(x, m, l) is the Gaussian PDF function, with given scalar input x, mean m and length scale l.
+export function gaussianPDF(x, m, l) {
+  return 1 / (Math.sqrt(2 * Math.PI) * l) * Math.exp(-0.5 * ((x - m) / l) ** 2)
+}
+
 // getGaussianRand(n) returns an array of n normally distributed random variables. If no number is given, it returns a single scalar number instead. All numbers have zero mean, unit variance and are independent. If you want non-zero mean, just add the mean. If you want a non-unit variance, multiply the numbers. If you want a specific covariance matrix, use getGaussianSample.
 export function getGaussianRand(n) {
   if (n === undefined)
