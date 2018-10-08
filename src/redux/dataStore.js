@@ -38,8 +38,17 @@ export default actions
  */
 
 const initialState = {} // This may be expanded by functions connecting to the datastore.
+const initialStatesToAdd = [] // This array keeps track of which initial states we should still add to the datastore.
 
 export function reducer(state = initialState, action) {
+	console.log('Reducer called')
+	// Check if there are data stores that we need to initialize with its initial state.
+	for (let dataStoreId = initialStatesToAdd.pop(); dataStoreId; dataStoreId = initialStatesToAdd.pop()) {
+		console.log('Initializing "' + dataStoreId + '"')
+		console.log(initialState[dataStoreId])
+		state[dataStoreId] = initialState[dataStoreId]
+	}
+
 	// Check if there was an external source for this action.
 	if (action.dataStoreSource) {
 		// So we have an external reducer. Clone (or create if not available) the appropriate objects, as is usual for redux.
@@ -132,7 +141,7 @@ export function connectToData(Class, id, options = {}) {
 	// How we do this depends on whether id is a string or an array. If it's a string, we couple the array to a single data store. Otherwise, we couple it to multiple data stores.
 	if (typeof id === 'string') {
 		// Set up the connection for a single data store. To access them, you need to use this.props.data[key].
-		adjustInitialStateFromOptions(id, options)
+		setInitialStateFromOptions(id, options)
 		const stateMap = (state) => ({
 			data: state.dataStore[id],
 		})
@@ -147,7 +156,7 @@ export function connectToData(Class, id, options = {}) {
 	} else if (Array.isArray(id)) {
 		// Set up the connection for multiple data stores. To access them, you need to use this.props.data[id][key].
 		id.forEach(currId => {
-			adjustInitialStateFromOptions(currId, options[currId])
+			setInitialStateFromOptions(currId, options[currId])
 		})
 		const stateMap = (state) => {
 			let data = {}
@@ -173,8 +182,8 @@ export function connectToData(Class, id, options = {}) {
 	}
 }
 
-// adjustInitialStateFromOptions will look at the options and check if the initial state needs to be adjusted, based on it.
-function adjustInitialStateFromOptions(id, options = {}) {
+// setInitialStateFromOptions will look at the options and check if the initial state needs to be defined, based on it.
+function setInitialStateFromOptions(id, options = {}) {
 	// Check that an initial parameter is given in the options.
 	if (!options.initial)
 		return
@@ -183,8 +192,10 @@ function adjustInitialStateFromOptions(id, options = {}) {
 	if (initialState[id])
 		throw new Error(`Double assignment of initial datastore state: the datastore "${id}" was assigned an initial state, but it already had been assigned one previously. Double assigning of an initial state is not allowed.`)
 	
-	// Store the initial state.
+	// Store the initial state. Also remember we should add it to the data store when it is used.
+	console.log('Setting up ' + id)
 	initialState[id] = options.initial
+	initialStatesToAdd.push(id)
 }
 
 // getModifierFunctions returns all the functions which a class, connected to a data store, gets to adjust the data in the data store.

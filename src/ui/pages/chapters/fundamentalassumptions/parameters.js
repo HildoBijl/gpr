@@ -1,7 +1,7 @@
 import GP from '../../../../logic/GaussianProcess/GaussianProcess.js'
 
 // The plot in the first section showing how stuff gradually changes.
-const gradualId = 'gradual'
+const gradualId = 'gradualFunctionVariationDemo'
 const gradualInitial = {
 	gp: {
 		meanData: {

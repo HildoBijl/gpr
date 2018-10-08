@@ -244,7 +244,7 @@ class PCorrelation1 extends LinePlot {
 		const middle = (start + end) / 2
 		const probability = getProbabilityOfIndex(index, this.lines[0].function)
 		this.props.explainer.set({
-			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
+			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature at {this.props.time+6}:00 is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
 			position: this.toPageCoordinates({
 				x: middle,
 				y: Math.min(this.lines[0].function(middle), this.range.output.max),
@@ -409,7 +409,7 @@ class PCorrelation2 extends GPPlot {
 		const end = start + blockStepSize
 		const probability = getProbabilityOfIndex(index, pdf)
 		this.props.explainer.set({
-			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
+			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature at {this.props.time+6}:00 is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
 			position: this.toPageCoordinates({
 				x: hover.time,
 				y: Math.min(end, this.range.output.max),

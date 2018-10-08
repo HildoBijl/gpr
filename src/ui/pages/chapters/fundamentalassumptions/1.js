@@ -68,6 +68,8 @@ class FGradual extends Figure {
 	}
 	getSlider(index) {
 		// Mean?
+		console.log(this.props.data.gp)
+		console.log(this.props.data.gp.meanData)
 		if (index === 0)
 			return (this.props.data.gp.meanData.m - minM)/(maxM - minM)
 		
@@ -77,6 +79,7 @@ class FGradual extends Figure {
 		return Math.log(Math.sqrt(V)/minL)/multip
 	}
 }
+console.log('Connecting A')
 FGradual = connectToData(FGradual, gradualId, { gp: true, initial: gradualInitial })
 
 // Set up the plot.

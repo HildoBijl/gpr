@@ -45,7 +45,7 @@ class CurrentSection extends Section {
 				{/* ToDo: add equations for this. */}
 
 				<h4>Visualizing the distribution</h4>
-				<p>We just visualized the distribution of the temperature at 8:00, using a Gaussian bell curve. This works well if we only care about the temperature at 8:00. But if we also want to include the temperatures at other times, it's better to use color gradients instead. That gives us another type of visualization.</p>
+				<p>We just visualized the distribution of the temperature at 8:00 using a Gaussian bell curve. This works well if we only care about the temperature at 8:00. But if we also want to include the temperatures at other times, it's better to use color gradients instead. That gives us another type of visualization.</p>
 				<FVisualizations section={this} number={++this.counters.figure} className="twoColumn" />
 				<FigureGuide>
 					<p>In the above figure, the left graph shows the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero. At the same time, the right plot also shows this temperature distribution, but now with a color gradient. The horizontal axis denotes the time and the vertical axis the temperature. In this plot, the color represents the probability: the lighter the color, the more likely the temperature is to occur.</p>

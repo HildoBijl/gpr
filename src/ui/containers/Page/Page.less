@@ -83,11 +83,23 @@
 		p {
 			line-height: @lineHeight;
 			margin: 6px 0 10px;
+			text-align: justify;
 		}
 
 		h1, h2, h3, p {
 			&:first-child {
 				margin-top: 0;
+			}
+		}
+		
+		ul {
+			list-style-type: square;
+			list-style-position: outside;
+			margin: 6px 0 6px 24px;
+
+			li {
+				line-height: @lineHeight;
+				margin: 6px 0;
 			}
 		}
 	}
