@@ -49,12 +49,12 @@ export default class Home extends Component {
 	render() {
 		return (
 			<div>
-				<p>This web app is a tutorial. It's an interactive book explaining you all about the machine learning technique called Gaussian process regression.</p>
-				<h2>What is Gaussian process regression?</h2>
+				<p>This web app is an interactive book. It's a tutorial explaining you all about the machine learning technique called Gaussian process regression.</p>
+				<h4>What is Gaussian process regression?</h4>
 				<p>Gaussian Process (GP) regression is, roughly said, a method of approximating functions/relations, based on measurements. For example, suppose that we measure the temperature at various times in a day, what can we then say about the temperature at intermediate times? That's the problem shown in the plot below. Interact with it! Click/press on it to add measurements, or reset the plot to remove them.</p>
 				<FGPDemo section={this} />
 				<p>But GP regression isn't only about function approximation. It's also about finding structure in data, making predictions, identifying systems, optimizing processes, and much, much more. In this tutorial app, you can read all about it and, more importantly, play around with it.</p>
-				<h2>How to use this app</h2>
+				<h4>How to use this app</h4>
 				<p>If this app needed a manual, it wouldn't be any good. Head to the <Link to={{ type: 'TREE' }}>Contents Tree</Link> and start reading/playing!</p>
 			</div>
 		)
@@ -67,7 +67,6 @@ class FGPDemo extends Figure {
 		return <PGPDemo />
 	}
 	onReset() {
-		console.log(this.props.data.gp)
 		this.props.data.gp.removeAllMeasurements()
 	}
 }

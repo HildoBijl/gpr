@@ -31,3 +31,89 @@ a {
 strong {
   font-weight: bold;
 }
+
+
+h1 {
+	font-weight: bold;
+	margin: 32px 0 24px 0;
+	
+	font-size: 1.9rem;
+	@media @landscape {
+		font-size: 1.9rem;
+	}
+}
+
+h2 {
+	font-weight: bold;
+	margin: 24px 0 16px 0;
+	
+	font-size: 1.7rem;
+	@media @landscape {
+		font-size: 1.7rem;
+	}
+}
+
+h3 {
+	font-weight: bold;
+	margin: 16px 0 10px 0;
+	
+	font-size: 1.4rem;
+	@media @landscape {
+		font-size: 1.4rem;
+	}
+}
+
+h4 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 16px 0 10px;
+  padding: 2px 0;
+}
+.lightTheme h4 {
+  border-bottom: 1px dashed @lightThemeColor;
+  color: @lightThemeColor;
+}
+.darkTheme h4 {
+  border-bottom: 1px dashed @darkThemeColor;
+  color: @darkThemeColor;
+}
+
+p {
+	line-height: @lineHeight;
+	margin: 6px 0 10px;
+	text-align: justify;
+}
+
+ul {
+	list-style-type: square;
+	list-style-position: outside;
+	margin: 6px 0 6px 24px;
+
+	li {
+		line-height: @lineHeight;
+		margin: 6px 0;
+	}
+}
+
+h1, h2, h3, p {
+	&:first-child {
+		margin-top: 0;
+	}
+}
+
+.lightTheme {
+	.success {
+		color: @lightSuccessColor;
+	}
+	.error {
+		color: @lightErrorColor;
+	}
+}
+.darkTheme {
+	.success {
+		color: @darkSuccessColor;
+	}
+	.error {
+		color: @darkErrorColor;
+	}
+}

@@ -48,8 +48,8 @@ const timeRange = { min: -1, max: 7 }
 const priorInitial = { // The initial datastore data.
 	m: initialM,
 	l: initialL,
-	c3: 0.5, // The initial correlation between 8:00 and 9:00.
-	c5: 0.5, // The initial correlation between 8:00 and 11:00.
+	[`c${t1}`]: 0.5, // The initial correlation between 8:00 and 9:00.
+	[`c${t2}`]: 0.5, // The initial correlation between 8:00 and 11:00.
 	gp: {
 		measurements: [
 			{

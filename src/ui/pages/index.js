@@ -10,13 +10,13 @@ import chapters from './chapters'
 const pages = {
 	HOME: {
 		component: Home,
-		title: 'Gaussian Process Regression',
+		title: 'Gaussian process regression: an interactive book',
 		skipPrefix: true, // Do not use a prefix in the <title>.
 		path: '/',
 	},
 	TREE: {
 		component: Tree,
-		title: 'Content Tree',
+		title: 'Content tree',
 		path: '/contents',
 	},
 	SETTINGS: {
@@ -26,7 +26,7 @@ const pages = {
 	},
 	ABOUT: {
 		component: About,
-		title: 'About this tutorial',
+		title: 'About this interactive book',
 		path: '/about',
 	},
 	CHAPTER: {

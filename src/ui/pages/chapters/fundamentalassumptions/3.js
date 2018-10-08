@@ -29,7 +29,7 @@ class CurrentSection extends Section {
 				<p>The key is that the temperature doesn't change very quickly. In other words, the temperature at 9:00 will be <Emph>similar</Emph> to the temperature at 8:00. But how similar? Could the temperature also be {measuredTemperature + 1}°C? Maybe {measuredTemperature + 2}°C? And what about {measuredTemperature + 3}°C?</p>
 				<FCorrelation section={this} number={++this.counters.figure} time={t1} className="twoColumn" />
 				<FigureGuide>
-					<p>In the above figure, the left plot again shows the probability distribution of the temperature, but now for 9:00. The right figure shows the same distribution using a color gradient.</p>
+					<p>In the above figure, the left plot again shows the probability distribution of the temperature, but now for 9:00. The right figure shows the same distribution using a color gradient. There is also a red dot. This represents the measurement we did at 8:00. We measured a temperature of {measuredTemperature}°C.</p>
 					<p>To adjust the figure, use the slider at the bottom. With it, you can change how much variation the temperature will have at 9:00.</p>
 				</FigureGuide>
 				<p>So you just defined the link between the temperatures at 8:00 and 9:00. The way in which we mathematically indicate this link is through the <Term>correlation</Term>. A correlation of 1 means that the two temperatures are exactly equal, while a correlation of 0 means that knowing the temperature at 8:00 does not tell us anything about the temperature at 9:00. It seems you've decided on a correlation of <Num>{this.props.data[`c${t1}`].toFixed(2)}</Num>.</p>

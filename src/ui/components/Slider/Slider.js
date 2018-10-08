@@ -34,11 +34,16 @@ export default class Slider extends Component {
 	}
 
 	componentWillUnmount() {
+		// Remove all event listeners.
 		this.area.removeEventListener('mousedown', this.startDrag)
 		this.button.removeEventListener('mousedown', this.startDrag)
 		this.area.removeEventListener('touchstart', this.startTouch)
 		this.button.removeEventListener('touchstart', this.startTouch)
 		window.removeEventListener('resize', this.update)
+
+		// Remove timeouts if present.
+		if (this.boundTimeout)
+			clearTimeout(this.boundTimeout)
 	}
 
 	update() {
@@ -148,7 +153,7 @@ export default class Slider extends Component {
 
 		// If the rectangles are still not known yet, then this is the first render. We cannot know the rectangles just yet. In that case, add to the javascript queue to update the slider again after rendering.
 		if (!this.areaRect || !this.buttonRect)
-			setTimeout(this.forceUpdate.bind(this), 0) // Yeah, it's a bit of a dirty trick.
+			this.boundTimeout = setTimeout(this.forceUpdate.bind(this), 0) // Yeah, it's a bit of a dirty trick.
 
 		// Find the position the slider should be in.
 		const value = bound(this.state.dragging ? this.state.value : this.props.value, 0, 1) // If we are dragging, we keep track of our own value, mainly because the application itself does not always set the value immediately. It can also do so upon releasing the slider.

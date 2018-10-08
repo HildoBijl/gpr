@@ -16,7 +16,7 @@ export default class GPPlot extends Plot {
 		this.className.gpPlot = true // Tell the plot that it's a GPPlot, so the corresponding CSS styling applied.
 
 		// Define settings that may be overwritten by the child class.
-		this.measurementRadius = 6
+		this.measurementRadius = 8
 	}
 	
 	// getGPData pulls the GP data (the state) out of the data props. How this is done depends on whether there are multiple data stores connected to this object. If so, it should be separately specified which dataStoreID contains the GP data.

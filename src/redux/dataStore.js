@@ -41,11 +41,8 @@ const initialState = {} // This may be expanded by functions connecting to the d
 const initialStatesToAdd = [] // This array keeps track of which initial states we should still add to the datastore.
 
 export function reducer(state = initialState, action) {
-	console.log('Reducer called')
 	// Check if there are data stores that we need to initialize with its initial state.
 	for (let dataStoreId = initialStatesToAdd.pop(); dataStoreId; dataStoreId = initialStatesToAdd.pop()) {
-		console.log('Initializing "' + dataStoreId + '"')
-		console.log(initialState[dataStoreId])
 		state[dataStoreId] = initialState[dataStoreId]
 	}
 
@@ -74,7 +71,7 @@ export function reducer(state = initialState, action) {
 			}
 		}
 	}
-	
+
 	// Check if the action was one of our regular actions.
 	switch (action.type) {
 
@@ -143,7 +140,7 @@ export function connectToData(Class, id, options = {}) {
 		// Set up the connection for a single data store. To access them, you need to use this.props.data[key].
 		setInitialStateFromOptions(id, options)
 		const stateMap = (state) => ({
-			data: state.dataStore[id],
+			data: state.dataStore[id] || initialState[id] || {}, // Provide the data stored in the data store. Or, if it has not been initialized yet, use the initial state. Barring that, use an empty object. Something should exist.
 		})
 		const actionMap = (dispatch) => ({
 			data: {
@@ -191,9 +188,8 @@ function setInitialStateFromOptions(id, options = {}) {
 	// Check that an initial state has not already been defined for this ID. That's not allowed. (Otherwise it would secretly overwrite earlier data, which is undesirable.)
 	if (initialState[id])
 		throw new Error(`Double assignment of initial datastore state: the datastore "${id}" was assigned an initial state, but it already had been assigned one previously. Double assigning of an initial state is not allowed.`)
-	
+
 	// Store the initial state. Also remember we should add it to the data store when it is used.
-	console.log('Setting up ' + id)
 	initialState[id] = options.initial
 	initialStatesToAdd.push(id)
 }
