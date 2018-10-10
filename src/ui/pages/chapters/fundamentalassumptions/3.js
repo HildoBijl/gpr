@@ -55,7 +55,7 @@ class CurrentSection extends Section {
 				<p>The width parameter of the correlation function (you just set it to <Num>{this.props.data.lT.toFixed(1)}</Num> hours) is an important parameter. It also functions as a <Term>length scale</Term>: it defines how much time (or space) needs to pass before the correlation is reduced to 61% of its original value. In other words, it tells us how quickly our temperature (the output value) can vary. A small length scale means that the temperature varies a lot, while a large length scale means that the temperature varies very little. We will study this further in the chapter on <Link to={{ type: 'CHAPTER', payload: { chapter: 'hyperparameters' } }}>tuning hyperparameters</Link>.</p>
 
 				<h4>The covariance function</h4>
-				<p>In practice, we don't work with the correlation function. Instead, we work with the covariance function. To obtain it, we only have to take the standard deviation of the temperature (you set it to <Num>{this.props.data.l.toFixed(1)}</Num>), take the square (<Num>{(this.props.data.l ** 2).toFixed(1)}</Num>) and multiply the correlation function by this number. This gives us the covariance function, shown below.</p>
+				<p>In practice, we don't work with the correlation function. Instead, we work with the covariance function. To obtain it, we only have to take the standard deviation of the temperature (you set it to <Num>{this.props.data.l.toFixed(1)}</Num>°C), take the square (<Num>{(this.props.data.l ** 2).toFixed(1)}</Num>°C<sup>2</sup>) and multiply the correlation function by this number. This gives us the covariance function, shown below.</p>
 				<FCorrelationFunction section={this} number={++this.counters.figure} covariance={true} />
 				<FigureGuide>
 					<p>This figure shows the covariance function for our problem. It is exactly the same as the previous figure, but then multiplied by a constant value of <Num>{(this.props.data.l ** 2).toFixed(1)}</Num>. Again, hover over the figure to see what it means.</p>
@@ -531,7 +531,7 @@ class PCorrelationFunction extends LinePlot {
 		this.pointHover = true // Specify that we're hovering over a point, so we should ignore other events that would adjust the explainer.
 		this.handleMouseLeave() // Pretend that the mouse left the plot, to remove the line that would otherwise be visible.
 		this.props.explainer.set({
-			contents: index === 0 ? <div>The temperature at {t0 + shift}:00 (or any other time) has a correlation of <Num>1</Num> with itself.</div> : <div>You specified that the temperature at {t0 + shift}:00 has a correlation of <Num>{point.y.toFixed(2)}</Num> with the temperature at {t0 + shift + point.x}:00 (time difference of {point.x} hours).</div>,
+			contents: index === 0 ? <div>The temperature at {t0 + shift}:00 (or any other time) has a correlation of <Num>1</Num> with itself.</div> : <div>You specified that the temperature at {t0 + shift}:00 and the temperature at {t0 + shift + point.x}:00 (time difference of {point.x} hour{point.x === 1 ? '' : 's'}) have a correlation of <Num>{point.y.toFixed(2)}</Num>.</div>,
 			position: this.toPageCoordinates(point),
 		})
 	}
