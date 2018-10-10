@@ -55,7 +55,7 @@ chapters.fundamentalassumptions = {
 		'Why make assumptions?',
 		'The temperature distribution',
 		'Links between temperatures',
-		'The final result',
+		'Putting it all together',
 	],
 	parents: [chapters.whatisgpr],
 	position: {

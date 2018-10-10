@@ -32,11 +32,16 @@ class Chapter extends Component {
 		window.removeEventListener('scroll', this.handleScroll)
 	}
 	componentDidUpdate(prevProps) {
+		// If there is a section change in the URL, deal with it accordingly.
 		this.checkForURLUpdate()
 		if (prevProps.chapter !== this.props.chapter)
 			this.loadSections()
 		else if (prevProps.section !== this.props.section)
 			this.adjustScrollToIndex(this.props.section - 1)
+
+		// Make sure that the height of the container always stays up to date. If suddenly Figure Guides need to be shown, then the container height should also adjust. (To test: turn Figure Guides on, and refresh a page with a lot of Figure Guides. Check if the page still has the correct height.)
+		if (prevProps.settings !== this.props.settings)
+			setTimeout(() => this.swipeableActions.updateHeight(), 0) // Delay this, to ensure it takes place after the rendering of the new components has finished.
 	}
 
 	checkForURLUpdate() {
@@ -168,7 +173,14 @@ class Chapter extends Component {
 		// Render the sections, each depending on whether it's been loaded already or not.
 		const sections = (
 			<div key="sections" className="sections">
-				<SwipeableViews className="swiper" index={this.props.section - 1} onChangeIndex={this.adjustSection} onSwitching={this.adjustScrollToIndex.bind(this)} animateHeight={true}>
+				<SwipeableViews
+					className="swiper"
+					index={this.props.section - 1}
+					onChangeIndex={this.adjustSection}
+					onSwitching={this.adjustScrollToIndex.bind(this)}
+					animateHeight={true} // Make sure that different sections have different lengths. If set to false, a short section will have a huge empty space if it's in the same chapter as a long section.
+					action={actions => { this.swipeableActions = actions }} // Get a handle to the swipeable actions.
+				>
 					{chapter.sections.map((_, ind) => {
 						const status = this.state.status[ind]
 						switch (status) {
@@ -263,6 +275,7 @@ const stateMap = (state) => {
 		chapter: payload.chapter,
 		section: section, // Assume default section 1 if no section is given.
 		updateURL: chapter && payload.section !== section, // Should the section be updated?
+		settings: state.settings, // We want the settings as well. If the settings change, we may need to update the height of the swipeable containers.
 	}
 }
 const actionMap = (dispatch) => ({

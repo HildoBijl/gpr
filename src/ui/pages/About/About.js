@@ -6,7 +6,7 @@ export default () => (
 		<p>Teaching people scientific concepts is often difficult. This is especially so when it concerns abstract mathematical subjects. The interactive book you're looking at now is my attempt to change that.</p>
 		<h4>If I would write a book, I wouldn't ...</h4>
 		<p>While writing my <a href="http://www.hildobijl.com/Research.php" target="_blank" rel="noopener noreferrer">Ph.D. thesis</a> on Gaussian Process (GP) regression, I asked myself a question. "If I would write a book that explains GP regression to people not familiar with the field, how would I set it up?" My first thought was that I would use intuitive explanations whenever possible. Most books focus on the raw mathematics, while it is the different ways of looking at concepts that truly allow readers to thoroughly understand them. This also led to my second thought: to accomplish this intuitive way of explaining, my work couldn't be a traditional book. It had to be interactive. And that's how the idea of this app formed.</p> 
-		<h4>... I'd make more than a book</h4>
+		<h4>... I'd make something interactive</h4>
 		<p>To keep things familiar for people, this app works just like a book, but with a few notable differences.</p>
 		<ul>
 			<li>Every figure you see is interactive. By playing around with it, you understand what it's about.</li>

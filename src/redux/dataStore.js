@@ -43,7 +43,7 @@ const initialStatesToAdd = [] // This array keeps track of which initial states 
 export function reducer(state = initialState, action) {
 	// Check if there are data stores that we need to initialize with its initial state.
 	for (let dataStoreId = initialStatesToAdd.pop(); dataStoreId; dataStoreId = initialStatesToAdd.pop()) {
-		state[dataStoreId] = initialState[dataStoreId]
+		state[dataStoreId] = deepMerge(initialState[dataStoreId], state[dataStoreId] || {}) // Only set this when the data store hasn't been set up previously yet.
 	}
 
 	// Check if there was an external source for this action.
@@ -185,12 +185,8 @@ function setInitialStateFromOptions(id, options = {}) {
 	if (!options.initial)
 		return
 
-	// Check that an initial state has not already been defined for this ID. That's not allowed. (Otherwise it would secretly overwrite earlier data, which is undesirable.)
-	if (initialState[id])
-		throw new Error(`Double assignment of initial datastore state: the datastore "${id}" was assigned an initial state, but it already had been assigned one previously. Double assigning of an initial state is not allowed.`)
-
-	// Store the initial state. Also remember we should add it to the data store when it is used.
-	initialState[id] = options.initial
+	// Merge the given initial state with any already existing initial state and save it. Also remember we should add it to the data store when it is used.
+	initialState[id] = deepMerge(options.initial, initialState[id] || {})
 	initialStatesToAdd.push(id)
 }
 

@@ -85,7 +85,7 @@ class PGradual extends GPPlot {
 		super()
 
 		// Define important settings.
-		this.measurementRadius = 10
+		this.measurementRadius = 8
 		this.numPlotPoints = 201 // Useful when the length scale is cut down and samples vary quickly.
 		this.transitionTime = 0 // Set to zero for instant reactions when adjusting sliders.
 

@@ -15,13 +15,7 @@ import LinePlot from '../../../components/Figure/LinePlot.js'
 import GPPlot from '../../../components/Figure/GPPlot.js'
 import { Note, Term, Num, Emph } from '../../../components/Textbox/index.js'
 
-import { priorId, priorInitial, minM, maxM, minL, maxL } from './parameters.js'
-
-// Style data for lines.
-const indicatorLineStyle = {
-	'stroke': '#eeeeee',
-	'stroke-width': '4',
-}
+import { priorId, priorInitial, t0, t1, shift, minM, maxM, minL, maxL, indicatorLineStyle } from './parameters.js'
 
 // The message shown in the visualization plot.
 const temperatureMessage = (T) => <div>This point in the plot corresponds to {T.toFixed(1)} °C in the adjacent plot: see the line there too.</div>
@@ -31,34 +25,34 @@ class CurrentSection extends Section {
 		this.reset()
 		return (
 			<div>
-				<p>To start off, we are going to look at a simple question: without doing any measurements, what would we expect the temperature at 8:00 to be? What sort of values could it have?</p>
+				<p>To start off, we are going to look at a simple question: without doing any measurements, what would we expect the temperature at {t0 + shift}:00 to be? What sort of values could it have?</p>
 
 				<h4>Mathematically defining the distribution</h4>
 				<p>We know, given that we're in the Netherlands in winter, that the temperature is going to be near the freezing point. Temperatures above 10 °C or below -5 °C are quite unlikely.</p>
 				<p>We can mathematically define this by saying that the temperature, at any given time, has a <Term>Guassian (normal) distribution</Term>. <Note>Of course we could also use any other type of distribution, instead of a Gaussian distribution. However, Gaussian distributions occur a lot in real life. In addition, using a Gaussian distributions results in relatively easy equations. So let's stick with Gaussian distributions.</Note> This distribution has a <Term>mean</Term> (the location of our bell curve) and a <Term>standard deviation</Term> (the width of it). But what should they be?</p>
 				<FGaussianDistribution section={this} number={++this.counters.figure} />
 				<FigureGuide>
-					<p>In the above figure, you see the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. Hover your mouse over the plot to learn more about this.</p>
+					<p>In the above figure, you see the probability distribution of the temperature at {t0 + shift}:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. Hover your mouse over the plot to learn more about this.</p>
 					<p>Below the figure, you can adjust the sliders. The left slider sets the mean (the location) of the bell curve, and the right slider sets the standard deviation (the width). Adjust them to something that makes sense to you.</p>
 				</FigureGuide>
 				<p>Based on the above figure, you seem to find a mean of <Num>{this.props.data.m.toFixed(1)} °C</Num> and a standard deviation of <Num>{this.props.data.l.toFixed(1)} °C</Num> appropriate here. (Based on my experiences with Dutch winter weather, I would go for roughly 2 °C as mean and 4 °C as standard deviation.) The mean will not be very important later on, but the standard deviation will be. It functions as a <Term>length scale</Term>: it specifies how much our temperature really varies. The bigger the number, the more temperature variations we assume will be present.</p>
 				{/* ToDo: add equations for this. */}
 
 				<h4>Visualizing the distribution</h4>
-				<p>We just visualized the distribution of the temperature at 8:00 using a Gaussian bell curve. This works well if we only care about the temperature at 8:00. But if we also want to include the temperatures at other times, it's better to use color gradients instead. That gives us another type of visualization.</p>
+				<p>We just visualized the distribution of the temperature at {t0 + shift}:00 using a Gaussian bell curve. This works well if we only care about the temperature at {t0 + shift}:00. But if we also want to include the temperatures at other times, it's better to use color gradients instead. That gives us another type of visualization.</p>
 				<FVisualizations section={this} number={++this.counters.figure} className="twoColumn" />
 				<FigureGuide>
-					<p>In the above figure, the left graph shows the probability distribution of the temperature at 8:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero. At the same time, the right plot also shows this temperature distribution, but now with a color gradient. The horizontal axis denotes the time and the vertical axis the temperature. In this plot, the color represents the probability: the lighter the color, the more likely the temperature is to occur.</p>
+					<p>In the above figure, the left graph shows the probability distribution of the temperature at {t0 + shift}:00. The horizontal axis shows the temperature, while the vertical axis indicates the probability that this temperature takes place. A temperature near zero is more likely than a temperature far from zero. At the same time, the right plot also shows this temperature distribution, but now with a color gradient. The horizontal axis denotes the time and the vertical axis the temperature. In this plot, the color represents the probability: the lighter the color, the more likely the temperature is to occur.</p>
 					<p>To use the figure, hover your mouse over one of the plots. It shows you, through the lines that appear, which position on the left graph corresponds to which position on the right one.</p>
 				</FigureGuide>
 				<p>Keep in mind that the two visualization methods mean the exact same thing: they indicate how likely it is that a given temperature occurs.</p>
 
 				<h4>The distribution of the temperature at other times</h4>
 
-				<p>By now we've defined all our knowledge concerning the temperature at 8:00. But what about the temperature at 9:00? What can we say about that?</p>
+				<p>By now we've defined all our knowledge concerning the temperature at {t0 + shift}:00. But what about the temperature at {t1 + shift}:00? What can we say about that?</p>
 
-				<p>The key realization is that the <Emph>distribution</Emph> of the temperature at 9:00 is exactly the same as the <Emph>distribution</Emph> of the temperature at 8:00. After all, it is just as likely to freeze at 8:00 as it is at 9:00. <Note>Okay, you might say that we have higher temperatures closer to noon. However, you must realize that this is another bit of prior knowledge you have that computers do not. So let's ignore this piece of prior knowledge for now. We don't want to make things too complicated yet. In a later chapter, when <Link to={{ type: 'CHAPTER', payload: { chapter: 'covariancefunctions' } }}>tuning covariance functions</Link>, we do look into this.</Note> Note that this does <Emph>not</Emph> mean that the temperature at 8:00 always equals that at 9:00. It could very well freeze at 8:00 and thaw at 9:00 or vice versa.</p>
-				<p>We can also visualize this. To do so, we simply add another color gradient at 9:00.</p>
+				<p>The key realization is that the <Emph>distribution</Emph> of the temperature at {t1 + shift}:00 is exactly the same as the <Emph>distribution</Emph> of the temperature at {t0 + shift}:00. After all, it is just as likely to freeze at {t0 + shift}:00 as it is at {t1 + shift}:00. <Note>Okay, you might say that we have higher temperatures closer to noon. However, you must realize that this is another bit of prior knowledge you have that computers do not. So let's ignore this piece of prior knowledge for now. We don't want to make things too complicated yet. In a later chapter, when <Link to={{ type: 'CHAPTER', payload: { chapter: 'covariancefunctions' } }}>tuning covariance functions</Link>, we do look into this.</Note> Note that this does <Emph>not</Emph> mean that the temperature at {t0 + shift}:00 always equals that at {t1 + shift}:00. It could very well freeze at {t0 + shift}:00 and thaw at {t1 + shift}:00 or vice versa.</p>
+				<p>We can also visualize this. To do so, we simply add another color gradient at {t1 + shift}:00.</p>
 				<FTwoTemperatures section={this} number={++this.counters.figure} times={[2,3]} />
 				<FigureGuide>
 					<p>Hover your mouse over the colored bars to get more information on what they mean.</p>
@@ -249,7 +243,7 @@ PGaussianDistribution = connectToExplainer(PGaussianDistribution)
 class FVisualizations extends Figure {
 	renderSubFigures() {
 		return [
-			<PVisualizations1 className="extraMargin" key="visualization1" title="The probability distribution of the temperature at 8:00" />,
+			<PVisualizations1 className="extraMargin" key="visualization1" title={`The probability distribution of the temperature at ${t0 + shift}:00`} />,
 			<PVisualizations2 className="extraMargin" key="visualization2" title="The same distribution, but then with a color gradient" />,
 		]
 	}

@@ -88,30 +88,8 @@ export default class Plot extends Component {
 		this.svgContainer = select(this.svg)
 		this.axisContainer = this.svgContainer.append('g').attr('class', 'axis')
 
-		window.t = this // TODO REMOVE
-		// Set up the scales.
-		this.scale = {
-			input: scaleLinear().domain([this.range.input.min, this.range.input.max]).range([0, this.width]),
-			output: scaleLinear().domain([this.range.output.min, this.range.output.max]).range([this.height, 0]),
-		}
-
-		// Set up a line function for any lines that may be used. This tells us how to transform a set of data points into coordinates.
-		this.lineFunction = line()
-			.x(point => this.scale.input(point.input))
-			.y(point => this.scale.output(point.output))
-			.curve(curveLinear)
-
-		// Set up the axes.
-		const inputAxis = this.getInputAxisStyle()
-		const outputAxis = this.getOutputAxisStyle()
-		this.axisContainer
-			.append('g')
-			.attr('transform', `translate(0,${this.scale.output(0)})`)
-			.call(inputAxis)
-		this.axisContainer
-			.append('g')
-			.attr('transform', `translate(${this.scale.input(0)},0)`)
-			.call(outputAxis)
+		// Apply the range that has been given.
+		this.setRange(this.range)
 
 		// Ensure that the plot is updated regularly.
 		this.cycleUpdates(true)
@@ -223,6 +201,37 @@ export default class Plot extends Component {
 			x: this.scale.input(point.x)/this.width*plotRect.width + plotRect.left - bodyRect.left,
 			y: this.scale.output(point.y)/this.height*plotRect.height + plotRect.top - bodyRect.top,
 		}
+	}
+
+	// Through this function the range can be adjusted while the plot has already been made.
+	setRange(range) {
+		// Store the range.
+		this.range = range
+
+		// Set up the scales.
+		this.scale = {
+			input: scaleLinear().domain([this.range.input.min, this.range.input.max]).range([0, this.width]),
+			output: scaleLinear().domain([this.range.output.min, this.range.output.max]).range([this.height, 0]),
+		}
+
+		// Set up a line function for any lines that may be used. This tells us how to transform a set of data points into coordinates.
+		this.lineFunction = line()
+			.x(point => this.scale.input(point.input))
+			.y(point => this.scale.output(point.output))
+			.curve(curveLinear)
+
+		// Set up the axes.
+		this.axisContainer.selectAll('g').remove() // Remove any old axes, if they exist.
+		const inputAxis = this.getInputAxisStyle()
+		const outputAxis = this.getOutputAxisStyle()
+		this.axisContainer
+			.append('g')
+			.attr('transform', `translate(0,${this.scale.output(0)})`)
+			.call(inputAxis)
+		this.axisContainer
+			.append('g')
+			.attr('transform', `translate(${this.scale.input(0)},0)`)
+			.call(outputAxis)
 	}
 
 	// render sets up the HTML of the plot. Based on what has been requested (through useSVG and useCanvas) it adds an SVG or Canvas object.

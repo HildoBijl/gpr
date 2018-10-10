@@ -43,7 +43,7 @@ export default class Figure extends Component {
 			return []
 
 		// Set up sliders.
-		const numSliders = this.numSliders || 1 // It is possible to use multiple sliders. In this case, the parameter `numSliders` should be set in the constructor.
+		const numSliders = this.numSliders !== undefined ? this.numSliders : 1 // It is possible to use multiple sliders. In this case, the parameter `numSliders` should be set in the constructor.
 		return new Array(numSliders).fill(0).map((_, index) => <Slider key={`slider${index}`} value={this.getSlider(index)} setValue={(value, definite) => this.setSlider(value, index, definite)} />)
 	}
 
@@ -57,7 +57,7 @@ export default class Figure extends Component {
 			return []
 
 		// Set up counters.
-		const numCounters = this.numCounters || 1 // It is possible to use multiple counters. In this case, the parameter `numCounters` should be set in the constructor.
+		const numCounters = this.numCounters !== undefined ? this.numCounters : 1 // It is possible to use multiple counters. In this case, the parameter `numCounters` should be set in the constructor.
 		return new Array(numCounters).fill(0).map((_,index) => <Counter key={`counter${index}`} value={this.getCounter(index)} setValue={(value) => this.setCounter(value, index)} />)
 	}
 
