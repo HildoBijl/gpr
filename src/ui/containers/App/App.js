@@ -1,3 +1,4 @@
+import 'katex/dist/katex.min.css'
 import '../../shared/reset.css'
 import '../../shared/general.css'
 import '../../font-awesome/less/font-awesome.css'

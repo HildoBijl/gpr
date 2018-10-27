@@ -59,10 +59,9 @@ class Settings extends Component {
 					changeFunction={(newVal) => this.props.applySettings({ showFigureGuides: newVal })}
 				/>
 				<Checkbox
-					label="Include important equations in the storyline (Not available yet)"
+					label="Include important equations in the storyline"
 					checked={settings.showEquations}
 					changeFunction={(newVal) => this.props.applySettings({ showEquations: newVal })}
-					disabled={true}
 				/>
 				<p className="addedNote"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> This requires knowledge of both probability theory and linear algebra</p>
 				<Checkbox
