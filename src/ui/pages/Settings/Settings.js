@@ -54,7 +54,7 @@ class Settings extends Component {
 			<div className="settings">
 				<h2>Extra content</h2>
 				<Checkbox
-					label={[<span key="label">Include figure explanations/guides</span>, <span key="circle" className="circle figureGuides"></span>]}
+					label={<><span>Include figure explanations/guides</span><span className="circle figureGuides"></span></>}
 					checked={settings.showFigureGuides}
 					changeFunction={(newVal) => this.props.applySettings({ showFigureGuides: newVal })}
 				/>

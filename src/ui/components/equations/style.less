@@ -1,14 +1,52 @@
+@import '../../shared/params.less';
+
+@hoverBlurSize: 5px;
+
 .equation {
-	color: #888;
+	cursor: default;
+
+	// Make sure that the equation cannot be selected when the user drags the mouse over it. This would look funny. At the same time, only apply this to the katex-html. In this way, the annotation is still selectable, so when the user copy-pastes the equation, he'll get LaTeX.
+	.katex-html {
+		.notSelectable;
+	}
+
+	// Set up hovering functionalities. To make sure child elements don't block hover events for parent elements, set pointer events off for all but hoverable elements.
 	* {
 		pointer-events: none;
 	}
-	.hovering {
-		background: red;
-		color: #000;
-		cursor: default;
-	}
 	.hoverable {
+		// display: inline-block; // This is a fix for a Microsoft Edge bug which doesn't deal properly with pointer-events of inline elements. Sadly, it also messes up the layout for Chrome a bit. So in the trade-off of functionality of Edge versus looks in Chrome, we chose the latter. No sensible person uses Edge anymore these days anyway.
 		pointer-events: auto;
 	}
+	&.hovering {
+		color: #888;
+
+		.hovering {
+			border-radius: 8px;
+		}
+	}
+}
+
+.lightTheme .equation {
+	&.hovering {
+		color: #888;
+
+		.hovering {
+			background: fade(@lightThemeColor, 20%);
+			box-shadow: 0px 0px @hoverBlurSize @hoverBlurSize fade(@lightThemeColor, 20%);
+			color: #000;
+		}
+	}
+}
+.darkTheme .equation {
+	&.hovering {
+		color: #888;
+
+		.hovering {
+			background: fade(@darkThemeColor, 20%);
+			box-shadow: 0px 0px @hoverBlurSize @hoverBlurSize fade(@darkThemeColor, 20%);
+			color: #fff;
+		}
+	}
+
 }

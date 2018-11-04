@@ -4,7 +4,23 @@ const axes = ['x', 'y']
 
 // isObject checks if a parameter is an object.
 export function isObject(item) {
-	return (item && typeof item === 'object' && !Array.isArray(item));
+	return (item && typeof item === 'object' && !Array.isArray(item))
+}
+
+// findInString finds the position of a text in a string and gives the given occurrence. If occurrence = 1, then this is identical to the indexOf function.
+export function findInString(text, string, occurrence = 1) {
+	// Check the input.
+	if (occurrence <= 0)
+		throw new Error(`Invalid search occurrence used: findInString was called to search for the ${occurrence}th occurrence of the text "${text}". This is not possible. We start counting at 1.`)
+
+	// Do the magic.
+	let index = -1
+	for (let i = 0; i < occurrence; i++) {
+		index = string.indexOf(text, index + 1)
+		if (index === -1)
+			return index
+	}
+	return index
 }
 
 // deepClone gives a clone of an object, where every sub-object is also cloned.

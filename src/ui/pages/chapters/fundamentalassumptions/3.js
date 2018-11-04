@@ -87,10 +87,12 @@ class FCorrelation extends Figure {
 		return this.props.data[`c${this.props.time}`] / maxC
 	}
 	renderSubFigures() {
-		return [
-			<PCorrelation1 className="extraMargin" key="visualization1" time={this.props.time} title={`The probability distribution of the temperature at ${this.props.time + 6}:00`} />,
-			<PCorrelation2 className="extraMargin" key="visualization2" time={this.props.time} title="The same distribution, but then with a color gradient" />,
-		]
+		return (
+			<>
+				<PCorrelation1 className="extraMargin" time={this.props.time} title={`The probability distribution of the temperature at ${this.props.time + 6}:00`} />,
+				<PCorrelation2 className="extraMargin" time={this.props.time} title="The same distribution, but then with a color gradient" />,
+			</>
+		)
 	}
 }
 FCorrelation = connectToData(FCorrelation, priorId)

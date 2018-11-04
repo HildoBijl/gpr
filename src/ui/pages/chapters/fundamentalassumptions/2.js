@@ -53,12 +53,12 @@ class CurrentSection extends Section {
 
 				<p>The key realization is that the <Emph>distribution</Emph> of the temperature at {t1 + shift}:00 is exactly the same as the <Emph>distribution</Emph> of the temperature at {t0 + shift}:00. After all, it is just as likely to freeze at {t0 + shift}:00 as it is at {t1 + shift}:00. <Note>Okay, you might say that we have higher temperatures closer to noon. However, you must realize that this is another bit of prior knowledge you have that computers do not. So let's ignore this piece of prior knowledge for now. We don't want to make things too complicated yet. In a later chapter, when <Link to={{ type: 'CHAPTER', payload: { chapter: 'covariancefunctions' } }}>tuning covariance functions</Link>, we do look into this.</Note> Note that this does <Emph>not</Emph> mean that the temperature at {t0 + shift}:00 always equals that at {t1 + shift}:00. It could very well freeze at {t0 + shift}:00 and thaw at {t1 + shift}:00 or vice versa.</p>
 				<p>We can also visualize this. To do so, we simply add another color gradient at {t1 + shift}:00.</p>
-				<FTwoTemperatures section={this} number={++this.counters.figure} times={[2,3]} />
+				<FTwoTemperatures section={this} number={++this.counters.figure} times={[2, 3]} />
 				<FigureGuide>
 					<p>Hover your mouse over the colored bars to get more information on what they mean.</p>
 				</FigureGuide>
 				<p>Of course this same trick would work for the temperatures at other times too. Like at 6:00, or 11:00, or 13:00.</p>
-				<FTwoTemperatures section={this} number={++this.counters.figure} times={[-1,0,1,2,3,4,5,6,7]} />
+				<FTwoTemperatures section={this} number={++this.counters.figure} times={[-1, 0, 1, 2, 3, 4, 5, 6, 7]} />
 				<p>In this way, we can mathematically define what we know about the temperature at any time. However, we're not done just yet. After all, the temperatures at various times are also linked.</p>
 			</div>
 		)
@@ -226,7 +226,7 @@ class PGaussianDistribution extends LinePlot {
 		const probability = meanValue * this.stepSize * 100
 
 		// Set the right message in the explainer.
-		const middle = (start + end)/2
+		const middle = (start + end) / 2
 		this.props.explainer.set({
 			contents: <div>There is a <Num>{probability.toFixed(1)}%</Num> chance that the temperature is between <Num>{start}°C</Num> and <Num>{end}°C</Num>.</div>,
 			position: this.toPageCoordinates({
@@ -242,10 +242,12 @@ PGaussianDistribution = connectToExplainer(PGaussianDistribution)
 // Set up the visualizations figure.
 class FVisualizations extends Figure {
 	renderSubFigures() {
-		return [
-			<PVisualizations1 className="extraMargin" key="visualization1" title={`The probability distribution of the temperature at ${t0 + shift}:00`} />,
-			<PVisualizations2 className="extraMargin" key="visualization2" title="The same distribution, but then with a color gradient" />,
-		]
+		return (
+			<>
+				<PVisualizations1 className="extraMargin" title={`The probability distribution of the temperature at ${t0 + shift}:00`} />,
+				<PVisualizations2 className="extraMargin" title="The same distribution, but then with a color gradient" />,
+			</>
+		)
 	}
 }
 
@@ -490,7 +492,7 @@ class PTwoTemperatures extends GPPlot {
 		// Set the right message in the explainer.
 		time = Math.round(time)
 		this.props.explainer.set({
-			contents: <div>The chance that the temperature at <Num>{time+6}:00</Num> is between <Num>{start}°C</Num> and <Num>{end}°C</Num> is <Num>{probability.toFixed(1)}%</Num>.</div>,
+			contents: <div>The chance that the temperature at <Num>{time + 6}:00</Num> is between <Num>{start}°C</Num> and <Num>{end}°C</Num> is <Num>{probability.toFixed(1)}%</Num>.</div>,
 			position: this.toPageCoordinates({
 				x: time,
 				y: end,

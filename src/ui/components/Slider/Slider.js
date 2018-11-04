@@ -78,7 +78,6 @@ export default class Slider extends Component {
 	}
 
 	updateTouch(event) {
-		window.e = event
 		// Check if the touch we're tracking is part of the changed touches.
 		const touch = Array.from(event.changedTouches).find(touch => touch.identifier === this.touch)
 		if (!touch)
